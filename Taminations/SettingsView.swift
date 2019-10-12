@@ -249,6 +249,12 @@ class SettingsView : ScrollingLinearLayout {
       ("Fade",""),
       ("Fade and Zoom","")
     )
+    radioButtons("Language for Definitions",default:"System",
+      ("System", "Prefer system language, else English"),
+      ("English", "Always show English"),
+      ("German", "Prefer German, else English"),
+      ("Japanese", "Prefer Japanese, else English"))
+
     checkBox("Dynamic Type","Adjust font size according to System Setting")
     checkBox("Tips","Show Tip of the Day at startup",true)
   }

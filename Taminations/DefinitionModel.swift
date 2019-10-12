@@ -42,7 +42,13 @@ class DefinitionModel {
     if (link != currentLink) {
       var langlink = link
       //  See if we have it in the user's language
-      let lang = Locale.preferredLanguages[0].replaceAll("[-_].*", "")
+      var lang = Locale.preferredLanguages[0].replaceAll("[-_].*", "")
+      switch (Setting("Language for Definitions").s) {
+        case "English" : lang = "en"
+        case "German" : lang = "de"
+        case "Japanese" : lang = "ja"
+        default : ()
+      }
       if (lang != "en" && TamUtils.calldata.first { it in
           link == it.link && it.languages.contains(lang) } != nil) {
         langlink += ".lang-\(lang)"
