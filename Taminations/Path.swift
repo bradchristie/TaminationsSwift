@@ -91,6 +91,7 @@ class Path {
 
   var beats:Double { get { return movelist.reduce(0.0, { $0 + $1.beats} ) } }
 
+  @discardableResult
   func changebeats(_ newbeats:Double) -> Path {
     let factor = newbeats / beats
     movelist = movelist.map { it in it.time(it.beats*factor) }
@@ -98,6 +99,7 @@ class Path {
     return self
   }
 
+  @discardableResult
   func changehands(_ hands:Hands) -> Path {
     movelist = movelist.map { it in it.useHands(hands) }
     return self
@@ -110,6 +112,7 @@ class Path {
     return self
   }
 
+  @discardableResult
   func skew(_ x:Double, _ y:Double) -> Path {
     if (!movelist.isEmpty) {
       //  Apply the skew to just the last movement

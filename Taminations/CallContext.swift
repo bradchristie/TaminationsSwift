@@ -37,6 +37,9 @@ class CallContext {
     let callindexinitfiles = [
       "b1/circle",
       "a1/clover_and_anything",
+      "a1/cross_clover_and_anything",
+      "c1/cross_your_neighbor",
+      "c2/criss_cross_your_neighbor",
       "plus/explode_the_wave",
       "b1/sashay",
       "b1/ladies_chain",
@@ -74,7 +77,11 @@ class CallContext {
       "ms/eight_chain_thru"
     ]
 
-    callindexinitfiles.forEach { loadOneFile($0) }
+    if (callindex.isEmpty) {
+      callindexinitfiles.forEach {
+        loadOneFile($0)
+      }
+    }
 
   }
 
@@ -109,11 +116,11 @@ class CallContext {
         let callitems = TamUtils.callmap[norm] ?? []
         let callfiles = callitems.map { $0.link }
         callfiles.forEach {
-          loadedXML[$0] = TamUtils.getXMLAsset($0)
+          loadOneFile($0)
         }
         //  Check for coded calls that require xml files
         CodedCall.getCodedCall(name)?.requires.forEach {
-          loadedXML[$0] = TamUtils.getXMLAsset($0)
+          loadOneFile($0)
         }
       }
     }
@@ -197,7 +204,7 @@ class CallContext {
 
   //  Get the active dancers, e.g. for "Boys Trade" the boys are active
   var actives: [Dancer] {
-    return dancers.filter {
+    dancers.filter {
       $0.data.active
     }
   }
@@ -244,7 +251,7 @@ class CallContext {
   }
   @discardableResult
   func applyCalls(_ calltext: String...) throws -> CallContext {
-    return try applyCalls(calltext)
+    try applyCalls(calltext)
   }
 
   /**
@@ -330,58 +337,76 @@ class CallContext {
     if (dc != ac) {
       //  Don't try to match unless the actives are together
       if (ctx1.actives.any { d in
-        ctx1.inBetween(d, ctx1.actives.first!).any { !$0.data.active }
+        ctx1.inBetween(d, ctx1.actives.first!).any {
+          !$0.data.active
+        }
       }) {
         perimeter = true
       }
-      ctx1 = CallContext(ctx1,ctx1.actives)
+      ctx1 = CallContext(ctx1, ctx1.actives)
     }
     //  Try to find a match in the xml animations
     let callnorm = TamUtils.normalizeCall(calltext)
     let callitems = TamUtils.callmap[callnorm] ?? []
-    let callfiles1 = callitems.map { $0.link }
+    let callfiles1 = callitems.map {
+      $0.link
+    }
     let callfiles2 = CallContext.callindex[callnorm] ?? []
     let callfiles = callfiles1 + callfiles2
     //  Found xml file with call, now look through each animation
     let found = callfiles.isEmpty
-    let matches = try callfiles.any { it in
-      try CallContext.loadedXML[it]?.xpath("/tamination/tam").filter { tam in
+    var bestOffset = Double.greatestFiniteMagnitude
+    var xmlCall: XMLCall? = nil
+    var title = ""
+    let matches = callfiles.any { it in
+      CallContext.loadedXML[it]?.xpath("/tamination/tam").filter { tam in
         tam.attr("sequencer") != "no" &&
           TamUtils.normalizeCall(tam.attr("title")!) == callnorm &&
-        //  Check for calls that must go around the centers
-          (!perimeter || tam.attr("sequencer")=="perimeter")
-      }.any { tam in
+          //  Check for calls that must go around the centers
+          (!perimeter || (tam.attr("sequencer") ?? "").contains("perimeter"))
+      }.forEach { tam in
         //  Calls that are gender-specific, e.g. Star Thru,
         //  are specifically flagged in the XML
-        let sexy = tam.attr("sequencer") == "gender-specific"
+        let sexy = tam.attr("sequencer")?.contains("gender-specific") ?? false
         //  Make sure we don't mismatch heads and sides
         //  on calls that specifically refer to them
         let headsmatchsides = !tam.attr("title")!.contains("Heads?|Sides?")
         //  Try to match the formation to the current dancer positions
         let ctx2 = CallContext(tam)
-        let mmm = ctx1.matchFormations(ctx2, sexy:sexy, fuzzy:fuzzy, handholds:false,
-          headsmatchsides:headsmatchsides)
+        let mmm = ctx1.matchFormations(ctx2, sexy: sexy, fuzzy: fuzzy, handholds: false,
+          headsmatchsides: headsmatchsides)
         if let mm = mmm {
-          let xmlCall = XMLCall(tam,mm,ctx2)
-          if (["Allemande Left",
-               // "Dixie Grand",
-               "Right and Left Grand"].contains(xmlCall.name)) {
-            if (!checkResolution(ctx2,mm)) {
-              throw ResolutionError()
-            }
+          let matchResult = ctx1.computeFormationOffsets(ctx2, mm)
+          let totOffset = matchResult.offsets.reduce(0.0) {
+            (s, v) in s + v.length
           }
-          // add XMLCall object to the call stack
-          ctx0.callstack.append(xmlCall)
-          ctx0.callname = callname + tam.attr("title")!.replaceAll("\\(.*\\)","") + " "
-          // set level to max of this and any previous
-          let thislevel = LevelObject.find(it)
-          if (thislevel > ctx0.level) {
-            ctx0.level = thislevel
+          if (totOffset < bestOffset) {
+            xmlCall = XMLCall(tam, mm, ctx2)
+            bestOffset = totOffset
+            title = tam.attr("title")!
           }
-          return true
         }
-        return false
-      } ?? false // if it.link not loaded
+      }
+      if (xmlCall != nil) {
+        if (["Allemande Left",
+             "Dixie Grand",
+             "Right and Left Grand"].contains(xmlCall!.name)) {
+          if (!checkResolution(xmlCall!.ctx2, xmlCall!.xmlmap)) {
+            Application.app.sendMessage(.RESOLUTION_ERROR)
+          }
+        }
+        // add XMLCall object to the call stack
+        ctx0.callstack.append(xmlCall!)
+        ctx0.callname = callname + title.replaceAll("\\(.*\\)", "") + " "
+        // set level to max of this and any previous
+        let thislevel = LevelObject.find(it)
+        if (thislevel > ctx0.level) {
+          ctx0.level = thislevel
+        }
+        return true
+      }
+      return false
+
     }
     if (found && !matches) {
       //  Found the call but formations did not match
@@ -397,7 +422,7 @@ class CallContext {
   //  to them in order plus or minus a rotation.
   //  So the mapping of the couples numbering mod 4 must be the same.
   private func checkResolution(_ ctx2:CallContext, _ mapping:[Int]) -> Bool {
-    return dancers.mapIndexed { (i,d) in
+    dancers.mapIndexed { (i,d) in
       (d.number_couple.d - ctx2.dancers[mapping[i]].number_couple.d + 4).truncatingRemainder(dividingBy: 4)
     }.distinct().count == 1
   }
@@ -469,7 +494,7 @@ class CallContext {
     }
   }
   private func dancerRelation(_ d1:Dancer, _ d2:Dancer) -> Int {
-    return angleBin(d1.angleToDancer(d2))
+    angleBin(d1.angleToDancer(d2))
   }
 
   private func matchFormations(_ ctx2: CallContext,
@@ -646,6 +671,9 @@ class CallContext {
     "T-Bone RUUL",
     "T-Bone DLDL",
     "T-Bone RDRD",
+    "T-Bone UURL",
+    "T-Bone RLUU",
+    //  There are also 8 possible 3x1 t-bones not listed here
     "Static Square"    
   ]
   private static let twoCoupleFormations = [
@@ -674,26 +702,28 @@ class CallContext {
     }
     //  Work on a copy with all dancers active, mapping only uses active dancers
     let ctx1 = CallContext(self)
-    ctx1.dancers.forEach { $0.data.active = true }
-    var bestMapping:BestMapping? = nil
+    ctx1.dancers.forEach {
+      $0.data.active = true
+    }
+    var bestMapping: BestMapping? = nil
     let formations = ctx1.dancers.count == 4
       ? CallContext.twoCoupleFormations : CallContext.standardFormations
     formations.forEach { f in
       let ctx2 = CallContext(TamUtils.getFormation(f))
       //  See if this formation matches
-      let mappingq = ctx1.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:true,handholds:false)
+      let mappingq = ctx1.matchFormations(ctx2, sexy: false, fuzzy: true, rotate: true, handholds: false)
       if let mapping = mappingq {
         //  If it does, get the offsets
-        let matchResult = ctx1.computeFormationOffsets(ctx2,mapping)
+        let matchResult = ctx1.computeFormationOffsets(ctx2, mapping)
         //  If the match is at some odd angle (not a multiple of 90 degrees)
         //  then consider it bogus
-        let angsnap = matchResult.transform.angle / (.pi/4)
+        let angsnap = matchResult.transform.angle / (.pi / 4)
         if (angsnap.isApproxInt()) {
           let totOffset = matchResult.offsets.reduce(0.0) { s, v in
             s + v.length
           }
           //  Favor formations closer to the top of the list
-          if (bestMapping == nil || totOffset + 0.1 < bestMapping!.totOffset) {
+          if (bestMapping == nil || totOffset + 0.2 < bestMapping!.totOffset) {
             bestMapping = BestMapping(
               name: f, // only used for debugging
               mapping: mapping,
@@ -705,7 +735,7 @@ class CallContext {
       }
     }
     if let bestMap = bestMapping {
-      for (i,d) in dancers.enumerated() {
+      for (i, d) in dancers.enumerated() {
         if (bestMap.offsets[i].length > 0.1) {
           //  Get the last movement
           let m = d.path.movelist.count > 0
@@ -715,7 +745,7 @@ class CallContext {
           d.animateToEnd()
           let vd = bestMapping!.offsets[i].rotate(-d.tx.angle)
           //  Apply it
-          d.path.add(m.skew(-vd.x,-vd.y))
+          d.path.add(m.skew(-vd.x, -vd.y))
           d.animateToEnd()
         }
       }
@@ -724,12 +754,12 @@ class CallContext {
 
   //  Return max number of beats among all the dancers
   var maxBeats: Double {
-    return dancers.reduce(0, { max($0, $1.path.beats) })
+    dancers.reduce(0, { max($0, $1.path.beats) })
   }
 
   //  Return all dancers, ordered by distance, that satisfies a conditional
   func dancersInOrder(_ d: Dancer, _ f: (Dancer) -> Bool = { _ in return true }) -> [Dancer] {
-    return dancers.filter {
+    dancers.filter {
       $0 != d
     }.filter(f).sorted {
       $0.distanceTo(d) < $1.distanceTo(d)
@@ -738,33 +768,33 @@ class CallContext {
 
   //  Return closest dancer that satisfies a given conditional
   func dancerClosest(_ d: Dancer, _ f: (Dancer) -> Bool) -> Dancer? {
-    return dancersInOrder(d, f).first
+    dancersInOrder(d, f).first
   }
 
   //  Return dancer directly in front of given dancer
   func dancerInFront(_ d: Dancer) -> Dancer? {
-    return dancerClosest(d) { d2 in
+    dancerClosest(d) { d2 in
       d2.isInFrontOf(d)
     }
   }
 
   //  Return dancer directly in back of given dancer
   func dancerInBack(_ d: Dancer) -> Dancer? {
-    return dancerClosest(d) { d2 in
+    dancerClosest(d) { d2 in
       d2.isInBackOf(d)
     }
   }
 
   //  Return dancer directly to the right of given dancer
   func dancerToRight(_ d: Dancer) -> Dancer? {
-    return dancerClosest(d) { d2 in
+    dancerClosest(d) { d2 in
       d2.isRightOf(d)
     }
   }
 
   //  Return dancer directly to the left of given dancer
   func dancerToLeft(_ d: Dancer) -> Dancer? {
-    return dancerClosest(d) { d2 in
+    dancerClosest(d) { d2 in
       d2.isLeftOf(d)
     }
   }
@@ -777,7 +807,7 @@ class CallContext {
 
   //  Return dancers that are in between two other dancers
   func inBetween(_ d1: Dancer, _ d2: Dancer) -> [Dancer] {
-    return dancers.filter { it in
+    dancers.filter { it in
       it != d1 && it != d2 &&
         (it.distanceTo(d1) + it.distanceTo(d2)).isApprox(d1.distanceTo(d2))
     }
@@ -785,35 +815,35 @@ class CallContext {
 
   //  Return all the dancers to the right, in order
   func dancersToRight(_ d: Dancer) -> [Dancer] {
-    return dancersInOrder(d) { d2 in
+    dancersInOrder(d) { d2 in
       d2.isRightOf(d)
     }
   }
 
   //  Return all the dancers to the left, in order
   func dancersToLeft(_ d: Dancer) -> [Dancer] {
-    return dancersInOrder(d) { d2 in
+    dancersInOrder(d) { d2 in
       d2.isLeftOf(d)
     }
   }
 
   //  Return all the dancers in front, in order
   func dancersInFront(_ d: Dancer) -> [Dancer] {
-    return dancersInOrder(d) { d2 in
+    dancersInOrder(d) { d2 in
       d2.isInFrontOf(d)
     }
   }
 
   //  Return all the dancers in back, in order
   func dancersInBack(_ d: Dancer) -> [Dancer] {
-    return dancersInOrder(d) { d2 in
+    dancersInOrder(d) { d2 in
       d2.isInBackOf(d)
     }
   }
 
   //  Return outer 2, 4 , 6 dancers
   func outer(_ num: Int) -> [Dancer] {
-    return Array(dancers.sorted {
+    Array(dancers.sorted {
       d1, d2 in
       d1.location.length < d2.location.length
     }.dropFirst(dancers.count - num))
@@ -821,7 +851,7 @@ class CallContext {
 
   //  Return center 2, 4 , 6 dancers
   func center(_ num: Int) -> [Dancer] {
-    return Array(dancers.sorted {
+    Array(dancers.sorted {
       d1, d2 in
       d1.location.length < d2.location.length
     }.dropLast(dancers.count - num))
@@ -842,7 +872,7 @@ class CallContext {
     return points
   }
   func points() -> [Dancer] {
-    return tryOneDiamondFormation("Diamond LH Boys Center") +
+    tryOneDiamondFormation("Diamond LH Boys Center") +
       tryOneDiamondFormation("Diamonds RH Girl Points") +
       tryOneDiamondFormation("Diamonds RH PTP Girl Points") +
       tryOneDiamondFormation("Hourglass RH GP") +
@@ -856,6 +886,10 @@ class CallContext {
       return d.angleToDancer(d2).angleEquals(d2.angleToDancer(d))
     }
     return false
+  }
+
+  func isFacingSameDirection(_ d:Dancer, _ d2:Dancer) -> Bool {
+    return d.angleFacing.isAround(d2.angleFacing)
   }
 
   //  Return true if this dancer is part of a couple facing same direction
@@ -927,6 +961,34 @@ class CallContext {
   //  Return true if dancers are tidal line or wave
   func isTidal() -> Bool {
     return dancersToRight(dancers.first!).count + dancersToLeft(dancers.first!).count == 7
+  }
+
+  //  Return true if dancers are in any type of 2x4 formation
+  func isTBone() -> Bool {
+    let centerCount = dancers.filter { d in
+      let loc = d.location
+      return loc.x.abs.isApprox(1.0) && loc.y.abs.isApprox(1.0)
+    }.count
+    let xCount = dancers.filter { d in
+      let loc = d.location
+      return loc.x.abs.isApprox(3.0) && loc.y.abs.isApprox(1.0)
+    }.count
+    let yCount = dancers.filter { d in
+      let loc = d.location
+      return loc.x.abs.isApprox(1.0) && loc.y.abs.isApprox(3.0)
+    }.count
+    return centerCount == 4 &&
+      ((xCount == 4 && yCount == 0) || (xCount == 0 && yCount == 4))
+  }
+
+  func isCollision() -> Bool {
+    dancers.any { d in
+      dancers.any { d2 in
+        d != d2 &&
+          d.location.x.isApprox(d2.location.x) &&
+          d.location.y.isApprox(d2.location.y)
+      }
+    }
   }
 
   //  Get direction dancer would roll

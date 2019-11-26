@@ -20,8 +20,10 @@
 
 class Cloverleaf : Action {
 
-  override var level:LevelData { return LevelObject.find("ms") }
-  override var requires:[String] { return ["a1/clover_and_anything"] }
+  override var level:LevelData { LevelObject.find("ms") }
+  override var requires:[String] {
+    ["a1/clover_and_anything","a1/cross_clover_and_anything"] 
+  }
 
   init() {
     super.init("Cloverleaf")
@@ -41,7 +43,13 @@ class Cloverleaf : Action {
 
 class CloverAnd : Action {
 
-  override var level:LevelData { return LevelObject.find("a1") }
+  override var level:LevelData {
+    if (name == "Clover and Nothing" || name == "Clover and Step") {
+      return LevelObject.find("ms")
+    } else {
+      return LevelObject.find("a1")
+    }
+  }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Find the 4 dancers to Cloverleaf
@@ -64,6 +72,8 @@ class CloverAnd : Action {
     let (clovercall,andcall) = (split[0],split[1])
     let ctx1 = CallContext(ctx,clovers)
     try ctx1.applyCalls("\(clovercall) and")
+    //  "Clover and <nothing>" is stored in A-1 but is really Mainstream
+    ctx1.level = LevelObject.find("ms")
     ctx1.appendToSource()
     //  And the other 4 do the next call at the same time
     let ctx2 = CallContext(ctx,ctx.dancers.filterNot { d in clovers.contains(d) } )

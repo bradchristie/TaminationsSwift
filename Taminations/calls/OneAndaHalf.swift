@@ -26,7 +26,9 @@ class OneAndaHalf : CodedCall {
       throw CallError("One and a half of what?")
     }
     //  At this point the call has already been done once
-    //  So just do half of it again
+    //  Be sure everyone waits until the call is complete
+    ctx.extendPaths()
+    //  Now do half of it again
     try ctx.applyCalls("half " + ctx.callstack.dropLast(1).map { $0.name }.joined(separator: " ")) 
   }
 

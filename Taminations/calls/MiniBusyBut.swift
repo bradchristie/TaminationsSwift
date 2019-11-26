@@ -18,26 +18,12 @@
 
 */
 
-class Roll : Action {
+class MiniBusyBut : Action {
 
-  override var level:LevelData { return LevelObject.find("plus") }
+  override var level:LevelData { LevelObject.find("c1") }
+  override var requires: [String] { ["a2/mini_busy"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    //  TODO should also check that there is a preceeding action
-    if (index == 0) {
-      throw CallError("'and Roll' must follow another call.")
-    }
-    try super.perform(ctx, index)
+    try ctx.applyCalls("_Mini-Busy But","Center 4 "+norm.replaceAll(".*but",""))
   }
-
-  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    let roll = ctx.roll(d)
-    if (roll.isRight) {
-      return TamUtils.getMove("Quarter Right")
-    } else if (roll.isLeft) {
-      return TamUtils.getMove("Quarter Left")
-    }
-    return TamUtils.getMove("Stand")
-  }
-
 }

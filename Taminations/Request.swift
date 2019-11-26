@@ -61,6 +61,7 @@ class Request : CustomStringConvertible {
     case TRANSITION_COMPLETE
     case TITLE
     case ABBREVIATIONS_CHANGED
+    case RESOLUTION_ERROR
     case KEYBOARD_VISIBLE
     case REGENERATE
   }

@@ -87,7 +87,6 @@ class TamUtils {
         callmap[norm]?.append(data)
       }
     }
-    CallContext.loadInitFiles()
   }
 
   //  Hack to keep working xref from de-allocation

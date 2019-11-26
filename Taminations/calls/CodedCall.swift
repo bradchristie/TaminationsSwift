@@ -25,9 +25,8 @@ class CodedCall : Call {
     "aceydeucey" : { AceyDeucey() },
     "and" : { And() },
     "and14more" : { QuarterMore() },
-    "androll" : { Roll() },
-    "roll" : { Roll() },
-    "andspread" : { Spread() },
+    "androll" : { Roll("androll","and Roll") },
+    "roll" : { Roll("roll","Roll") },
     "backaway" : { BackAway() },
     "beau" : { Beaus() },
     "belle" : { Belles() },
@@ -74,7 +73,9 @@ class CodedCall : Call {
     "14in" : { QuarterIn("14in","Quarter In") },
     "14out" : { QuarterIn("14out","Quarter Out") },
     "14tag" : { QuarterTag() },
-    "run" : { Run() },
+    "run" : { Run("run","Run") },
+    "runright" : { Run("runright","Run Right") },
+    "runleft" : { Run("runleft","Run Left") },
     "separate" : { Separate() },
     "slidethru" : { SlideThru() },
     "slip" : { Slip() },
@@ -84,6 +85,7 @@ class CodedCall : Call {
     "steptoacompactlefthandwave" : { StepToACompactWave("left","") },
     "leftstarthru" : { StarThru("leftstarthru","Left Star Thru") },
     "step" : { Step() },
+    "switchtheline" : { SwitchTheLine() },
     "tagtheline" : { TagTheLine() },
     "32aceydeucey" : { ThreeByTwoAceyDeucey() },
     "34tag" : { ThreeQuartersTag() },
@@ -134,7 +136,7 @@ class CodedCall : Call {
 
   let norm:String
   //  Any XML files that might be needed to apply a call
-  var requires:[String] { return [] }
+  var requires:[String] { [] }
 
   static func getCodedCall(_ callname:String) -> CodedCall? {
     let callnorm = TamUtils.normalizeCall(callname)
@@ -204,6 +206,14 @@ class CodedCall : Call {
       }
       return AnythingChainThru(callnorm,callname)
     }
+    if (callnorm.matches("minibusybut.*")) {
+      return MiniBusyBut(callnorm,callname)
+    }
+
+    if (callnorm.matches("(and)?spread")) {
+      return Spread(callnorm,callname)
+    }
+
     return nil
   }
 

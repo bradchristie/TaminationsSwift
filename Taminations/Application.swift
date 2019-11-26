@@ -67,6 +67,7 @@ class Application : Page {
     Application._app = self
   }
 
+  @discardableResult
   func buildDisplay() -> View {
     //  Add the title bar
     layout.clear()

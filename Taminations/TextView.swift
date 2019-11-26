@@ -58,6 +58,8 @@ class TextView : View {
     self.init()
     self.text = text
     mydiv.font = UIFont.preferredFont(forTextStyle: .body)
+    //  iOS default color is white in Dark Mode, which we do not support
+    mydiv.textColor = UIColor.black
   }
 
   var autoSize:Bool {

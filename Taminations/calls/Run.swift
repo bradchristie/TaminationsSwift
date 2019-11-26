@@ -21,10 +21,6 @@
 class Run : Action {
 
   override var level: LevelData { return LevelObject.find("b2") }
-  
-  init() {
-    super.init("Run")
-  }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  We need to look at all the dancers, not just actives
@@ -33,7 +29,12 @@ class Run : Action {
       if (d.data.active) {
         //  Find dancer to run around
         //  Usually it's the partner
-        guard var d2 = d.data.partner else {
+        //  If a direction was given, look there
+        guard var d2 = norm == "runright" 
+          ? ctx.dancerToRight(d)
+          : norm == "runleft"
+          ? ctx.dancerToLeft(d)
+          : d.data.partner else {
           throw CallError("Dancer ${d.number} has nobody to Run around")
         }
         //  But special case of t-bones, could be the dancer on the other side,

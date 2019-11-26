@@ -27,8 +27,18 @@ class QuarterTag : Action {
     super.init("Quarter Tag")
   }
 
+  private func centersHoldLeftHands(_ ctx:CallContext) -> Bool {
+    return ctx.actives.any { d in
+      d.data.center && (ctx.dancerToLeft(d)?.data.center ?? false)
+    }
+  }
+
   override func performCall(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Centers Hinge While Ends Face In")
+    if (centersHoldLeftHands(ctx)) {
+      try ctx.applyCalls("Center 4 Hinge and Spread While Ends Face In")
+    } else {
+      try ctx.applyCalls("Centers Hinge While Ends Face In")
+    }
   }
 
 

@@ -66,7 +66,7 @@ class InteractiveDancer : Dancer {
       tx = Matrix(starttx)
       primaryTouch = Vector()
       primaryMove = Vector()
-    } else { 
+    } else {
 
       if (primaryMove !== InteractiveDancer.NOPOINT) {
         let d = (primaryMove - primaryTouch) * InteractiveDancer.MOVESENSITIVITY
@@ -107,7 +107,7 @@ class InteractiveDancer : Dancer {
 
     }
   }
-  
+
   func touchDown(_ m:UITouch, x:Double, y:Double) {
     //  Figure out if touching left or right side, and remember the point
     //  Also need to remember the "id" to correlate future move events
@@ -122,7 +122,7 @@ class InteractiveDancer : Dancer {
       secondaryid = m
     }
   }
-  
+
   func touchUp(_ m:UITouch) {
     if (m == primaryid) {
       primaryTouch = InteractiveDancer.NOPOINT
@@ -134,7 +134,7 @@ class InteractiveDancer : Dancer {
       secondaryid = nil
     }
   }
-  
+
   func touchMove(_ m:UITouch, x:Double, y:Double) {
     if (m ==  primaryid) {
       primaryMove = Vector(x,y)
@@ -142,6 +142,6 @@ class InteractiveDancer : Dancer {
       secondaryMove = Vector(x,y)
     }
   }
-  
+
 }
-  
+

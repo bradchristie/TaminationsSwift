@@ -21,8 +21,8 @@
 class XMLCall : Call {
 
   let xelem:XMLElement
-  private let xmlmap:[Int]
-  private let ctx2:CallContext
+  public let xmlmap:[Int]
+  public let ctx2:CallContext
   init(_ xelem:XMLElement, _ xmlmap:[Int], _ ctx2:CallContext) {
     self.xelem = xelem
     self.xmlmap = xmlmap

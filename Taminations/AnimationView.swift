@@ -482,6 +482,17 @@ class AnimationView : Canvas {
 
   }
 
+  //  Check that there isn't another dancer in the middle of
+  //  a computed handhold.  Can happen when dancers are in
+  //  tight formations like tidal waves.
+  private func dancerInHandhold(_ hh:Handhold) -> Bool {
+    let hhloc = (hh.dancer1.location + hh.dancer2.location).scale(0.5,0.5)
+    return dancers.any { d in
+         d != hh.dancer1 && d != hh.dancer2 &&
+         (d.location - hhloc).length < 0.5
+    }
+  }
+
   func updateDancers() {
     //  Move dancers
     //  For big jumps, move incrementally -
@@ -531,7 +542,7 @@ class AnimationView : Canvas {
     hhlist.sort { $0.score < $1.score }
     //  Apply the handholds in order from best to worst
     //  so that if a dancer has a choice it gets the best handhold
-    for hh in hhlist {
+    for hh in hhlist.filter( { !dancerInHandhold($0) }) {
       //  Check that the hands aren't already used
       let incenter = geometry == GeometryType.HEXAGON && hh.inCenter()
       if (incenter ||

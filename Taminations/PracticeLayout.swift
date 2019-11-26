@@ -20,39 +20,40 @@
 
 import UIKit
 
-class PracticeLayout : LinearLayout {
+class PracticeLayout : StackLayout {
 
   let animationView = AnimationView()
   let repeatButton = Button("Repeat")
   let continueButton = Button("Next")
   let returnButton = Button("Return")
   let definitionButton = Button("Definition")
-  let resultsPanel = LinearLayout(.VERTICAL)
+  let resultsPanel = LinearLayout(.HORIZONTAL)
+  let resultsPanelFrame = LinearLayout(.VERTICAL)
   let scoreNumbers = TextView("0 / 0")
   let scoreText = TextView("Poor")
   let definitionView = DefinitionView()
 
   init() {
-    super.init(.HORIZONTAL)
+    super.init() //.HORIZONTAL)
     backgroundColor = UIColor.FLOOR
-    animationView.fillVertical()
-    animationView.weight = 2
+    //animationView.fillVertical()
+    //animationView.weight = 2
     animationView.div.isMultipleTouchEnabled = true
-    resultsPanel.width = Application.screenHeight * 2 / 3
-    resultsPanel.topMargin = 20
-    resultsPanel.leftMargin = 20
+    //resultsPanel.width = Application.screenHeight * 2 / 3
+    resultsPanelFrame.topMargin = 20
+    resultsPanelFrame.leftMargin = 20
     //resultsPanel.fillVertical()
-    resultsPanel.weight = 1
+    resultsPanelFrame.weight = 1
     let complete = TextView("Animation Complete")
     complete.alignMiddle()
-    resultsPanel.appendView(complete)
+    resultsPanelFrame.appendView(complete)
     let yourscore = TextView("Your Score")
     yourscore.alignMiddle()
-    resultsPanel.appendView(yourscore)
+    resultsPanelFrame.appendView(yourscore)
     scoreNumbers.alignMiddle()
-    resultsPanel.appendView(scoreNumbers)
+    resultsPanelFrame.appendView(scoreNumbers)
     scoreText.alignMiddle()
-    resultsPanel.appendView(scoreText)
+    resultsPanelFrame.appendView(scoreText)
     let buttons1 = LinearLayout(.HORIZONTAL)
     buttons1.fillHorizontal()
     repeatButton.weight = 1
@@ -65,21 +66,26 @@ class PracticeLayout : LinearLayout {
     buttons1.appendView(continueButton)
     buttons1.appendView(returnButton)
     buttons1.appendView(View())  // hack to get Return button working
-    resultsPanel.appendView(buttons1)
+    resultsPanelFrame.appendView(buttons1)
     let buttons2 = LinearLayout(.HORIZONTAL)
     definitionButton.fillVertical()
     buttons2.appendView(definitionButton)
-    resultsPanel.appendView(buttons2)
-    resultsPanel.children.forEach { it in
+    resultsPanelFrame.appendView(buttons2)
+    resultsPanelFrame.children.forEach { it in
       it.alignLeft()
       if let t = it as? TextView {
         t.textSize = 32.pp
       }
       it.topMargin = 8
     }
-    resultsPanel.alignTop()
-    appendView(resultsPanel)
+    //resultsPanel.alignTop()
+    let filler = View()
+    filler.weight = 2
+    resultsPanel.appendView(resultsPanelFrame)
+    resultsPanelFrame.alignTop()
+    resultsPanel.appendView(filler)
     appendView(animationView)
+    appendView(resultsPanel)
   }
 
 }

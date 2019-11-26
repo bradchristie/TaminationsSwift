@@ -126,14 +126,16 @@ class SequencerModel {
 
   @discardableResult
   private func interpretOneCall(_ calltext:String) -> Bool {
+    //  Remove any underscores, which are reserved for internal calls only
+    let calltxt = calltext.replace("_","")
     //  Add call as entered, in case parsing fails
     let line = callNames.count
-    callNames.append(calltext)
+    callNames.append(calltxt)
     let avdancers = seqView.animationView.dancers
     let cctx = CallContext(avdancers)
     do {
       let prevbeats = seqView.animationView.movingBeats
-      try cctx.interpretCall(calltext)
+      try cctx.interpretCall(calltxt)
       try cctx.performCall()
       cctx.extendPaths()
       cctx.matchStandardFormation()
@@ -144,7 +146,7 @@ class SequencerModel {
       let newbeats = seqView.animationView.movingBeats
       if (newbeats > prevbeats) {
         //  Call worked, add it to the list
-        callsView.addCall(calltext.capWords(),level:cctx.level)
+        callsView.addCall(calltxt.capWords(),level:cctx.level)
         callNames[line] = cctx.callname
         callBeats.append(newbeats - prevbeats)
         //callsView.highlightCall(line) gets highlighted later

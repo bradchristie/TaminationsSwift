@@ -21,10 +21,6 @@
 class Spread : Action {
 
   override var level:LevelData { return LevelObject.find("plus") }
-  
-  init() {
-    super.init("and Spread")
-  }
 
   /*
    * 1. If only some of the dancers are directed to Spread (e.g., from a
@@ -65,11 +61,11 @@ class Spread : Action {
 }
 
 class Case1 : Action {
-  
+
   init() {
     super.init("and  Spread")
   }
-  
+
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     ctx.extendPaths()
     try ctx.dancers.forEach { d in
@@ -91,15 +87,15 @@ class Case1 : Action {
       }
     }
   }
-  
+
 }
 
 class Case2 : Action {
-  
+
   init() {
     super.init("and Spread")
   }
-  
+
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     let p = d.path
     //  This is for waves only
@@ -117,18 +113,18 @@ class Case2 : Action {
     v = tx * v
     p.add(m.skew(v.x,v.y).useHands(Hands.NOHANDS))
     //  Return dummy path
-    return Path()    
+    return Path()
   }
-  
+
 }
 
 class Case3 : Case1 {
-  
+
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Mark the leaders as active
     ctx.dancers.forEach { d in  d.data.active = d.data.leader  }
     //  And forward to Case1, actives spread
-    try super.perform(ctx,index)    
+    try super.perform(ctx,index)
   }
-  
+
 }

@@ -60,6 +60,7 @@ class SequencerPage : Page {
 
     onAction(.SEQUENCER) { request in
       Application.app.titleBar.title = "Sequencer"
+      CallContext.loadInitFiles()
       self.rightPage.doRequest(.SEQUENCER_INSTRUCTIONS, request)
       self.model.startSequence()
       self.callPage.textInput.focus()
@@ -108,6 +109,10 @@ class SequencerPage : Page {
     }
     onMessage(Request.Action.SEQUENCER_LISTEN) { message in
       self.model.listen(self.callPage.listening)
+    }
+    onMessage(Request.Action.RESOLUTION_ERROR) { message in
+      self.callPage.errorText.text = "Warning: Dancers are not resolved."
+      self.callPage.errorText.show()
     }
   }
 
