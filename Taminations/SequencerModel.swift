@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class SequencerModel {
     self.callsView = callsView
     self.callListener = CallListener(callHandler: { call in self.loadOneCall(call) },
       errorHandler: { error in self.showError(error) } )
-//    startSequence()
+    startSequence()
     callsView.textInput.returnAction {
       let call = self.callsView.textInput.text
       if (!call.isBlank) {

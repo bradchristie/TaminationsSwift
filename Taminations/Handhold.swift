@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -126,16 +126,16 @@ struct Handhold {
 
     //  Generate return value
     if (d1.rightgrip == d2 && d2.rightgrip == d1) {
-      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.RIGHTHAND, hold2: Hands.RIGHTHAND, 
+      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.RIGHTHAND, hold2: Hands.RIGHTHAND,
         angle1: ah1, angle2: ah2, distance: d, score: 0)
     } else if (d1.rightgrip == d2 && d2.leftgrip == d1) {
-      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.RIGHTHAND, hold2: Hands.LEFTHAND, 
+      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.RIGHTHAND, hold2: Hands.LEFTHAND,
         angle1: ah1, angle2: ah2, distance: d, score: 0)
     } else if (d1.leftgrip == d2 && d2.rightgrip == d1) {
-      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.LEFTHAND, hold2: Hands.RIGHTHAND, 
+      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.LEFTHAND, hold2: Hands.RIGHTHAND,
         angle1: ah1, angle2: ah2, distance: d, score: 0)
     } else if (d1.leftgrip == d2 && d2.leftgrip == d1) {
-      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.LEFTHAND, hold2: Hands.LEFTHAND, 
+      return Handhold(dancer1: d1, dancer2: d2, hold1: Hands.LEFTHAND, hold2: Hands.LEFTHAND,
         angle1: ah1, angle2: ah2, distance: d, score: 0)
     } else if (score1 > 1 || score2 > 1 || score1 + score2 > 1.2) {
       return nil

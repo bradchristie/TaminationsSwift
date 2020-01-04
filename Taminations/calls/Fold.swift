@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ class Fold : Action {
   init() {
     super.init("Fold")
   }
-  
+
   //  We need to work with all the dancers, not just actives
   //  because partners of the folders need to adjust
   //  so we get a standard formation that can be used for more calls

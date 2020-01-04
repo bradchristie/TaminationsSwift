@@ -18,18 +18,16 @@
 
 */
 
-class SequencerInstructionPage : Page {
-
-  private let _view = DefinitionView()
-  override var view:View { return _view }
-  private let model:DefinitionModel
-
-  override init() {
-    model = DefinitionModel(_view)
-    super.init()
-    onAction(.SEQUENCER_INSTRUCTIONS) { request in
-      self.model.setDefinition(link:"info/sequencer",title:"")
+class Slide : Action {
+  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
+    var dir = ""
+    switch (norm) {
+      case "slideleft" : dir = "Left"
+      case "slideright" : dir = "Right"
+      case "slidein" : dir = d.isCenterLeft ? "Left" : "Right"
+      case "slideout" : dir = d.isCenterLeft ? "Right" : "Left"
+      default : throw CallError("Slide how?")
     }
+    return TamUtils.getMove("Dodge \(dir)")
   }
-
 }

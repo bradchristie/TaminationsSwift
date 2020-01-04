@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ class Trade : Action {
   init() {
     super.init("Trade")
   }
-  
+
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     //  Figure out what dancer we're trading with
     var leftcount = 0
@@ -99,8 +99,8 @@ class Trade : Action {
         hands = (call == "Run Left") ? .LEFTHAND : .RIGHTHAND
       }
     }
-    return TamUtils.getMove(call).changehands(hands).scale(scaleX,dist/2)    
-    
+    return TamUtils.getMove(call).changehands(hands).scale(scaleX,dist/2)
+
   }
 
 

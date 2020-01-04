@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -158,6 +158,14 @@ class Dancer : Comparable, CustomStringConvertible {
   var isFacingOut:Bool {
     let a = angleToOrigin.abs
     return !a.isApprox(.pi/2) && a > .pi/2
+  }
+
+  var isCenterLeft:Bool {
+    angleToOrigin > 0
+  }
+
+  var isCenterRight:Bool {
+    angleToOrigin < 0
   }
 
   func isInFrontOf(_ d2:Dancer) -> Bool {

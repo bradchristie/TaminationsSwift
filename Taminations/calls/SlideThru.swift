@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ class SlideThru : Action {
   init() {
     super.init("Slide Thru")
   }
-  
+
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     //  Check if in wave, slide thru with adj dancer
     if (ctx.isInWave(d) && d.data.beau && ctx.dancerToRight(d)!.data.active) {

@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 class TriangleCirculate : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
+  override var level:LevelData { LevelObject.find("c1") }
 
   //  Calculate circulate path to next triangle dancer
   private func oneCirculatePath(_ d:Dancer, _ d2:Dancer) -> Path {
@@ -70,13 +70,22 @@ class TriangleCirculate : Action {
           }
         }
       }
-      case "wavebased" : points.forEach { it in
-        let others = ctx.dancersInOrder(it)
-        if (!(others[0].isLeftOf(others[1]) || others[0].isRightOf(others[1])) ||
-          !(others[1].isLeftOf(others[0]) || others[1].isRightOf(others[0]))) {
-          it.data.active = false
+      case "wavebased", "" : 
+        if (points.count > 0) {
+          points.forEach { it in
+            let others = ctx.dancersInOrder(it)
+            if (!(others[0].isLeftOf(others[1]) || others[0].isRightOf(others[1])) ||
+              !(others[1].isLeftOf(others[0]) || others[1].isRightOf(others[0]))) {
+              it.data.active = false
+            }
+          }
+        } else {
+          //  No points, maybe a sausage
+          let sausage = CallContext(TamUtils.getFormation("Sausage RH"))
+          if (ctx.matchFormations(sausage,rotate: true) != nil) {
+            ctx.center(2).forEach { d in d.data.active = false }
+          }
         }
-      }
       default : break
     }
     if (ctx.actives.count != 6) {

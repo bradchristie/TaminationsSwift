@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -102,6 +102,9 @@ class TamUtils {
       }
       if (tam.attr("xref-from") != nil) {
         s += "[@from='\(tam.attr("xref-from")!)']"
+      }
+      if (tam.attr("xref-formation") != nil) {
+        s += "[@formation='\(tam.attr("xref-formation"))']"
       }
       return xtam.xpath(s).first!
     }

@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class Bezier {
   private let by:Double
   private let cx:Double
   private let cy:Double
-  
+
 
   init(x1:Double,y1:Double,ctrlx1:Double,ctrly1:Double,ctrlx2:Double,ctrly2:Double,x2:Double,y2:Double) {
     self.x1 = x1
@@ -47,7 +47,7 @@ class Bezier {
     self.ctrly2 = ctrly2
     self.x2 = x2
     self.y2 = y2
-    
+
     cx = 3.0*(ctrlx1-x1)
     bx = 3.0*(ctrlx2-ctrlx1) - cx
     ax = x2 - x1 - cx - bx
@@ -80,9 +80,9 @@ class Bezier {
   func translate(_ t:Double) -> Matrix {
     let x = xt(t)
     let y = yt(t)
-    return Matrix(x:x,y:y)    
+    return Matrix(x:x,y:y)
   }
- 
+
   func rotate(_ t:Double) -> Matrix {
     let theta = angle(t)
     return Matrix(angle:theta)
@@ -99,6 +99,6 @@ class Bezier {
     //  If angle is 0 then no turn
     return (theta.angleEquals(0.0)) ? 0.0 : theta
   }
-  
-  
+
+
 }

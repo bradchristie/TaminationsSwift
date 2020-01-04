@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,8 +25,10 @@ class Twice : CodedCall {
       throw CallError("Twice what?")
     }
     //  At this point the call has already been done once
+    //  Make sure everyone waits to finish the first time
+    ctx.extendPaths()
     //  So just do it again
-    let calls = Array(ctx.callstack.map { $0.name }.dropLast())
+    let calls = ctx.callstack.map { $0.name }.dropLast().joined(separator: " ")
     try ctx.applyCalls(calls)
   }
 

@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ class CallContext {
   class func loadInitFiles() {
 
     let callindexinitfiles = [
+      "c1/block_formation",
       "b1/circle",
       "a1/clover_and_anything",
       "a1/cross_clover_and_anything",
@@ -49,6 +50,7 @@ class CallContext {
       "b1/circulate",
       "b1/face",
       "c1/butterfly_formation",
+      "c1/concentric_concept",
       "a2/all_4_all_8",
       "a1/as_couples",
       "b1/veer",
@@ -497,7 +499,7 @@ class CallContext {
     angleBin(d1.angleToDancer(d2))
   }
 
-  private func matchFormations(_ ctx2: CallContext,
+  func matchFormations(_ ctx2: CallContext,
                                sexy:Bool=false,
                                fuzzy:Bool=false,
                                rotate:Bool=false,
@@ -659,6 +661,7 @@ class CallContext {
     "Double Pass Thru",
     "Quarter Tag",
     "Tidal Line RH",
+    "Tidal Wave of 6",
     "I-Beam",
     "Diamonds RH Girl Points",
     "Diamonds RH PTP Girl Points",
@@ -674,7 +677,7 @@ class CallContext {
     "T-Bone UURL",
     "T-Bone RLUU",
     //  There are also 8 possible 3x1 t-bones not listed here
-    "Static Square"    
+    "Static Square"
   ]
   private static let twoCoupleFormations = [
     "Facing Couples Compact",

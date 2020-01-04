@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ class XMLCall : Call {
     //  Mark dancers that had no XML move as inactive
     //  Needed for post-call modifications e.g. spread
     var inactives:[Dancer] = []
-    xmlmap.enumerated().forEach { (m,i4) in
+    xmlmap.enumerated().forEach { (i4,m) in
       if (allp[m>>1].movelist.count == 0) {
         inactives.append(ctx.actives[i4])
       }

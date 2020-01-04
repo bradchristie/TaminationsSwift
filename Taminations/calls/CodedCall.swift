@@ -1,7 +1,7 @@
 /*
 
   Taminations Square Dance Animations
-  Copyright (C) 2019 Brad Christie
+  Copyright (C) 2020 Brad Christie
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -52,6 +52,10 @@ class CodedCall : Call {
     "facing" : { FacingDancers() },
     "fold" : { Fold() },
     "girl" : { Girls() },
+    "grandleftswingthru" : { GrandSwingThru("grandleftswingthru","Grand Left Swing Thru") },
+    "grandswingthru" : { GrandSwingThru("grandswingthru","Grand Swing Thru") },
+    "_grandswingleft" : { GrandSwingX("grandswingleft","Grand Swing Left") },
+    "_grandswingright" : { GrandSwingX("grandswingright","Grand Swing Right") },
     "hinge" : { Hinge("hinge","Hinge") },
     "singlehinge" : { Hinge("hinge","Single Hinge") },
     "partnerhinge" : { Hinge("hinge","Partner Hinge") },
@@ -77,6 +81,10 @@ class CodedCall : Call {
     "runright" : { Run("runright","Run Right") },
     "runleft" : { Run("runleft","Run Left") },
     "separate" : { Separate() },
+    "slideleft" : { Slide("slideleft","Slide Left") },
+    "slideright" : { Slide("slideright","Slide Right") },
+    "slidein" : { Slide("slidein","Slide In") },
+    "slideout" : { Slide("slideout","Slide Out") },
     "slidethru" : { SlideThru() },
     "slip" : { Slip() },
     "squeeze" : { Squeeze() },
@@ -197,7 +205,7 @@ class CodedCall : Call {
     if (callnorm.matches("while.+")) {
       return While(callnorm,callname)
     }
-    if (callnorm.matches("(inside|outside|inpoint|outpoint|tandembased|wavebased)trianglecirculate")) {
+    if (callnorm.matches("(inside|outside|inpoint|outpoint|tandembased|wavebased)?trianglecirculate")) {
       return TriangleCirculate(callnorm,callname)
     }
     if (callnorm.matches(".*chainthru")) {
