@@ -68,6 +68,8 @@ class SequencerModel {
       callListener.pause()
       callsView.mike.color = UIColor.black
       callsView.mikeButton.invalidate()
+      callsView.textInput.enable()
+      callsView.textInput.focus()
     }
   }
 
