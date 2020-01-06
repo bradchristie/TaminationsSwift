@@ -104,7 +104,7 @@ class TamUtils {
         s += "[@from='\(tam.attr("xref-from")!)']"
       }
       if (tam.attr("xref-formation") != nil) {
-        s += "[@formation='\(tam.attr("xref-formation"))']"
+        s += "[@formation='\(tam.attr("xref-formation")!)']"
       }
       return xtam.xpath(s).first!
     }
