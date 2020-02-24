@@ -20,10 +20,10 @@
 
 class WheelAnd : Action {
 
-  override var level:LevelData  { return LevelObject.find("c1") }
-  override var requires:[String] { return ["c1/wheel_and_anything"] }
+  override var level:LevelData  { LevelObject.find("c1") }
+  override var requires:[String] { ["c1/wheel_and_anything"] }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     let a = name.split("and", maxSplits: 2)
     let (wheelcall, andcall) = (a[0],a[1])
     let reverse = (wheelcall.lowercased().contains("reverse")) ? "Reverse" : ""

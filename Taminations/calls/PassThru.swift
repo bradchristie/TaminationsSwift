@@ -21,11 +21,31 @@
 class PassThru : Action {
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
+    //  If in wave then maybe Ocean Wave rule applies
+    if (ctx.isInWave(d)) {
+      var d2 = d.data.partner!
+      if (!d2.data.active) {
+        let d3 = d2.isRightOf(d) ? ctx.dancerToLeft(d) : ctx.dancerToRight(d)
+        if (d3 != nil) {
+          d2 = d3!
+        }
+      }
+      if (d2.data.active) {
+        let dist = d.distanceTo(d2)
+        if (norm.startsWith("left")) {
+          if (d2.isLeftOf(d)) {
+            return TamUtils.getMove("Extend Left").scale(1.0,dist/2.0)
+          }
+        } else if (d2.isRightOf(d)) {
+          return TamUtils.getMove("Extend Right").scale(1.0,dist/2.0)
+        }
+      }
+    }
     //  Can only pass thru with another dancer
     //  in front of this dancer
     //  who is also facing this dancer
     guard let d2 = ctx.dancerFacing(d) else {
-      throw CallError("Dancer \(d) has nobody to Pass Thru with")
+      return try ctx.dancerCannotPerform(d, name)
     }
     if (!d2.data.active) {
       throw CallError("Dancers must Pass Thru with each other")

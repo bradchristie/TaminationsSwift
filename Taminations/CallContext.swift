@@ -75,8 +75,18 @@ class CallContext {
       "a1/quarter_thru",
       "a1/three_quarter_thru",
       "b1/split_the_outside_couple",
+      "c2/anything_the_k",
       "a2/transfer_and_anything",
-      "ms/eight_chain_thru"
+      "ms/eight_chain_thru",
+      "b1/separate",
+      "c1/anything_the_windmill",
+      "c1/anything_to_a_wave",
+      "c1/tagging_calls_back_to_a_wave",
+      "plus/grand_swing_thru",
+      "c2/anything_and_circle",
+      "b1/star",
+      "b2/alamo_style",
+      "c2/once_removed_concept"
     ]
 
     if (callindex.isEmpty) {
@@ -136,6 +146,7 @@ class CallContext {
   private var source: CallContext? = nil
   private var snap = true
   private var extend = true
+  private var thoseWhoCan = false
 
   //  For cases where creating a new context from a source,
   //  get the dancers from the source and clone them.
@@ -227,6 +238,22 @@ class CallContext {
     }
   }
 
+  //  For now this just checks for collisions in a tidal formation
+  //  If a collision is detected, then the animation is
+  //  squeezed along the axis of the formation
+  func checkForCollisions() {
+    if (isOnAxis() && isCollision()) {
+      let a = isOnXAxis() ? 0.0 : .pi/2.0
+      dancers.forEach { d in
+        d.animate(beat:0.0)
+        let b = d.angleFacing
+        let xscale = 1.0 - 0.5 * cos(a+b).abs
+        let yscale = 1.0 - 0.5 * sin(a+b).abs
+        d.path.scale(xscale,yscale)
+      }
+    }
+  }
+
   private func applyCall(_ calltext: String) throws {
     try interpretCall(calltext)
     try performCall()
@@ -239,6 +266,17 @@ class CallContext {
     }) {
       throw CallError("\(calltext) does nothing")
     }
+  }
+
+  public func thoseWhoCanOnly() {
+    thoseWhoCan = true
+  }
+
+  public func dancerCannotPerform(_ d:Dancer, _ call:String) throws -> Path {
+    if (thoseWhoCan) {
+      return Path()
+    }
+    throw CallError("Dancer \(d) cannot \(call)")
   }
 
   @discardableResult
@@ -254,6 +292,10 @@ class CallContext {
   @discardableResult
   func applyCalls(_ calltext: String...) throws -> CallContext {
     try applyCalls(calltext)
+  }
+
+  func animate(_ beat:Double) {
+    dancers.forEach { $0.animate(beat:beat) }
   }
 
   /**
@@ -286,14 +328,18 @@ class CallContext {
 
         //  Then look for a code match
         do {
-          try success = success || self.matchCodedCall(onecall)
+          if (!success) {
+            try success = self.matchCodedCall(onecall)
+          }
         } catch let err3 as CallError {
           err = err3
         } catch {
         }
         //  Finally try a fuzzier match in Taminations
         do {
-          try success = success || self.matchXMLcall(onecall, fuzzy: true)
+          if (!success) {
+            try success = self.matchXMLcall(onecall, fuzzy: true)
+          }
         } catch let err4 as CallError {
           err = err4
         }
@@ -436,7 +482,7 @@ class CallContext {
     var offsets:[Vector]
   }
 
-  func computeFormationOffsets(_ ctx2:CallContext, _ mapping:[Int]) -> FormationMatchResult {
+  func computeFormationOffsets(_ ctx2:CallContext, _ mapping:[Int], delta:Double=0.1) -> FormationMatchResult {
     var dvbest:[Vector] = []
     //  We don't know how the XML formation needs to be turned to overlap
     //  the current formation.  So do an RMS fit to find the best match.
@@ -451,7 +497,7 @@ class CallContext {
     }
     let (u,_,v) = Matrix(bxa[0][0], bxa[1][0], 0.0, bxa[0][1], bxa[1][1], 0.0).svd22()
     let ut = u.transpose()
-    let rotmat = (v * ut).snapTo90()
+    let rotmat = (v * ut).snapTo90(delta:delta)
     //  Now rotate the formation and compute any remaining
     //  differences in position
     actives.enumerated().forEach { (j,d2) in
@@ -504,7 +550,8 @@ class CallContext {
                                fuzzy:Bool=false,
                                rotate:Bool=false,
                                handholds: Bool=true,
-                               headsmatchsides:Bool=true) -> [Int]? {
+                               headsmatchsides:Bool=true,
+                               maxError:Double=1.9) -> [Int]? {
     if (dancers.count != ctx2.dancers.count) {
       return nil
     }
@@ -540,6 +587,11 @@ class CallContext {
           dancers[mapindex+1].rotateStartAngle(180.0)
           rotated[mapindex] = true
         } else {
+          if (rotated[mapindex]) {
+            //  Restore to original
+            dancers[mapindex].rotateStartAngle(180.0)
+            dancers[mapindex+1].rotateStartAngle(180.0)
+          }
           rotated[mapindex] = false
           mapindex -= 2
         }
@@ -551,8 +603,8 @@ class CallContext {
           //  Rate the mapping and save if best
           let matchResult = computeFormationOffsets(ctx2,mapping)
           //  Don't match if some dancers are too far from their mapped location
-          let maxOffset = matchResult.offsets.max { v1,v2 in v1.length > v2.length }!
-          if (maxOffset.length < 2.0) {
+          let maxOffset = matchResult.offsets.max { v1,v2 in v1.length < v2.length }!
+          if (maxOffset.length < maxError) {
             let totOffset = matchResult.offsets.reduce(0.0, { $0 + $1.length })
             if (bestmapping == nil || totOffset < bestOffset) {
               bestmapping = mapping  // in Swift this copies the array
@@ -663,6 +715,7 @@ class CallContext {
     "Tidal Line RH",
     "Tidal Wave of 6",
     "I-Beam",
+    "H-Beam",
     "Diamonds RH Girl Points",
     "Diamonds RH PTP Girl Points",
     "Hourglass RH BP",
@@ -677,7 +730,8 @@ class CallContext {
     "T-Bone UURL",
     "T-Bone RLUU",
     //  There are also 8 possible 3x1 t-bones not listed here
-    "Static Square"
+    "Static Square",
+    "Alamo Wave"
   ]
   private static let twoCoupleFormations = [
     "Facing Couples Compact",
@@ -738,19 +792,23 @@ class CallContext {
       }
     }
     if let bestMap = bestMapping {
-      for (i, d) in dancers.enumerated() {
-        if (bestMap.offsets[i].length > 0.1) {
-          //  Get the last movement
-          let m = d.path.movelist.count > 0
-            ? d.path.movelist.removeLast()
-            : TamUtils.getMove("Stand").notFromCall().pop()
-          //  Transform the offset to the dancer's angle
-          d.animateToEnd()
-          let vd = bestMapping!.offsets[i].rotate(-d.tx.angle)
-          //  Apply it
-          d.path.add(m.skew(-vd.x, -vd.y))
-          d.animateToEnd()
-        }
+      adjustToFormationMatch(bestMap)
+    }
+  }
+
+  func adjustToFormationMatch(_ match:BestMapping) {
+    for (i, d) in dancers.enumerated() {
+      if (match.offsets[i].length > 0.1) {
+        //  Get the last movement
+        let m = d.path.movelist.count > 0
+          ? d.path.movelist.removeLast()
+          : TamUtils.getMove("Stand").notFromCall().pop()
+        //  Transform the offset to the dancer's angle
+        d.animateToEnd()
+        let vd = match.offsets[i].rotate(-d.tx.angle)
+        //  Apply it
+        d.path.add(m.skew(-vd.x, -vd.y))
+        d.animateToEnd()
       }
     }
   }
@@ -761,7 +819,7 @@ class CallContext {
   }
 
   //  Return all dancers, ordered by distance, that satisfies a conditional
-  func dancersInOrder(_ d: Dancer, _ f: (Dancer) -> Bool = { _ in return true }) -> [Dancer] {
+  func dancersInOrder(_ d: Dancer, _ f: (Dancer) -> Bool = { _ in true }) -> [Dancer] {
     dancers.filter {
       $0 != d
     }.filter(f).sorted {
@@ -892,7 +950,7 @@ class CallContext {
   }
 
   func isFacingSameDirection(_ d:Dancer, _ d2:Dancer) -> Bool {
-    return d.angleFacing.isAround(d2.angleFacing)
+    d.angleFacing.isAround(d2.angleFacing)
   }
 
   //  Return true if this dancer is part of a couple facing same direction
@@ -905,7 +963,6 @@ class CallContext {
 
   //  Return true if this dancer is in tandem with another dancer
   func isInTandem(_ d: Dancer) -> Bool {
-    return
       d.data.trailer ? dancerInFront(d)!.data.leader
         : d.data.leader ? dancerInBack(d)!.data.trailer
         : false
@@ -913,7 +970,6 @@ class CallContext {
 
   //  Return true if this is 4 dancers in a line
   func isLine() -> Bool {
-    return
       //  Must have 4 dancers
       dancers.count == 4 &&
         //  Each dancer must have right or left shoulder to origin
@@ -932,21 +988,21 @@ class CallContext {
 
   //  Return true if 8 dancers are in 2 general lines of 4 dancers each
   func isLines() -> Bool {
-    return dancers.all {
+    dancers.all {
       d in dancersToRight(d).count + dancersToLeft(d).count == 3
     }
   }
 
   //  Return true if 8 dancers are in 2 general columns of 4 dancers each
   func isColumns() -> Bool {
-    return dancers.all {
+    dancers.all {
       d in dancersInFront(d).count + dancersInBack(d).count == 3
     }
   }
 
   //  Return true if 8 dancers are in two-faced lines
   func isTwoFacedLines() -> Bool {
-    return isLines() &&
+    isLines() &&
       dancers.all { d in isInCouple(d) } &&
       dancers.filter { d in d.data.leader }.count == 4 &&
       dancers.filter { d in d.data.leader }.count == 4
@@ -954,7 +1010,7 @@ class CallContext {
 
   //  Return true if dancers are at squared set positions
   func isSquare() -> Bool {
-    return dancers.all { d in
+    dancers.all { d in
       let loc = d.location
       return (loc.x.abs.isApprox(3.0) && loc.y.abs.isApprox(1.0)) ||
         (loc.x.abs.isApprox(1.0) && loc.y.abs.isApprox(3.0))
@@ -963,7 +1019,19 @@ class CallContext {
 
   //  Return true if dancers are tidal line or wave
   func isTidal() -> Bool {
-    return dancersToRight(dancers.first!).count + dancersToLeft(dancers.first!).count == 7
+    dancersToRight(dancers.first!).count + dancersToLeft(dancers.first!).count == 7
+  }
+
+  //  Return true if dancers are all on one axis
+  //  Could be tidal or could be e.g. dancers all facing center
+  private func isOnXAxis() -> Bool {
+    dancers.all { d in d.isOnXAxis }
+  }
+  private func isOnYAxis() -> Bool {
+    dancers.all { d in d.isOnYAxis }
+  }
+  func isOnAxis() -> Bool {
+    isOnXAxis() || isOnYAxis()
   }
 
   //  Return true if dancers are in any type of 2x4 formation
@@ -1000,12 +1068,12 @@ class CallContext {
     init(_ d:Double) {
       direction = d
     }
-    var isLeft:Bool { get { return direction > 0.1 } }
-    var isRight:Bool { get { return direction < -0.1 } }
+    var isLeft:Bool { get { direction > 0.1 } }
+    var isRight:Bool { get { direction < -0.1 } }
   }
   func roll(_ d:Dancer) -> Rolling {
     //  Look at the last curve of the past, excluding post-processing adjustments
-    return Rolling(d.path.movelist.filter({ move in move.fromCall }).lastOrNull()?.brotate.rolling() ?? 0.0)
+    Rolling(d.path.movelist.filter({ move in move.fromCall }).lastOrNull()?.brotate.rolling() ?? 0.0)
   }
 
   //  Level off the number of beats for each dancer
@@ -1029,6 +1097,26 @@ class CallContext {
     dancers.forEach { d in
       while (d.path.movelist.lastOrNull()?.fromCall == false) {
         d.path.pop()
+      }
+    }
+  }
+
+  //  This is useful for calls that depend on re-defining dancer types
+  //  for subgroups, e.g. "Centers Zoom"
+  func analyzeActives() {
+    //  If all dancers are active then the usual call to analyze() will suffice
+    if (actives.count != dancers.count) {
+      let ctx2 = CallContext(self, actives)
+      ctx2.analyze()
+      actives.forEach { d in
+        let d2 = ctx2.dancers.first { $0 == d }!
+        d.data.beau = d2.data.beau
+        d.data.belle = d2.data.belle
+        d.data.leader = d2.data.leader
+        d.data.trailer = d2.data.trailer
+        d.data.center = d2.data.center
+        d.data.end = d2.data.end
+        d.data.partner = dancers.first { $0 == d2.data.partner }
       }
     }
   }

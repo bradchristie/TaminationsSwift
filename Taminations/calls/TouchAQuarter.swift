@@ -24,7 +24,7 @@ class TouchAQuarter : Action {
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     guard let d2 = ctx.dancerFacing(d) else {
-      throw CallError("Dancer ${d.number} cannot Touch a Quarter")
+      return try ctx.dancerCannotPerform(d, name)
     }
     var move = TamUtils.getMove("Extend Left")
       .scale(d.distanceTo(d2)/2.0,1.0)

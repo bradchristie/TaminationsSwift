@@ -36,7 +36,7 @@ class TextInput : View, UITextFieldDelegate {
     get { return fontSize }
     set {
       fontSize = newValue
-      mydiv.font = UIFont(name:mydiv.font?.fontName ?? "Helvetica",size:fontSize.cg)
+      mydiv.font = UIFont(name:"Helvetica",size:fontSize.cg)
     }
   }
 

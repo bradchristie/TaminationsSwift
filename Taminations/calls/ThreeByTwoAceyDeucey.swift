@@ -24,7 +24,7 @@ class ThreeByTwoAceyDeucey : Action {
     super.init("Three By Two Acey Deucey")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     try ctx.applyCalls("Outside Triangle Circulate While Very Centers Trade")
   }
 }

@@ -24,7 +24,7 @@ class SequencerLayout : LinearLayout {
 
   let animationView = AnimationView()
   let panelLayout = AnimationPanelLayout()
-  let beatText = TextView("")
+  let beatText = TextView("beats")
   let callText = TextView("")
   private let abbrButton = Button("Abbrev")
   private let instructionsButton = Button("Help")
@@ -41,19 +41,24 @@ class SequencerLayout : LinearLayout {
     super.init(.VERTICAL)
     backgroundColor = UIColor.black
     let rel = RelativeLayout()
-    appendView(rel)
     rel.weight = 1
-    rel.fillHorizontal()
-    animationView.fillParent()
     rel.appendView(animationView)
+    rel.appendView(beatText)
     beatText.margins = 10
     beatText.textSize = 24
-    beatText.alignRight().alignBottom()
-    rel.appendView(beatText)
-    callText.margins = 4
-    callText.textSize = 24
-    callText.alignTop().alignLeft()
+    beatText.height = 30
+    beatText.width = 200
+    beatText.alignBottom().alignRight()
     rel.appendView(callText)
+    rel.appendView(callText)
+    callText.margins = 10
+    callText.textSize = 32
+    callText.height = 48
+    callText.alignLeft()
+    callText.alignTop()
+    animationView.fillParent()
+    appendView(rel)
+    rel.fillHorizontal()
 
     appendView(panelLayout).weight(0).fillHorizontal()
 
@@ -90,4 +95,11 @@ class SequencerLayout : LinearLayout {
     pageButtons.fillHorizontal()
   }
 
+  override func layoutChildren() {
+    beatText.height = 30
+    beatText.width = 200
+    callText.height = 48
+    callText.fillHorizontal()
+    super.layoutChildren()
+  }
 }

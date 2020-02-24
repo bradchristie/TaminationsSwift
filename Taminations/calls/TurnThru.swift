@@ -30,24 +30,22 @@ class TurnThru : Action {
     if (ctx.isInWave(d)) {
       //  If in waves, Turn Thru has to be right-handed,
       //  Left Turn Thru left-handed
-      guard let d2 = ((norm.contains("left")) ? ctx.dancerToLeft(d) : ctx.dancerToRight(d)) else {
-        throw CallError("Dancer \(d) has no one to $name with")
+      let d2 = (norm.contains("left")) ? ctx.dancerToLeft(d) : ctx.dancerToRight(d)
+      if (d2 != nil && d2!.data.active) {
+        let dist = d.distanceTo(d2!)
+        return TamUtils.getMove("Swing \(dir2)").scale(dist / 2, 0.5) +
+          TamUtils.getMove("Extend \(dir2)").scale(1.0, 0.5)
       }
-      let dist = d.distanceTo(d2)
-      return TamUtils.getMove("Swing \(dir2)").scale(dist / 2, 0.5) +
-        TamUtils.getMove("Extend \(dir2)").scale(1.0, 0.5)
     }
     //  Otherwise has to be facing dancers
-    else {
-      let d2 = ctx.dancerFacing(d)
-      if (d2 == nil || !d2!.data.active || ctx.dancerInFront(d2!) != d) {
-        throw CallError("Cannot find dancer to Turn Thru with \(d)")
-      }
-      let dist = d.distanceTo(d2!)
-      return TamUtils.getMove("Extend \(dir1)").scale(dist / 2, 0.5) +
-        TamUtils.getMove("Swing \(dir2)").scale(0.5, 0.5) +
-        TamUtils.getMove("Extend \(dir2)").scale(dist / 2, 0.5)
+    let d2 = ctx.dancerFacing(d)
+    if (d2 == nil || !d2!.data.active || ctx.dancerInFront(d2!) != d) {
+      return try ctx.dancerCannotPerform(d, name)
     }
+    let dist = d.distanceTo(d2!)
+    return TamUtils.getMove("Extend \(dir1)").scale(dist / 2, 0.5) +
+      TamUtils.getMove("Swing \(dir2)").scale(0.5, 0.5) +
+      TamUtils.getMove("Extend \(dir2)").scale(dist / 2, 0.5)
   }
 
 }

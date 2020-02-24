@@ -20,7 +20,7 @@
 
 class Spread : Action {
 
-  override var level:LevelData { return LevelObject.find("plus") }
+  override var level:LevelData { LevelObject.find("plus") }
 
   /*
    * 1. If only some of the dancers are directed to Spread (e.g., from a
@@ -36,7 +36,7 @@ class Spread : Action {
    *  (e.g., Wheel & Deal from a line of four), the lead dancers slide apart sideways,
    *  while the trailing dancers step forward between them.
    */
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Is this spread from waves, tandem, actives?
     var spreader: Action? =  nil
       if (ctx.actives.count == ctx.dancers.count / 2) {

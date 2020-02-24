@@ -22,7 +22,7 @@
 class Hinge : Action {
 
   private var myLevel = LevelObject.find("ms")
-  override var level:LevelData { return myLevel }
+  override var level:LevelData { myLevel }
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     //  Find the dancer to hinge with
@@ -32,7 +32,10 @@ class Hinge : Action {
       : leftCount.isEven && rightCount.isOdd ? ctx.dancerToRight(d)
       : nil
     guard let d2 = d2q else {
-      throw CallError("Dancer \(d) has no one to hinge with.")
+      return try ctx.dancerCannotPerform(d,name)
+    }
+    if (!d2.data.active) {
+      return try ctx.dancerCannotPerform(d,name)
     }
     if (!ctx.isInWave(d,d2)) {
       myLevel = LevelObject.find("a1")
@@ -56,7 +59,7 @@ class Hinge : Action {
     if (ctx.isInCouple(d,d2) && d2.isLeftOf(d)) {
       return TamUtils.getMove("Quarter Left").skew(-1.0, dist / 2)
     }
-    throw CallError("Dancer \(d) has no one to hinge with.")
+    return try ctx.dancerCannotPerform(d,name)
   }
 
 }

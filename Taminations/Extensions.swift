@@ -6,111 +6,112 @@ import UIKit
 
 extension Int {
 
-  var d:Double { get { return Double(self) } }
-  var cg:CGFloat { get { return CGFloat(self) } }
-  var s:String { get { return "\(self)" } }
-  var abs:Int { get { return self < 0 ? -self : self } }
-  var isEven:Bool { get { return self % 2 == 0 } }
-  var isOdd:Bool { get { return self % 2 == 1 } }
+  var d:Double { get { Double(self) } }
+  var cg:CGFloat { get { CGFloat(self) } }
+  var s:String { get { "\(self)" } }
+  var abs:Int { get { self < 0 ? -self : self } }
+  var isEven:Bool { get { self % 2 == 0 } }
+  var isOdd:Bool { get { self % 2 == 1 } }
 
 }
 
 extension Float {
 
-  var d:Double { get { return Double(self) } }
+  var d:Double { get { Double(self) } }
 
 }
 
 extension CGFloat {
 
-  var i:Int { get { return Int(self) } }
-  var d:Double { get { return Double(self) } }
-  var s:String { get { return "\(self)" } }
+  var i:Int { get { Int(self) } }
+  var d:Double { get { Double(self) } }
+  var s:String { get { "\(self)" } }
 
 }
 
 extension Double {
 
-  var s:String { return "\(self)" }
-  var i:Int { return Int(self) }
-  var f:Float { return Float(self) }
-  var cg:CGFloat { return CGFloat(self) }
-  var sign:Double { return self < 0.0 ? -1.0 : self > 0.0 ? 1.0 : 0.0 }
-  var Ceil:Double { return ceil(self) }
-  var abs:Double { return self < 0 ? -self : self }
-  var Sqrt:Double { return sqrt(self) }
-  var sq:Double { return self * self }
-  var Sin:Double { return sin(self) }
-  var Cos:Double { return cos(self) }
-  var toRadians:Double { return self * .pi / 180 }
-  func isApproxInt(delta:Double=0.1) -> Bool { return (self - self.rounded()).abs < delta }
-  func isApprox(_ y:Double, delta:Double=0.1) -> Bool { return (self-y).abs < delta }
+  var s:String { "\(self)" }
+  var i:Int { Int(self) }
+  var f:Float { Float(self) }
+  var cg:CGFloat { CGFloat(self) }
+  var sign:Double { self < 0.0 ? -1.0 : self > 0.0 ? 1.0 : 0.0 }
+  var Ceil:Double { ceil(self) }
+  var abs:Double { self < 0 ? -self : self }
+  var Sqrt:Double { sqrt(self) }
+  var sq:Double { self * self }
+  var Sin:Double { sin(self) }
+  var Cos:Double { cos(self) }
+  var toRadians:Double { self * .pi / 180 }
+  func isApproxInt(delta:Double=0.1) -> Bool { (self - self.rounded()).abs < delta }
+  func isApprox(_ y:Double, delta:Double=0.1) -> Bool { (self-y).abs < delta }
+  func isAbout(_ y:Double) -> Bool { isApprox(y) }
   func angleDiff(_ a2:Double) -> Double {
-    return ((((self-a2).truncatingRemainder(dividingBy:.pi*2)) + (.pi*3)).truncatingRemainder(dividingBy: (.pi*2))) - .pi
+    ((((self-a2).truncatingRemainder(dividingBy:.pi*2)) + (.pi*3)).truncatingRemainder(dividingBy: (.pi*2))) - .pi
   }
   func angleEquals(_ a2:Double) -> Bool {
-    return angleDiff(a2).isApprox(0.0)
+    angleDiff(a2).isApprox(0.0)
   }
   func isAround(_ a2:Double) -> Bool {
-    return angleEquals(a2)
+    angleEquals(a2)
   }
 
 }
 
 //  Swift seems to be missing a logical XOR
 func ^(b1:Bool, b2:Bool) -> Bool {
-  return b1 ? !b2 : b2
+  b1 ? !b2 : b2
 }
 
 extension Array {
 
   func isNotEmpty() -> Bool {
-    return !isEmpty
+    !isEmpty
   }
 
   func last() -> Element {
-    return self[self.count-1]
+    self[self.count-1]
   }
 
   func lastOrNull() -> Element? {
-    return self.count > 0 ? last() : nil
+    self.count > 0 ? last() : nil
   }
 
   func mapIndexed<T>(_ f:(Int,Element) -> T ) -> [T] {
-    return self.enumerated().map { (i,it) in f(i,it) }
+    self.enumerated().map { (i,it) in f(i,it) }
   }
 
   func any(_ f:(Element) throws -> Bool) rethrows -> Bool {
-    return try first(where:f) != nil
+    try first(where:f) != nil
   }
   func none(_ f:(Element) -> Bool) -> Bool {
-    return !any(f)
+    !any(f)
   }
   func all(_ f:(Element) throws -> Bool) rethrows -> Bool {
-    return try allSatisfy(f)
+    try allSatisfy(f)
   }
 
   func sortedBy<T:Comparable>(_ f:(Element) -> T) -> [Element] {
-    return self.sorted { (a,b) in f(a) < f(b) }
+    self.sorted { (a,b) in f(a) < f(b) }
   }
 
   func drop(_ n:Int) -> [Element] {
-    return Array(self[n...])
+    Array(self[n...])
   }
   //func dropLast(_ n:Int) -> [Element] {
   //  return Array(self[...(count-n-1)])
  // }
 
   func filterNot(_ f:(Element)->Bool) -> [Element] {
-    return filter { e in !f(e) }
+    filter { e in !f(e) }
   }
 
   func elementAtOrNull(_ i:Int) -> Element? {
-    return i >= 0 && i < count ? self[i] : nil
+    i >= 0 && i < count ? self[i] : nil
   }
 
 
-  var second:Element? { return self[1] }
+  var second:Element? { self[1] }
 
 }
 
@@ -127,7 +128,7 @@ extension Array where Array.Element : Equatable {
   }
 
   func containsAll(_ a:[Element]) -> Bool {
-    return a.all { a1 in contains { x in x == a1 } }
+    a.all { a1 in contains { x in x == a1 } }
   }
 
 }
@@ -135,26 +136,30 @@ extension Array where Array.Element : Equatable {
 
 extension String {
 
-  var i: Int { get { return isBlank ? 0 : Int(self)! } }
-  var d:Double { get { return Double(self)! } }
+  var i: Int { get { isBlank ? 0 : Int(self)! } }
+  var d:Double { get { Double(self)! } }
 
   func isNotEmpty() -> Bool {
-    return !isEmpty
+    !isEmpty
   }
 
   func trim() -> String {
-    return self.trimmingCharacters(in: .whitespaces)
+    self.trimmingCharacters(in: .whitespaces)
   }
 
   var isBlank: Bool {
     get {
-      return self.trim().isEmpty
+      self.trim().isEmpty
     }
   }
 
   func replaceAll(_ query: String, _ replacement: String) -> String {
-    return self.replacingOccurrences(of: query, with: replacement,
+    self.replacingOccurrences(of: query, with: replacement,
       options: .regularExpression, range: nil)
+  }
+  func replaceIgnoreCase(_ query: String, _ replacement: String) -> String {
+    self.replacingOccurrences(of: query, with: replacement,
+      options: [.regularExpression , .caseInsensitive] , range: nil)
   }
   func replaceFirst(_ query:String, _ replacement:String) -> String {
     var retval = self
@@ -165,7 +170,7 @@ extension String {
   }
 
   func split() -> [String] {
-    return components(separatedBy: CharacterSet.whitespaces)
+    components(separatedBy: CharacterSet.whitespaces)
   }
 
   func split(_ c: String, maxSplits:Int = 0) -> [String] {
@@ -199,27 +204,27 @@ extension String {
    *   Return all combinations of words from a string
    */
   func minced() -> [String] {
-    return chopped().flatMap { (s:String) -> [String] in s.diced() }
+    chopped().flatMap { (s:String) -> [String] in s.diced() }
   }
 
   /**
    * Tests whether this string matches the given regularExpression. This method returns
    * true only if the regular expression matches the <i>entire</i> input string. */
   func matches(_ query:String) -> Bool {
-    return range(of: "^("+query+")$", options: .regularExpression) != nil
+    range(of: "^("+query+")$", options: .regularExpression) != nil
   }
   //  And this one can match any substring
   func contains(_ query:String) -> Bool {
-    return range(of: query, options: .regularExpression) != nil
+    range(of: query, options: .regularExpression) != nil
   }
 
   func replace(_ query: String, _ replacement: String) -> String {
-    return self.replacingOccurrences(of: query, with: replacement)
+    self.replacingOccurrences(of: query, with: replacement)
   }
 
   //  Quote a string and escape any internal quotes
   func quote() -> String {
-    return "\"\(replace("\"","&quot;"))\""
+    "\"\(replace("\"","&quot;"))\""
   }
 
 
@@ -246,19 +251,19 @@ extension String {
   }
   //  Return the first match with groups
   func matchWithGroups(_ regexPattern: String) -> [String]? {
-    return matchesWithGroups(regexPattern).first
+    matchesWithGroups(regexPattern).first
   }
 
   func startsWith(_ query:String) -> Bool {
-    return starts(with:query)
+    starts(with:query)
   }
   func endsWith(_ query:String) -> Bool {
-    return reversed().starts(with:query.reversed())
+    reversed().starts(with:query.reversed())
   }
 
   //  Return string with (almost) every word capitalized
   func capWords() -> String {
-    return self.split().map { s in
+    self.split().map { s in
       let cap = s.lowercased().capitalized
       switch (cap) {
         case "And": return "and"
@@ -273,11 +278,11 @@ extension String {
   }
 
   func encodeURI() -> String {
-    return self.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!
+    self.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!
   }
 
   func decodeURI() -> String {
-    return self.removingPercentEncoding!
+    self.removingPercentEncoding!
   }
 }
 

@@ -139,11 +139,10 @@ class SequencerModel {
       let prevbeats = seqView.animationView.movingBeats
       try cctx.interpretCall(calltxt)
       try cctx.performCall()
+      cctx.checkForCollisions()
       cctx.extendPaths()
       cctx.matchStandardFormation()
-      for i in 0..<avdancers.count {
-        avdancers[i].path.add(cctx.dancers[i].path)
-      }
+      cctx.appendToSource()
       seqView.animationView.recalculate()
       let newbeats = seqView.animationView.movingBeats
       if (newbeats > prevbeats) {

@@ -20,13 +20,13 @@
 
 class AnythingChainThru : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
+  override var level:LevelData { LevelObject.find("c1") }
   override var requires:[String] {
-    return ["b2/trade","ms/cast_off_three_quarters",
+    ["b2/trade","ms/cast_off_three_quarters",
             "plus/diamond_circulate","c1/triangle_formation",
             "c1/interlocked_diamond_circulate"] }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     let firstCall = norm.replace("chainthru","")
       .replace("triangle","trianglecirculate")
       .replace("diamond","diamondcirculate")

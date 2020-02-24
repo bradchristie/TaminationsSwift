@@ -23,7 +23,7 @@ class StarThru : Action {
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     //  Must be facing dancers, opposite gender
     guard let d2 = ctx.dancerFacing(d) else {
-      throw CallError("Dancer \(d) has nobody to Star Thru with")
+      return try ctx.dancerCannotPerform(d, name)
     }
     if (d2.gender == d.gender) {
       throw CallError("Cannot Star Thru with same gender.")

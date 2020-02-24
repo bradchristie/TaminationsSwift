@@ -37,6 +37,21 @@ class Bezier {
   private let cx:Double
   private let cy:Double
 
+  //  Constructor from 4 points along the curve
+  //  at times 0, 1/3, 2/3, 1
+  //  Reference:  https://web.archive.org/web/20131225210855/http://people.sc.fsu.edu/~jburkardt/html/bezier_interpolation.html
+  static func fromPoints(_ p0:Vector, _ p1:Vector, _ p2:Vector, _ p3:Vector) -> Bezier {
+    let pc1 = Vector(
+      (-5.0*p0.x + 18.0*p1.x - 9.0*p2.x + 2.0*p3.x)/6.0,
+      (-5.0*p0.y + 18.0*p1.y - 9.0*p2.y + 2.0*p3.y)/6.0
+    )
+    let pc2 = Vector(
+      (2.0*p0.x - 9.0*p1.x + 18.0*p2.x - 5.0*p3.x)/6.0,
+      (2.0*p0.y - 9.0*p1.y + 18.0*p2.y - 5.0*p3.y)/6.0
+    )
+    return Bezier(x1:p0.x, y1:p0.y, ctrlx1:pc1.x, ctrly1:pc1.y,
+                  ctrlx2:pc2.x, ctrly2:pc2.y, x2:p3.x, y2:p3.y)
+  }
 
   init(x1:Double,y1:Double,ctrlx1:Double,ctrly1:Double,ctrlx2:Double,ctrly2:Double,x2:Double,y2:Double) {
     self.x1 = x1
@@ -57,23 +72,25 @@ class Bezier {
     ay = y2 - y1 - cy - by
   }
 
+  var endPoint:Vector { Vector(x2,y2) }
+
   //  Compute X, Y values for a specific t value
   func xt(_ t:Double) -> Double {
-    return x1 + t*(cx + t*(bx + t*ax))
+    x1 + t*(cx + t*(bx + t*ax))
   }
   func yt(_ t:Double) -> Double {
-    return y1 + t*(cy + t*(by + t*ay))
+    y1 + t*(cy + t*(by + t*ay))
   }
 
   //  Compute dx, dy values for a specific t value
   private func dxt(_ t:Double) -> Double {
-    return cx + t*(2.0*bx + t*3.0*ax)
+    cx + t*(2.0*bx + t*3.0*ax)
   }
   private func dyt(_ t:Double) -> Double {
-    return cy + t*(2.0*by + t*3.0*ay)
+    cy + t*(2.0*by + t*3.0*ay)
   }
   private func angle(_ t:Double) -> Double {
-    return atan2(dyt(t),dxt(t))
+    atan2(dyt(t),dxt(t))
   }
 
   //  Return the movement along the curve given "t" between 0 and 1
@@ -100,5 +117,20 @@ class Bezier {
     return (theta.angleEquals(0.0)) ? 0.0 : theta
   }
 
+  //  Well, there could be control points way out but this is ok for our use
+  func isIdentity() -> Bool {
+    x2.isAbout(0.0) && y2.isAbout(0.0)
+  }
+
+  ////  Functions to compute a new Bezier
+  func scale(_ x:Double, _ y:Double) -> Bezier {
+    Bezier(x1:x1*x, y1:y1*y, ctrlx1:ctrlx1*x, ctrly1:ctrly1*y,
+           ctrlx2:ctrlx2*x, ctrly2:ctrly2*y, x2:x2*x, y2:y2*y)
+  }
+
+  func skew(_ x:Double, _ y:Double) -> Bezier {
+    Bezier(x1:x1, y1:y1, ctrlx1:ctrlx1, ctrly1:ctrly1,
+           ctrlx2:ctrlx2+x, ctrly2:ctrly2+y, x2:x2+x, y2:y2+y)
+  }
 
 }

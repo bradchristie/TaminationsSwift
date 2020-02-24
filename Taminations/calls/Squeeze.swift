@@ -30,7 +30,7 @@ class Squeeze : Action {
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     guard let d2 = ctx.dancerToLeft(d) ?? ctx.dancerToRight(d) else {
-      throw CallError("No dancer to Squeeze with \(d)")
+      return try ctx.dancerCannotPerform(d, name)
     }
     let dist = d.distanceTo(d2)
     let isClose = dist < 2.0 || dist.isApprox(2.0)

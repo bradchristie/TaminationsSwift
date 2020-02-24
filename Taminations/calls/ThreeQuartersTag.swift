@@ -20,19 +20,20 @@
 
 class ThreeQuartersTag : Action {
 
-  override var level:LevelData { return LevelObject.find("ms") }
-  override var requires:[String] { return ["ms/fraction_tag"] }
-
-  init() {
-    super.init("3/4 Tag the Line")
-  }
+  override var level:LevelData { LevelObject.find("ms") }
+  override var requires:[String] { ["ms/fraction_tag"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
+    let dir = norm.startsWith("left") ? "Left" : ""
     //  All the 4-dancer formations are in Taminations
     if (ctx.actives.count < 8) {
-      try ctx.applyCalls("3/4 Tag the Line")
+      try ctx.applyCalls("\(dir) 3/4 Tag the Line")
+    } else if (ctx.isTidal()) {
+      try ctx.applyCalls("\(dir) Quarter Tag","Extend","Extend")
     } else if (!ctx.isLines()) {
       throw CallError("Dancers must be in lines")
+    } else if (dir == "Left") {
+      try ctx.applyCalls("Face In","Centers Step to a Left-Hand Wave","Extend","Extend")
     } else {
       try super.perform(ctx, index)
     }

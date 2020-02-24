@@ -24,22 +24,24 @@ class BoxtheGnat : Action {
     super.init("Box the Gnat")
   }
 
-  private func checkOtherDancer(_ d:Dancer, _ d2:Dancer?) throws -> Dancer {
+  private func checkOtherDancer(_ d:Dancer, _ d2:Dancer?) -> Dancer? {
     guard let other = d2 else {
-      throw CallError("Cannot find dancer to turn with \(d.number)")
+      return nil
     }
     if (!other.data.active) {
-      throw CallError("Cannot find dancer to turn with ${d.number}")
+      return nil
     }
     if (other.gender == d.gender) {
-      throw CallError("Same gender cannot Box the Gnat")
+      return nil
     }
     return other
   }
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     if (ctx.isInWave(d)) {
-      let d2 = try checkOtherDancer(d, ctx.dancerToRight(d))
+      guard let d2 = checkOtherDancer(d, ctx.dancerToRight(d)) else {
+        return try ctx.dancerCannotPerform(d,name)
+      }
       let dist = d.distanceTo(d2)
       let offset =
         dist > 1.5 && d.data.end ? -dist
@@ -47,15 +49,19 @@ class BoxtheGnat : Action {
           : -dist / 2.0
       return TamUtils.getMove((d.gender == Gender.BOY) ? "U-Turn Right" : "U-Turn Left").skew(1.0, offset).changehands(Hands.GRIPRIGHT)
     } else {
-      let d2 = try checkOtherDancer(d, ctx.dancerFacing(d))
+      guard let d2 = checkOtherDancer(d, ctx.dancerFacing(d)) else {
+        return try ctx.dancerCannotPerform(d,name)
+      }
       let dist = d.distanceTo(d2)
       let cy1 = (d.gender == Gender.BOY) ? 1.0 : 0.1
       let y4 = (d.gender == Gender.BOY) ? -2.0 : 2.0
       let hands = (d.gender == Gender.BOY) ? Hands.GRIPLEFT : Hands.GRIPRIGHT
       let m = Movement(
         fullbeats: 4.0, hands: hands,
-        cx1: 1.0, cy1: cy1, cx2: dist / 2, cy2: cy1, x2: dist / 2 + 1, y2: 0.0,
-        cx3: 1.3, cx4: 1.3, cy4: y4, x4: 0.0, y4: y4)
+        btranslate: Bezier(x1:0.0, y1:0.0, ctrlx1: 1.0, ctrly1: cy1,
+                           ctrlx2: dist / 2, ctrly2: cy1, x2: dist / 2 + 1, y2: 0.0),
+        brotate: Bezier(x1:0.0, y1:0.0, ctrlx1: 1.3, ctrly1: 0.0,
+                       ctrlx2: 1.3, ctrly2: y4, x2: 0.0, y2: y4))
       return Path(m)
     }
   }

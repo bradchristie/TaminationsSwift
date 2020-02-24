@@ -22,7 +22,7 @@ class GrandSwingThru : Action {
 
   override var level: LevelData { LevelObject.find("plus") }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Check that we have 6 dancers in a tidal wave
     var count = 0
     try ctx.actives.forEach { d in

@@ -24,6 +24,7 @@ enum Gender:Int {
   case BOY = 1
   case GIRL = 2
   case PHANTOM = 3
+  case NONE = 4    // for concepts with abstract dancers
 }
 
 //  info used by sequencer
@@ -55,7 +56,7 @@ class Dancer : Comparable, CustomStringConvertible {
   let geom:Geometry
   let moves:[Movement]
   let clonedFrom:Dancer?
-  var drawColor:UIColor { get { return fillcolor.darker() } }
+  var drawColor:UIColor { get { fillcolor.darker() } }
   var showNumber = Dancer.NUMBERS_OFF
   var showColor = true
   var showShape = true
@@ -65,7 +66,7 @@ class Dancer : Comparable, CustomStringConvertible {
   var hands = Hands.NOHANDS
   var tx = Matrix()
   private var pathpath = DrawingPath()
-  var beats:Double { get { return path.beats } }
+  var beats:Double { get { path.beats } }
   //  Other vars for computing handholds
   var leftdancer: Dancer? = nil
   var rightdancer: Dancer? = nil
@@ -103,9 +104,11 @@ class Dancer : Comparable, CustomStringConvertible {
     animateComputed(beat:-2.0)
   }
 
-  convenience init(_ from:Dancer) {
-    self.init(number: from.number, couple: from.number_couple,
-      gender: from.gender.rawValue, fillcolor: from.fillcolor, mat: from.tx,
+  convenience init(_ from:Dancer, number:String="", number_couple:String="", gender:Int=0) {
+    self.init(number: number == "" ? from.number : number,
+              couple: number_couple == "" ? from.number_couple : number_couple,
+              gender: gender == 0 ? from.gender.rawValue : gender,
+      fillcolor: from.fillcolor, mat: from.tx,
       //  Already geometrically rotated so don't do it again
       geom: GeometryMaker.makeOne(from.geom.geometry(),r:0), moves: [], clonedFrom: from)
     data.active = from.data.active
@@ -113,40 +116,40 @@ class Dancer : Comparable, CustomStringConvertible {
 
   //  Required methods for Comparable
   static func < (lhs:Dancer, rhs:Dancer) -> Bool {
-    return lhs.number < rhs.number
+    lhs.number < rhs.number
   }
   static func == (lhs:Dancer, rhs:Dancer) -> Bool {
-    return lhs.number == rhs.number
+    lhs.number == rhs.number
   }
   //  Property for CustomStringConvertible
-  var description: String { return number }
+  var description: String { number }
 
-  var isPhantom:Bool { return gender == .PHANTOM }
+  var isPhantom:Bool { gender == .PHANTOM }
 
-  var location:Vector { return tx.location }
+  var location:Vector { tx.location }
 
   //  distance to another dancer
   func distanceTo(_ d2:Dancer) -> Double {
-    return (location - d2.location).length
+    (location - d2.location).length
   }
 
   //  angle the dancer is facing relative to the positive x-axis
-  var angleFacing:Double { return tx.angle }
+  var angleFacing:Double { tx.angle }
 
   //  angle of the dancer's position relative to the positive x-axis
-  var anglePosition:Double { return tx.location.angle }
+  var anglePosition:Double { tx.location.angle }
 
   //  angle the dancer turns to look at the origin
-  var angleToOrigin:Double { return (tx.inverse() * Vector(0,0)).angle }
+  var angleToOrigin:Double { (tx.inverse() * Vector(0,0)).angle }
 
   func vectorToDancer(_ d2:Dancer) -> Vector {
-    return tx.inverse() * d2.location
+    tx.inverse() * d2.location
   }
   //  Angle of d2 as viewed from this dancer
   //  If angle is 0 then d2 is in front
   //  Angle returned is in the range -pi to pi
   func angleToDancer(_ d2:Dancer) -> Double {
-    return vectorToDancer(d2).angle
+    vectorToDancer(d2).angle
   }
 
   //  Other geometric interrogatives
@@ -168,24 +171,40 @@ class Dancer : Comparable, CustomStringConvertible {
     angleToOrigin < 0
   }
 
+  var isOnXAxis:Bool {
+    location.y.isAbout(0.0)
+  }
+
+  var isOnYAxis:Bool {
+    location.x.isAbout(0.0)
+  }
+
+  var isOnAxis: Bool {
+    isOnXAxis || isOnYAxis
+  }
+
+  var isTidal:Bool {
+    (isOnXAxis || isOnYAxis) && (isCenterLeft || isCenterRight)
+  }
+
   func isInFrontOf(_ d2:Dancer) -> Bool {
-    return self != d2 && d2.angleToDancer(self).angleEquals(0.0)
+    self != d2 && d2.angleToDancer(self).angleEquals(0.0)
   }
 
   func isInBackOf(_ d2:Dancer) -> Bool {
-    return self != d2 && d2.angleToDancer(self).angleEquals(.pi)
+    self != d2 && d2.angleToDancer(self).angleEquals(.pi)
   }
 
   func isRightOf(_ d2:Dancer) -> Bool {
-    return self != d2 && d2.angleToDancer(self).angleEquals(.pi*3/2)
+    self != d2 && d2.angleToDancer(self).angleEquals(.pi*3/2)
   }
 
   func isLeftOf(_ d2:Dancer) -> Bool {
-    return self != d2 && d2.angleToDancer(self).angleEquals(.pi/2)
+    self != d2 && d2.angleToDancer(self).angleEquals(.pi/2)
   }
 
   func isOpposite(_ d2:Dancer) -> Bool {
-    return self != d2 && (location + d2.location).length.isApprox(0.0)
+    self != d2 && (location + d2.location).length.isApprox(0.0)
   }
 
 
@@ -193,7 +212,7 @@ class Dancer : Comparable, CustomStringConvertible {
    *   Used for hexagon handholds
    * @return  True if dancer is close enough to center to make a center star
    */
-  var inCenter:Bool { return location.length < 1.1 }
+  var inCenter:Bool { location.length < 1.1 }
 
   /**
    *   Move dancer to location along path
@@ -208,6 +227,12 @@ class Dancer : Comparable, CustomStringConvertible {
   func animateToEnd() { animate(beat:beats) }
 
   func animate(beat:Double) { animateComputed(beat:beat) }
+
+  func setStartPosition(_ x:Double, _ y:Double) {
+    let a = angleFacing
+    starttx = Matrix(x:x,y:y) * Matrix(angle:a)
+    tx = Matrix(starttx)
+  }
 
   func rotateStartAngle(_ angle:Double) {
     starttx = starttx * Matrix(angle:angle.toRadians)

@@ -21,7 +21,7 @@
 class Action : CodedCall {
 
   //  Wrapper method for performing one call
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  final override func performCall(_ ctx: CallContext, _ index: Int) throws {
     try perform(ctx, index)
     ctx.dancers.forEach { d in
       d.path.recalculate()
@@ -42,7 +42,7 @@ class Action : CodedCall {
   //  Default method for one dancer to perform one call
   //  Returns an empty path (the dancer just stands there)
   func performOne(_ d:Dancer, _ ctx:CallContext) throws -> Path {
-    return Path()
+    Path()
   }
 
 }

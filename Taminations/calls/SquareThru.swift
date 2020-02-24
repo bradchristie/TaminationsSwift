@@ -20,7 +20,10 @@
 
 class SquareThru : Action {
 
-  override var requires:[String] { return ["b2/ocean_wave","plus/explode_the_wave","b1/step_thru"] }
+  private var myLevel = LevelObject.find("ms")
+  override var level:LevelData { myLevel }
+
+  override var requires:[String] { ["b2/ocean_wave","plus/explode_the_wave","b1/step_thru"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Set up alternating hands
@@ -28,7 +31,7 @@ class SquareThru : Action {
       ? ("","Left-Hand")
       : ("Left-Hand","")
     //  Find out how many hands
-    let count = Int(norm.suffix(1)) ?? 4
+    let count = Int(norm.replace("toawave","").suffix(1)) ?? 4
     //  First hand is step to a wave if not already there
     if (ctx.actives.any { d in ctx.isInCouple(d) }) {
       try ctx.applyCalls("Facing Dancers Step to a Compact \(right) Wave")
@@ -45,8 +48,14 @@ class SquareThru : Action {
     try (1 ..< count).forEach { c in
       let hand = (c % 2 == 0) ? right : left
       try ctx.applyCalls("Explode and Step to a Compact \(hand) Wave")
+      ctx.level = LevelObject.find("b1")  // override Explode (Plus)
     }
-    try ctx.applyCalls("Step Thru")
+    //  Finish back-to-back unless C-1 concept "to a Wave" added
+    if (norm.endsWith("toawave")) {
+      myLevel = LevelObject.find("c1")
+    } else {
+      try ctx.applyCalls("Step Thru")
+    }
   }
 }
 

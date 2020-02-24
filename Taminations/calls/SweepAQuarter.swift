@@ -20,14 +20,14 @@
 
 class SweepAQuarter : Action {
 
-  override var level:LevelData { return LevelObject.find("b2") }
-  override var requires:[String] { return ["b2/sweep_a_quarter"] }
+  override var level:LevelData { LevelObject.find("b2") }
+  override var requires:[String] { ["b2/sweep_a_quarter"] }
 
   init() {
     super.init("and Sweep a Quarter")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     if (ctx.actives.any { d in
       !ctx.isInCouple(d)
     }) {

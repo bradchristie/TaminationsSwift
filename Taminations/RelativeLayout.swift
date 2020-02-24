@@ -37,6 +37,14 @@ class RelativeLayout : ViewGroup {
       if (child.align & Align.Right != 0) {
         alignEdge(child,.right,self,.right)
       }
+
+      if (child is TextView && (child.align & Align.Top != 0 || child.align & Align.Bottom != 0)) {
+        NSLayoutConstraint(item:child.div, attribute: .height, relatedBy: .equal,toItem: nil,attribute: .notAnAttribute, multiplier: 1, constant: child.height.cg).isActive = true
+      }
+      if (child is TextView && (child.align & Align.Left != 0 || child.align & Align.Right != 0)) {
+        NSLayoutConstraint(item:child.div, attribute: .width, relatedBy: .equal,toItem: nil,attribute: .notAnAttribute, multiplier: 1, constant: child.width.cg).isActive = true
+      }
+
     }
   }
 

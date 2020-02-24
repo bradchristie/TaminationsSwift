@@ -26,6 +26,8 @@ class CodedCall : Call {
     "and" : { And() },
     "and14more" : { QuarterMore() },
     "androll" : { Roll("androll","and Roll") },
+    "around1toaline" : { AroundToALine("around1toaline","Around One to a Line") },
+    "around2toaline" : { AroundToALine("around2toaline","Around Two to a Line") },
     "roll" : { Roll("roll","Roll") },
     "backaway" : { BackAway() },
     "beau" : { Beaus() },
@@ -56,6 +58,8 @@ class CodedCall : Call {
     "grandswingthru" : { GrandSwingThru("grandswingthru","Grand Swing Thru") },
     "_grandswingleft" : { GrandSwingX("grandswingleft","Grand Swing Left") },
     "_grandswingright" : { GrandSwingX("grandswingright","Grand Swing Right") },
+    "12tag" : { HalfTag("halftag","Half Tag") },
+    "left12tag" : { HalfTag("lefthalftag","Left Half Tag") },
     "hinge" : { Hinge("hinge","Hinge") },
     "singlehinge" : { Hinge("hinge","Single Hinge") },
     "partnerhinge" : { Hinge("hinge","Partner Hinge") },
@@ -76,7 +80,8 @@ class CodedCall : Call {
     "point" : { Points() },
     "14in" : { QuarterIn("14in","Quarter In") },
     "14out" : { QuarterIn("14out","Quarter Out") },
-    "14tag" : { QuarterTag() },
+    "14tag" : { QuarterTag("quartertag","Quarter Tag") },
+    "left14tag" : { QuarterTag("leftquartertag","Left Quarter Tag") },
     "run" : { Run("run","Run") },
     "runright" : { Run("runright","Run Right") },
     "runleft" : { Run("runleft","Run Left") },
@@ -88,23 +93,32 @@ class CodedCall : Call {
     "slidethru" : { SlideThru() },
     "slip" : { Slip() },
     "squeeze" : { Squeeze() },
+    "squeezethehourglass" : { SqueezeTheHourglass() },
+    "squeezethegalaxy" : { SqueezeTheGalaxy() },
     "starthru" : { StarThru("starthru","Star Thru") },
     "steptoacompactwave" : { StepToACompactWave("","") },
     "steptoacompactlefthandwave" : { StepToACompactWave("left","") },
     "leftstarthru" : { StarThru("leftstarthru","Left Star Thru") },
     "step" : { Step() },
+    "stepahead" : { Step() },
     "switchtheline" : { SwitchTheLine() },
     "tagtheline" : { TagTheLine() },
     "32aceydeucey" : { ThreeByTwoAceyDeucey() },
-    "34tag" : { ThreeQuartersTag() },
-    "34tagtheline" : { ThreeQuartersTag() },
+    "34tag" : { ThreeQuartersTag("34tag","3/4 Tag the Line") },
+    "34tagtheline" : { ThreeQuartersTag("34tag","3/4 Tag the Line") },
+    "left34tag" : { ThreeQuartersTag("left34tag","Left 3/4 Tag the Line") },
+    "left34tagtheline" : { ThreeQuartersTag("left34tag","Left 3/4 Tag the Line") },
+    "touch" : { Touch("touch","Touch") },
+    "lefttouch" : { Touch("lefttouch","Left Touch") },
     "trade" : { Trade() },
     "partnertrade" : { Trade() },
+    "thosewhocan" : { ThoseWhoCan() },
     "touch14" : { TouchAQuarter("touch14","Touch a Quarter") },
     "lefttouch14" : { TouchAQuarter("lefttouch14","Left Touch a Quarter") },
     "triplestarthru" : { TripleStarThru() },
     "tripletrade" : { TripleTrade() },
     "turnback" : { TurnBack() },
+    "twisttheline" : { TwistAnything("twisttheline","Twist the Line") },
     "zoom" : { Zoom() },
     "singlewheel" : { SingleWheel("singlewheel","Single Wheel") },
     "leftsinglewheel" : { SingleWheel("leftsinglewheel","Left Single Wheel") },
@@ -127,7 +141,15 @@ class CodedCall : Call {
     "zigzag" : { ZigZag("zigzag","Zig Zag") },
     "zagzig" : { ZigZag("zagzig","Zag Zig") },
     "zagzag" : { ZigZag("zagzag","Zag Zag") },
-    "zing" : { Zing() }
+    "zing" : { Zing() },
+    "toawave" : { ToAWave() },
+    "kickoff" : { KickOff() },
+    "singlecrossandwheel" : { SingleCrossAndWheel() },
+    "crossandwheel" : { CrossAndWheel() },
+    "crosstradeandwheel" : { CrossTradeAndWheel() },
+    "grandcrosstradeandwheel" : { GrandCrossTradeAndWheel() },
+    "singlecrosstradeandwheel" : { SingleCrossTradeAndWheel() },
+    "bendtheline" : { BendTheLine() }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -160,7 +182,7 @@ class CodedCall : Call {
     }
     //  Be careful not to parse Wheel and Deal and Roll as
     //  Wheel and (Deal and Roll)
-    if (callnorm.matches("(reverse)?wheeland(?!deal)(\\\\w.*)")) {
+    if (callnorm.matches("(reverse)?wheeland(?!deal)(\\w.*)")) {
       return WheelAnd(callnorm,callname)
     }
     if (callnorm.matches("out(er|sides?)(2|4|6)?")) {
@@ -187,7 +209,7 @@ class CodedCall : Call {
     if (callnorm.matches("_windmill(in|out|left|right|forward)")) {
       return Windmillx(callnorm,callname)
     }
-    if (callnorm.matches("(left)?squarethru(1|2|3|4|5|6|7)?")) {
+    if (callnorm.matches("(left)?squarethru(1|2|3|4|5|6|7)?(toawave)?")) {
       return SquareThru(callnorm,callname)
     }
     if (callnorm.matches("(left)?splitsquarethru(2|3|4|5|6|7)?")) {
@@ -208,18 +230,63 @@ class CodedCall : Call {
     if (callnorm.matches("(inside|outside|inpoint|outpoint|tandembased|wavebased)?trianglecirculate")) {
       return TriangleCirculate(callnorm,callname)
     }
-    if (callnorm.matches(".*chainthru")) {
-      if (callnorm.matches(".*squarechainthru")) {
-        return nil
-      }
-      return AnythingChainThru(callnorm,callname)
-    }
     if (callnorm.matches("minibusybut.*")) {
       return MiniBusyBut(callnorm,callname)
     }
 
     if (callnorm.matches("(and)?spread")) {
       return Spread(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left)?(split)?catch(1|2|3|4)")) {
+      return Catch(callnorm,callname)
+    }
+
+    if callnorm.matches("butterfly.*") {
+      return Butterfly(callnorm,callname)
+    }
+
+    if (callname.lowercased().matches("o .+")) {
+      return OFormation(callnorm,callname)
+    }
+
+    if (callnorm.matches("zipcode\\d")) {
+      return ZipCode(callnorm,callname)
+    }
+
+    if (callnorm.matches("twistand.*")) {
+      return TwistAnything(callnorm,callname)
+    }
+
+    if (callnorm.matches("ascouples.*")) {
+      return AsCouples(callnorm,callname)
+    }
+
+    if (callnorm.matches("tandem.*")) {
+      return Tandem(callnorm,callname)
+    }
+
+    if (callnorm.matches("(12|34)?crazy.*")) {
+      return Crazy(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left)?verticaltagback(toawave)?")) {
+      return VerticalTagBack(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left)?vertical(left)?(14|12|34)?tag")) {
+      return VerticalTag(callnorm,callname)
+    }
+
+    if (callnorm.matches("adjustto.*")) {
+      return Adjust(callnorm,callname)
+    }
+
+    if (callnorm.matches(".*chainthru")) {
+      if (callnorm.matches(".*squarechainthru")) {
+        return nil
+      }
+      return AnythingChainThru(callnorm,callname)
     }
 
     return nil

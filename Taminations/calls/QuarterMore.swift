@@ -20,13 +20,13 @@
 
 class QuarterMore : Action {
 
-  override var requires:[String] { return ["b2/wheel_around"] }
+  override var requires:[String] { ["b2/wheel_around"] }
 
   init() {
     super.init("and a Quarter More")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     if (ctx.actives.any { d in !ctx.isInCouple(d)} ) {
       throw CallError("Only couples can go a Quarter More")
     }

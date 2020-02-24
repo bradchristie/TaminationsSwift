@@ -20,15 +20,15 @@
 
 class Ramble : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
+  override var level:LevelData { LevelObject.find("c1") }
   override var requires:[String] {
-    return ["a2/single_wheel","ms/slide_thru","b1/separate"]
+    ["a2/single_wheel","ms/slide_thru","b1/separate"]
   }
 
   init() {
     super.init("Ramble")
   }
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     let ctx2 = CallContext(ctx,beat:0.0).noSnap().noExtend()
     try ctx2.applyCalls("Center 4 Single Wheel and Slide Thru")
     try ctx2.applyCalls("Outer 4 Separate and Slide Thru")

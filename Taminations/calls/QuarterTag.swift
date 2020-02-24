@@ -20,24 +20,32 @@
 
 class QuarterTag : Action {
 
-  override var level:LevelData { return LevelObject.find("ms") }
-  override var requires:[String] { return ["ms/hinge","b1/face"] }
-
-  init() {
-    super.init("Quarter Tag")
-  }
+  override var level:LevelData { LevelObject.find("ms") }
+  override var requires:[String] { ["ms/hinge","b1/face"] }
 
   private func centersHoldLeftHands(_ ctx:CallContext) -> Bool {
-    return ctx.actives.any { d in
-      d.data.center && (ctx.dancerToLeft(d)?.data.center ?? false)
+    ctx.actives.filter { d in d.data.center } . all { d in
+        ctx.dancerToLeft(d)?.data.center ?? false
     }
   }
+  private func centersHoldRightHands(_ ctx:CallContext) -> Bool {
+    ctx.actives.filter { d in d.data.center } . all { d in
+        ctx.dancerToRight(d)?.data.center ?? false
+      }
+  }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
-    if (centersHoldLeftHands(ctx)) {
-      try ctx.applyCalls("Center 4 Hinge and Spread While Ends Face In")
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
+    let dir = norm.startsWith("left") ? "Left" : ""
+    if (ctx.isTidal()) {
+      try ctx.applyCalls("Center 4 Face Out While Outer 4 Face In",
+        "Facing Dancers \(dir) Touch")
     } else {
-      try ctx.applyCalls("Centers Hinge While Ends Face In")
+      if (centersHoldLeftHands(ctx) && dir == "" ||
+          centersHoldRightHands(ctx) && dir == "Left") {
+        try ctx.applyCalls("Center 4 Hinge and Spread While Ends Face In")
+      } else {
+        try ctx.applyCalls("Centers \(dir) Hinge While Ends Face In")
+      }
     }
   }
 

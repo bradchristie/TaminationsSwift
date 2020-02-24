@@ -20,9 +20,9 @@
 
 class BraceThru : Action {
 
-  override var level:LevelData { return LevelObject.find("a1") }
+  override var level:LevelData { LevelObject.find("a1") }
   override var requires:[String] {
-    return ["b1/pass_thru","b1/courtesy_turn","b1/turn_back","b2/wheel_around"]
+    ["b1/pass_thru","b1/courtesy_turn","b1/turn_back","b2/wheel_around"]
   }
 
   init() {
@@ -31,8 +31,8 @@ class BraceThru : Action {
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     let ctx2 = CallContext(ctx,ctx.actives)
-    ctx2.analyze()
     try ctx2.applyCalls("Pass Thru")
+    ctx2.analyze()
 
     try ctx2.dancers.forEach { d in
       guard let partner = d.data.partner else {

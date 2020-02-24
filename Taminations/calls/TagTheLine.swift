@@ -20,14 +20,14 @@
 
 class TagTheLine : Action {
 
-  override var level:LevelData { return LevelObject.find("ms") }
-  override var requires:[String] { return ["ms/fraction_tag","b2/extend"] }
+  override var level:LevelData { LevelObject.find("ms") }
+  override var requires:[String] { ["ms/fraction_tag","b2/extend"] }
 
   init() {
     super.init("Tag the Line")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     try ctx.applyCalls("34tag")
     ctx.contractPaths()
     try ctx.applyCalls("extend")

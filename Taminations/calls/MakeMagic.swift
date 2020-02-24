@@ -25,13 +25,13 @@ class MakeMagic : Action {
   }
 
   override var level: LevelData {
-    return LevelObject.find("c1")
+    LevelObject.find("c1")
   }
   override var requires: [String] {
-    return ["a1/cross_trail_thru"]
+    ["a1/cross_trail_thru"]
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  If center 4 dancers are facing each other, they do a Cross Trail Thru
     if (ctx.center(4).all { d in d.isFacingIn } ) {
       try ctx.applyCalls("Center 4 Cross Trail Thru")

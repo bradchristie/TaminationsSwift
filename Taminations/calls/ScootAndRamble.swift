@@ -20,16 +20,16 @@
 
 class ScootAndRamble : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
+  override var level:LevelData { LevelObject.find("c1") }
   override var requires:[String] {
-    return ["ms/scoot_back","a2/single_wheel","ms/slide_thru","b1/separate"]
+    ["ms/scoot_back","a2/single_wheel","ms/slide_thru","b1/separate"]
   }
 
   init() {
     super.init("Scoot and Ramble")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     try ctx.applyCalls("Scoot Back","Ramble")
   }
 

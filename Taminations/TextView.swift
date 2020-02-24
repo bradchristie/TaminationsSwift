@@ -49,6 +49,7 @@ class TextView : View {
   private let mydiv = TextLabel()
   private var fontSize = 20
   private var bold = ""
+  private var fontName = "Helvetica"
 
   init() {
     mydiv.translatesAutoresizingMaskIntoConstraints = false
@@ -83,7 +84,7 @@ class TextView : View {
     get { return fontSize }
     set {
       fontSize = newValue
-      mydiv.font = UIFont(name:mydiv.font.fontName,size:fontSize.cg)
+      mydiv.font = UIFont(name:fontName,size:fontSize.cg)
     }
   }
 
@@ -111,7 +112,7 @@ class TextView : View {
     if (cw > 0 && ch > 0 && (tw > cw || th > ch) && mydiv.font.pointSize > 4) {
       //  Set new font size
       let newSize = mydiv.font.pointSize - 1
-      mydiv.font = UIFont(name: mydiv.font.fontName, size: newSize)
+      mydiv.font = UIFont(name: fontName, size: newSize)
       //  Let system catch up and check again
       Application.later {
         self.recursivelyFitTextToBounds()
@@ -125,7 +126,7 @@ class TextView : View {
     //div.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     //  First reset ti user-requested size, might have been reduced
     //  by previous call
-    mydiv.font = UIFont(name:mydiv.font.fontName, size:fontSize.cg)
+    mydiv.font = UIFont(name:fontName, size:fontSize.cg)
     //  Give the system a chance to calculate its new space,
     //  then fit to it
     Application.later {

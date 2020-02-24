@@ -269,6 +269,9 @@ class TamUtils {
       .replaceAll("\\blead(er)?(ing)?s?\\b","lead")
       .replaceAll("\\btrail(er)?(ing)?s?\\b","trail")
       .replaceAll("\\b(1|3)4 tag the line\\b","$14 tag")
+      //  'Dixie Style' -> 'Dixie Style to a Wave'
+      .replaceAll("\\bdixie style(?! to)","dixie style to a wave")
+      .replaceAll("\\bchase left\\b","left chase")
       //  Accept optional "dancers" e.g. "head dancers" == "heads"
       .replaceAll("\\bdancers?\\b","")
       //  Also handle "Lead Couples" as "Leads"

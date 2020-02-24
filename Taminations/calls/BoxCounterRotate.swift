@@ -20,7 +20,7 @@
 
 class BoxCounterRotate : Action {
 
-  override var level:LevelData { return LevelObject.find("a2") }
+  override var level:LevelData { LevelObject.find("a2") }
 
   init() {
     super.init("Box Counter Rotate")
@@ -40,8 +40,10 @@ class BoxCounterRotate : Action {
     let cv1 = (v2 * 0.5).rotate(-a1)
     let cv2 = (v * 0.5).rotate(-a1) + dv
     let m = Movement(fullbeats: 2.0, hands: .NOHANDS,
-      cx1: cv1.x, cy1: cv1.y, cx2: cv2.x, cy2: cv2.y, x2: dv.x, y2: dv.y,
-      cx3: 0.55, cx4: 1.0, cy4: cy4, x4: 1.0, y4: y4)
+      btranslate: Bezier(x1:0.0, y1:0.0, ctrlx1: cv1.x, ctrly1: cv1.y,
+                         ctrlx2: cv2.x, ctrly2: cv2.y, x2: dv.x, y2: dv.y),
+      brotate: Bezier(x1:0.0, y1:0.0, ctrlx1: 0.55, ctrly1:0.0,
+                      ctrlx2: 1.0, ctrly2: cy4, x2: 1.0, y2: y4))
     return Path(m)
   }
 }

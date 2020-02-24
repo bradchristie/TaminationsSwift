@@ -18,18 +18,16 @@
 
 */
 
-import UIKit
-
 class AceyDeucey : Action {
 
-  override var level:LevelData { return LevelObject.find("plus") }
-  override var requires:[String] { return ["b2/trade","b1/circulate"] }
+  override var level:LevelData { LevelObject.find("plus") }
+  override var requires:[String] { ["b2/trade","b1/circulate"] }
 
   init() {
     super.init("Acey Deucey")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     try ctx.applyCalls("Center 4 Trade While Outer 4 Circulate")
   }
 }

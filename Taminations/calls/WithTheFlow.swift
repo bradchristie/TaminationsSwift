@@ -18,17 +18,15 @@
 
 */
 
-import UIKit
-
 class WithTheFlow : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
+  override var level:LevelData { LevelObject.find("c1") }
 
   init() {
     super.init("With the Flow")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
     if (ctx.actives.any { d in
       !ctx.isInCouple(d)
     }) {

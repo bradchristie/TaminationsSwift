@@ -83,13 +83,21 @@ class Path {
     return m
   }
 
+  @discardableResult
+  func shift() -> Movement? {
+    let m = movelist.first
+    movelist.removeFirst()
+    recalculate()
+    return m
+  }
+
   func reflect() -> Path {
     movelist = movelist.map { it in it.reflect() }
     recalculate()
     return self
   }
 
-  var beats:Double { get { return movelist.reduce(0.0, { $0 + $1.beats} ) } }
+  var beats:Double { get { movelist.reduce(0.0, { $0 + $1.beats} ) } }
 
   @discardableResult
   func changebeats(_ newbeats:Double) -> Path {
@@ -112,11 +120,24 @@ class Path {
     return self
   }
 
+  //  This likely will not work well for paths with >1 movement
+  //  Instead use skewFirst or skewFromEnd
   @discardableResult
   func skew(_ x:Double, _ y:Double) -> Path {
     if (!movelist.isEmpty) {
       //  Apply the skew to just the last movement
       movelist.append(movelist.removeLast().skew(x,y))
+      recalculate()
+    }
+    return self
+  }
+
+  //  Shift path based on adjustment to final position
+  //  This should work well with any number of movements in the path
+  @discardableResult
+  func skewFromEnd(_ x:Double, _ y:Double) -> Path {
+    if (movelist.isNotEmpty()) {
+      movelist.append(movelist.removeLast().skewFromEnd(x, y))
       recalculate()
     }
     return self

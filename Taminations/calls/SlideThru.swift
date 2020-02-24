@@ -37,7 +37,7 @@ class SlideThru : Action {
     //  Not in wave
     //  Must be facing dancers
     guard let d2 = ctx.dancerFacing(d) else {
-      throw CallError("Dancer \(d) has nobody to Slide Thru with")
+      return try ctx.dancerCannotPerform(d,name)
     }
     let dist = d.distanceTo(d2)
     return TamUtils.getMove("Extend Left").scale(dist / 2, 0.5) +

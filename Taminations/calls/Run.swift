@@ -39,10 +39,16 @@ class Run : Action {
         }
         //  But special case of t-bones, could be the dancer on the other side,
         //  check if another dancer is running around this dancer's "partner"
+        //  also check if partner is also active
         let d3 = d2.data.partner
-        if (d != d3 && d3 != nil && d3!.data.active) {
+        if (d2.data.active) {
+          guard let d2 = (d2.isRightOf(d) ? ctx.dancerToLeft(d) : ctx.dancerToRight(d)) else {
+            throw CallError("Dancer \(d) has nobody to Run around")
+          }
+        }
+        else if (d != d3 && d3 != nil && d3!.data.active) {
           guard let d2q = d3!.isRightOf(d) ? ctx.dancerToRight(d) : ctx.dancerToLeft(d) else {
-            throw CallError("Dancer ${d.number} has nobody to Run around")
+            throw CallError("Dancer \(d) has nobody to Run around (\(d) around \(d2)")
           }
           d2 = d2q
         }

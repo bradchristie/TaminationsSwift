@@ -27,12 +27,12 @@ class Matrix {
     self.m22 = m22
     self.m32 = m32
   }
-  
+
   //  Identity matrix
   convenience init() {
     self.init(1,0,0,0,1,0)
   }
-  
+
   //  Copy constructor
   convenience init(_ m:Matrix) {
     self.init(m.m11,m.m21,m.m31,m.m12,m.m22,m.m32)
@@ -50,7 +50,7 @@ class Matrix {
 
   //  Compute and return this * m
   fileprivate func multiply(_ m: Matrix) -> Matrix {
-    return Matrix(
+    Matrix(
       m11 * m.m11 + m21 * m.m12,
       m11 * m.m21 + m21 * m.m22,
       m11 * m.m31 + m21 * m.m32 + m31,
@@ -61,7 +61,7 @@ class Matrix {
 
   //  Compute and return this * v
   fileprivate func multiply(_ v: Vector) -> Vector {
-    return Vector(
+    Vector(
       m11 * v.x + m21 * v.y + m31,
       m12 * v.x + m22 * v.y + m32)
   }
@@ -69,12 +69,12 @@ class Matrix {
   //  This is for rotation transforms only,
   //  or when using as a 2x2 matrix (as in SVD)
   func transpose() -> Matrix {
-    return Matrix(m11, m12, 0.0, m21, m22, 0.0)
+    Matrix(m11, m12, 0.0, m21, m22, 0.0)
   }
-  
-  var location:Vector { get { return Vector(m31,m32) } }
-  var direction:Vector { get { return Vector(m11,m21) } }
-  var angle:Double { get { return atan2(m12,m22) } }
+
+  var location:Vector { get { Vector(m31,m32) } }
+  var direction:Vector { get { Vector(m11,m21) } }
+  var angle:Double { get { atan2(m12,m22) } }
 
   //  Compute and return the inverse matrix - only for affine transform matrix
   func inverse() -> Matrix {
@@ -89,11 +89,11 @@ class Matrix {
   }
 
   //  If a rotation matrix is close to a 90 degree angle,snap to it
-  func snapTo90() -> Matrix {
-    return Matrix(snapDouble(m11),snapDouble(m21),m31,
-                  snapDouble(m12),snapDouble(m22),m32)
+  func snapTo90(delta:Double=0.1) -> Matrix {
+    Matrix(snapDouble(m11,delta:delta),snapDouble(m21,delta:delta),m31,
+           snapDouble(m12,delta:delta),snapDouble(m22,delta:delta),m32)
   }
-  
+
   //  SVD simple and fast for 2x2 arrays
   //  for matching 2d formations
   func svd22() -> (Matrix,[Double], Matrix) {
@@ -149,20 +149,20 @@ class Matrix {
 }
 
 func *(m1:Matrix, m2:Matrix) -> Matrix {
-  return m1.multiply(m2)
+  m1.multiply(m2)
 }
 func *(m:Matrix, v:Vector) -> Vector {
-  return m.multiply(v)
+  m.multiply(v)
 }
 
-private func snapDouble(_ x:Double) -> Double {
-  if (x.isApprox(0.0)) {
+private func snapDouble(_ x:Double, delta:Double) -> Double {
+  if (x.isApprox(0.0, delta:delta)) {
     return 0.0
   }
-  if (x.isApprox(1.0)) {
+  if (x.isApprox(1.0, delta:delta)) {
     return 1.0
   }
-  if (x.isApprox(-1.0)) {
+  if (x.isApprox(-1.0, delta:delta)) {
     return -1.0
   }
   return x

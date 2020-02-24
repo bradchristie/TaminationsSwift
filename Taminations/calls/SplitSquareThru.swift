@@ -25,6 +25,9 @@ class SplitSquareThru : Action {
                                            "b2/ocean_wave","plus/explode_the_wave","b1/step_thru"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
+    if (ctx.actives.count < 8) {
+      throw CallError("Use Heads Start or Sides Start Split Square Thru")
+    }
     let (left,right) = norm.startsWith("left") ? ("","Left") : ("Left","")
     let count = Int(norm.suffix(1)) ?? 4
     //  If the centers start, they need to face out to work with the ends
