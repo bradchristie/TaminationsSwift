@@ -149,7 +149,8 @@ class CodedCall : Call {
     "crosstradeandwheel" : { CrossTradeAndWheel() },
     "grandcrosstradeandwheel" : { GrandCrossTradeAndWheel() },
     "singlecrosstradeandwheel" : { SingleCrossTradeAndWheel() },
-    "bendtheline" : { BendTheLine() }
+    "bendtheline" : { BendTheLine() },
+    "diamondcirculate" : { DiamondCirculate() }
   ]
 
   //  More complex calls where the text is needed either to select

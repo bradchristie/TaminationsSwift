@@ -48,7 +48,7 @@ class HeadsStart : Action {
     } else {
       try ctx.applyCalls("Sides Start")
     }
-    try ctx.applyCalls(norm.replaceAll("(head|side)start(a)?",""))
+    try ctx.applyCalls(norm.replaceIgnoreCase("(head|side)(s)?\\s+start(a)?\\s+",""))
   }
 
 }

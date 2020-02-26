@@ -22,7 +22,8 @@ class PassThru : Action {
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     //  If in wave then maybe Ocean Wave rule applies
-    if (ctx.isInWave(d)) {
+    let isFacing = ctx.dancerFacing(d)?.data.active ?? false
+    if (!isFacing && ctx.isInWave(d)) {
       var d2 = d.data.partner!
       if (!d2.data.active) {
         let d3 = d2.isRightOf(d) ? ctx.dancerToLeft(d) : ctx.dancerToRight(d)

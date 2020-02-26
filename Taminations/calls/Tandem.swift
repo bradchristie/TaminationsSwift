@@ -89,6 +89,9 @@ class Tandem : Action {
       dsingle.setStartPosition(newpos.x, newpos.y)
       return dsingle
     }
+    if (dancers.count != ctx.dancers.count/2) {
+      throw CallError("Unable to group all dancers in Tandems")
+    }
     let singlectx = CallContext(dancers)
 
     //  Perform the Tandem call
@@ -120,8 +123,8 @@ class Tandem : Action {
             : 0.5
           //  Get the 4 points needed to compute Bezier curve
           let cp1 = computeLocation(m, 0.0, start, isLeader)
-          let cp2 = computeLocation(m, m.beats / 3.0, start * 2.0 / 3.0 + end / 3.0, isLeader) - cp1
-          let cp3 = computeLocation(m, m.beats * 2.0 / 3.0, start / 3.0 + end * 2.0 / 3.0, isLeader) - cp1
+          let cp2 = computeLocation(m, m.beats / 3.0, 0.5, isLeader) - cp1
+          let cp3 = computeLocation(m, m.beats * 2.0 / 3.0, 0.5, isLeader) - cp1
           let cp4 = computeLocation(m, m.beats, end, isLeader) - cp1
           //  Now we can compute the Bezier
           let cb = Bezier.fromPoints(Vector(), cp2, cp3, cp4)
