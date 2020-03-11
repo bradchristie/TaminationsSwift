@@ -20,6 +20,10 @@
 
 class XMLCall : Call {
 
+  private var _name: String
+  override var name: String { get { _name } }
+
+
   let xelem:XMLElement
   public let xmlmap:[Int]
   public let ctx2:CallContext
@@ -27,7 +31,7 @@ class XMLCall : Call {
     self.xelem = xelem
     self.xmlmap = xmlmap
     self.ctx2 = ctx2
-    super.init(xelem.attr("title")!)
+    _name = xelem.attr("title")!
   }
 
   override func performCall(_ ctx: CallContext, _ index: Int) throws {

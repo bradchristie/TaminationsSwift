@@ -41,6 +41,14 @@ struct DancerData {
   var actionBeats:Double = 0.0  // needed for moves that analyze previous action, like Roll
 }
 
+//  Dancer Space is a coordinate system where the dancer
+//  is at (0,0) and looking down the X axis.
+//  Convert a point from world space to dancer space
+//  based on the dancer's current location.
+extension Vector {
+  func ds(_ d:Dancer) -> Vector { d.tx.inverse() * self }
+}
+
 class Dancer : Comparable, CustomStringConvertible {
 
   static let NUMBERS_OFF = 0

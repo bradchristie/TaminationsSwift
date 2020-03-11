@@ -150,7 +150,11 @@ class CodedCall : Call {
     "grandcrosstradeandwheel" : { GrandCrossTradeAndWheel() },
     "singlecrosstradeandwheel" : { SingleCrossTradeAndWheel() },
     "bendtheline" : { BendTheLine() },
-    "diamondcirculate" : { DiamondCirculate() }
+    "diamondcirculate" : { DiamondCirculate() },
+    "everyone" : { Everyone("everyone","Everyone") },
+    "everybody" : { Everyone("everybody","Everybody") },
+    "shazam" : { Shazam() },
+    "counterrotate" : { CounterRotate() }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -166,6 +170,9 @@ class CodedCall : Call {
   static let specifier = "\\s*(boys?|girls?|beaus?|belles?|centers?|ends?|leaders?|trailers?|heads?|sides?|very centers?)\\s*"
 
   let norm:String
+  private let _name:String
+  override var name: String { get { _name } }
+
   //  Any XML files that might be needed to apply a call
   var requires:[String] { [] }
 
@@ -264,7 +271,11 @@ class CodedCall : Call {
     }
 
     if (callnorm.matches("tandem.*")) {
-      return Tandem(callnorm,callname)
+      return TandemConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("siamese.*")) {
+      return SiameseConcept(callnorm,callname)
     }
 
     if (callnorm.matches("(12|34)?crazy.*")) {
@@ -283,6 +294,14 @@ class CodedCall : Call {
       return Adjust(callnorm,callname)
     }
 
+    if (callnorm.matches("bouncethe.*")) {
+      return Bounce(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left)?tagback(toawave)?")) {
+      return TagBack(callnorm,callname)
+    }
+
     if (callnorm.matches(".*chainthru")) {
       if (callnorm.matches(".*squarechainthru")) {
         return nil
@@ -293,9 +312,14 @@ class CodedCall : Call {
     return nil
   }
 
-  init(_ norm:String, _ name:String = "") {
+  init(_ norm:String, _ name:String) {
     self.norm = norm
-    super.init(name.isEmpty ? norm.capWords() : name)
+    _name = name
+  }
+
+  init(_ name:String) {
+    self.norm = TamUtils.normalizeCall(name)
+    _name = name
   }
 
 }

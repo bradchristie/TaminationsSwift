@@ -20,14 +20,11 @@
 
 class Call {
 
-  let _name:String
-  var name:String { get { return _name } }
-  var level:LevelData { return LevelObject.find("b1") }
-  func performCall(_ ctx:CallContext, _ index:Int=0) throws { }
-  func postProcess(_ ctx:CallContext, _ index:Int=0) {  }
+  var name:String { get { "" } }
+  var level:LevelData { get { LevelObject.find("b1") } }
 
-  init(_ name:String) {
-    self._name = name
-  }
+  func performCall(_ ctx:CallContext, _ index:Int=0) throws { }
+  func postProcess(_ ctx:CallContext, _ index:Int=0) { }
 
 }
+

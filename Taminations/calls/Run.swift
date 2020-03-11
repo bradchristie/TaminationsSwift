@@ -20,7 +20,7 @@
 
 class Run : Action {
 
-  override var level: LevelData { return LevelObject.find("b2") }
+  override var level: LevelData { LevelObject.find("b2") }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  We need to look at all the dancers, not just actives

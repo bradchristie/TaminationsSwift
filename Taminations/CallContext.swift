@@ -87,7 +87,8 @@ class CallContext {
       "c2/anything_and_circle",
       "b1/star",
       "b2/alamo_style",
-      "c2/once_removed_concept"
+      "c2/once_removed_concept",
+      "c1/split_square_thru_variations"
     ]
 
     if (callindex.isEmpty) {
@@ -297,6 +298,9 @@ class CallContext {
 
   func animate(_ beat:Double) {
     dancers.forEach { $0.animate(beat:beat) }
+  }
+  func animateToEnd() {
+    dancers.forEach { $0.animateToEnd() }
   }
 
   /**
@@ -731,7 +735,12 @@ class CallContext {
     "T-Bone UURL",
     "T-Bone RLUU",
     //  There are also 8 possible 3x1 t-bones not listed here
-    "Static Square"
+    "Static Square",
+    //  Siamese formations
+    "Siamese Box 1",
+    "Siamese Box 2",
+    //  One wave is H-Beam, above
+    "Siamese Wave"  
   ]
   private static let twoCoupleFormations = [
     "Facing Couples Compact",
@@ -1168,11 +1177,15 @@ class CallContext {
 
       //  Use the results of the counts to assign belle/beau/leader/trailer
       //  and partner
-      if (leftcount % 2 == 1 && rightcount % 2 == 0 && d1.distanceTo(bestleft!) < 3) {
+      let bestleftMismatch = bestleft != nil && bestleft!.data.partner != nil && bestleft!.data.partner != d1
+      let bestRightMismatch = bestright != nil && bestright!.data.partner != nil && bestright!.data.partner != d1
+      if (leftcount % 2 == 1 && rightcount % 2 == 0 && !bestleftMismatch &&
+        d1.distanceTo(bestleft!) < 3 || (bestleft != nil && bestRightMismatch)) {
         d1.data.partner = bestleft
         d1.data.belle = true
       }
-      else if (rightcount % 2 == 1 && leftcount % 2 == 0 && d1.distanceTo(bestright!) < 3) {
+      else if (rightcount % 2 == 1 && leftcount % 2 == 0 && !bestRightMismatch &&
+        d1.distanceTo(bestright!) < 3 || (bestleft != nil && bestleftMismatch)) {
         d1.data.partner = bestright
         d1.data.beau = true
       }

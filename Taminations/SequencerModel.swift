@@ -218,8 +218,8 @@ class SequencerModel {
 
   //  Replace any abbreviations
   private func getAbbrevs(_ str:String) -> String {
-    return str.split().map { s in
-      return Storage["abbrev "+s.lowercased()] ?? s
+    str.split().map { s in
+      Storage["abbrev "+s.lowercased()] ?? s
     }.joined(separator:" ")
   }
 
@@ -250,7 +250,7 @@ class SequencerModel {
       let s = pb.string!
       callNames = []
       loadCalls(s.split("\n").filter({ (s:String) -> Bool in
-        return s.matches(".*\\w.*")
+        s.matches(".*\\w.*")
       }))
     }
   }

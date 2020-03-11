@@ -114,6 +114,12 @@ class Path {
   }
 
   @discardableResult
+  func addhands(_ hands:Hands) -> Path {
+    movelist = movelist.map { it in it.useHands(Hands(rawValue: it.hands.rawValue | hands.rawValue)!) }
+    return self
+  }
+
+  @discardableResult
   func scale(_ x:Double, _ y:Double) -> Path {
     movelist = movelist.map { it in it.scale(x,y) }
     recalculate()

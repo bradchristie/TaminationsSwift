@@ -46,7 +46,7 @@ class FilterActives : CodedCall {
   *   defined by the child class
   * @param ctx contains dancers to select
   */
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func performCall(_ ctx: CallContext, _ index: Int=0) throws {
     ctx.dancers.filter{$0.data.active}.forEach { d in
       d.data.active = isActive(d,ctx,index)
     }

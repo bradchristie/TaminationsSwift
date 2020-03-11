@@ -24,7 +24,7 @@ class And : FilterActives {
     super.init("and")
   }
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override func performCall(_ ctx: CallContext, _ index: Int=0) throws {
     if (index < 1) {
       throw CallError("Use \"and\" to combine calls")
     }

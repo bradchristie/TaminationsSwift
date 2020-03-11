@@ -20,7 +20,7 @@
 
 class Twice : CodedCall {
 
-  override func performCall(_ ctx: CallContext, _ index: Int) throws {
+ override func performCall(_ ctx: CallContext, _ index: Int) throws {
     if (ctx.callstack.count < 2) {
       throw CallError("Twice what?")
     }

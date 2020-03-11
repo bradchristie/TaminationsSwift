@@ -28,14 +28,22 @@ class WheelAnd : Action {
     let (wheelcall, andcall) = (a[0],a[1])
     let reverse = (wheelcall.lowercased().contains("reverse")) ? "Reverse" : ""
     //  Find the 4 dancers to Wheel
-    let facingOut = ctx.dancers.filter { d in d.isFacingOut
-    }
+    let facingOut = ctx.dancers.filter { d in d.isFacingOut }
     if (facingOut.containsAll(ctx.outer(4))) {
+      try ctx.applyCalls("As Couples Step")
+    }
+    //  First we will try the usual way
+    do {
       try ctx.applyCalls("Outer 4 \(reverse) Wheel While Center 4 \(andcall)")
-    } else if (facingOut.containsAll(ctx.center(4))) {
-      try ctx.applyCalls("Center 4 \(reverse) Wheel While Outer 4 Step And \(andcall)")
-    } else {
-      throw CallError("Unable to find dancers to Wheel")
+    } catch let e1 as CallError {
+      //  Maybe the call applies to all 8 dancers
+      //  (although that really doesn't fit the definition)
+      do {
+        try ctx.applyCalls("OUter 4 \(reverse) Wheel",andcall)
+      } catch _ as CallError {
+        //  That didn't work either, throw the original error
+        throw e1
+      }
     }
   }
 

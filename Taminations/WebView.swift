@@ -36,7 +36,7 @@ class WebView : View {
   }
 
   func setSource(_ link:String, afterload: @escaping ()->() = { }) {
-    let path = "files/"
+    let path = "files"
     let filePath = Bundle.main.path(forResource: link, ofType: "html", inDirectory:path)!
     let htmlfile = try? String(contentsOfFile: filePath)
     let baseURL = URL(fileURLWithPath: filePath)

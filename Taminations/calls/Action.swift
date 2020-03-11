@@ -21,7 +21,7 @@
 class Action : CodedCall {
 
   //  Wrapper method for performing one call
-  final override func performCall(_ ctx: CallContext, _ index: Int) throws {
+  override final func performCall(_ ctx: CallContext, _ index: Int) throws {
     try perform(ctx, index)
     ctx.dancers.forEach { d in
       d.path.recalculate()
