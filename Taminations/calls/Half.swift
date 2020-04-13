@@ -36,7 +36,8 @@ class Half : Action {
       //  For XML calls there should be an explicit number of parts
       if (call is XMLCall) {
         //  Figure out how many beats are in half the call
-        let parts = (call as! XMLCall).xelem.attr("parts") ?? ""
+        let parts = (call as! XMLCall).xelem.attr("parts") ??
+                    (call as! XMLCall).xelem.attr("fractions") ?? ""
         if (parts.isNotEmpty()) {
           let partnums = parts.split(";")
           halfbeats = partnums[0..<partnums.count/2].reduce(0, { (n,s) in n + Double(s)! } )

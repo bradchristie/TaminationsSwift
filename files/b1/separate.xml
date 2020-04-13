@@ -222,18 +222,18 @@
 
   <tam title="Outside Couples Separate And Touch a Quarter"
        formation="Trade By" group="Outside Couples Separate">
-    <path>
-      <move select="Run Right" beats="5" offsetX="-3" offsetY="-.5"/>
-      <move select="Hinge Right" scaleY=".5"/>
-    </path>
-    <path>
-      <move select="Run Left" beats="5" offsetX="-3" offsetY="-.5"/>
-      <move select="Hinge Right" scaleY=".5"/>
-    </path>
-    <path>
-    </path>
-    <path>
-    </path>
+  <path>
+    <move select="Run Right" beats="5" offsetX="-3" offsetY="-.5"/>
+    <move select="Hinge Right" scaleY=".5"/>
+  </path>
+  <path>
+    <move select="Run Left" beats="5" offsetX="-3" offsetY="-.5"/>
+    <move select="Hinge Right" scaleY=".5"/>
+  </path>
+  <path>
+  </path>
+  <path>
+  </path>
   </tam>
 
   <tam title="Heads Pass the Ocean and Swing Thru, Others Separate and Everybody Right and Left Thru"

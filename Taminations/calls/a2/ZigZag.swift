@@ -18,19 +18,21 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+class ZigZag : Action {
 
-  override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
+  override var level:LevelData { LevelObject.find("a2") }
+
+  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
+    if (d.data.leader && norm.matches("zigz[ai]g")) {
+      return TamUtils.getMove("Quarter Right")
+    } else if (d.data.leader && norm.matches("zagz[ai]g")) {
+      return TamUtils.getMove("Quarter Left")
+    } else if (d.data.trailer && norm.matches("z[ai]gzig")) {
+      return TamUtils.getMove("Quarter Right")
+    } else if (d.data.trailer && norm.matches("z[ai]gzag")) {
+      return TamUtils.getMove("Quarter Left")
     } else {
-      try super.perform(ctx,index)
+      return TamUtils.getMove("Stand")
     }
   }
 

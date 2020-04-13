@@ -15,10 +15,16 @@ class Vector {
     self.y = y
   }
 
+  //  So we don't have to type decimal points all the time
+  init(_ x:Int, _ y:Int) {
+    self.x = x.d
+    self.y = y.d
+  }
+
   //  Compute vector length
   var length:Double { get { return sqrt(x*x + y*y) } }
 
-  //  Angle off the X-axiz
+  //  Angle off the X-axis
   var angle:Double { get { return atan2(y,x) } }
 
   //  Rotate by a given angle
@@ -26,8 +32,8 @@ class Vector {
     let d = length
     let a = angle + angle2
     return Vector(d * cos(a), d * sin(a))
-  }  
-  
+  }
+
   //  Multiply by scale factors in one or more dimensions
   func scale(_ sx:Double, _ sy:Double) -> Vector {
     return Vector(x*sx, y*sy)
@@ -40,8 +46,12 @@ class Vector {
   }
 
   //  Return Z-coord of the cross product between two vectors
-  func crossZ(_ v: Vector) -> Double { 
-    return x * v.y - y * v.x 
+  func crossZ(_ v: Vector) -> Double {
+    return x * v.y - y * v.x
+  }
+
+  func isApprox(_ v2:Vector, delta:Double = 0.1) -> Bool {
+    x.isApprox(v2.x,delta: delta) && y.isApprox(v2.y,delta: delta)
   }
 
 
@@ -67,4 +77,4 @@ func *(v:Vector, s:Double) -> Vector {
 
 func angleAngleDiff(_ a1:Double, _ a2:Double) -> Double {
   return ((a1-a2 + Double.pi*3).truncatingRemainder(dividingBy: Double.pi*2) ) - Double.pi
-} 
+}

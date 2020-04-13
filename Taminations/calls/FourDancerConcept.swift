@@ -26,6 +26,7 @@
 class FourDancerConcept : Action {
 
   var conceptName:String { get { "" } }
+  var realCall:String { get { name.replaceIgnoreCase("\(conceptName) ", "") } }
 
   //  Return list of groups of dancers
   //  List must have 4 sub-lists
@@ -38,11 +39,16 @@ class FourDancerConcept : Action {
 
   //  Compute location for a real dancer at a specific beat
   //  given location of the concept dancer
-  func computeLocation(_ d:Dancer, _ m:Movement,
+  func computeLocation(_ d:Dancer, _ m:Movement, _ mi:Int,
                        _ beat:Double, _ groupIndex:Int) -> Vector {
     Vector()
   }
 
+  //  Any analysis or processing after call is applied to concept dancers
+  //  but before application to real dancers
+  func analyzeConceptResult(_ conceptctx:CallContext, _ realctx:CallContext) { }
+
+  //  Make any changes to the final result (optional)
   func postAdjustment(_ ctx:CallContext, _ cd:Dancer, _ group:[Dancer]) { }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
@@ -79,14 +85,17 @@ class FourDancerConcept : Action {
       let dsingle = Dancer(group.first!, number_couple: nc, gender: g.rawValue)
       //  Set the location for the concept dancer
       let newpos = startPosition(group)
-      dsingle.setStartPosition(newpos.x, newpos.y)
+      dsingle.setStartPosition(newpos)
       return dsingle
     }
 
     //  Create context for concept dancers
     let conceptctx = CallContext(singles)
     //  And apply the call
-    try conceptctx.applyCalls(name.replaceIgnoreCase("\(conceptName) ", ""))
+    try conceptctx.applyCalls(realCall)
+    //  Hook for concept to see the result
+    conceptctx.animate(0.0)
+    analyzeConceptResult(conceptctx, ctx)
 
     //  Get the paths and apply to the original dancers
     conceptctx.dancers.enumerated().forEach { (ci,cd) in
@@ -99,14 +108,14 @@ class FourDancerConcept : Action {
           conceptctx.animate(cdbeat)
           //  Get the 4 points needed to compute Bezier curve
           let p1 = (i==0) ? (d.location - cd.location).rotate(-cd.angleFacing)
-                          : computeLocation(cd,m,0.0,gi)
-          let p2 = computeLocation(cd,m,m.beats / 3.0,gi) - p1
-          let p3 = computeLocation(cd,m,m.beats * 2.0 / 3.0,gi) - p1
-          let p4 = computeLocation(cd,m,m.beats,gi) - p1
+                          : computeLocation(cd,m,i,0.0,gi)
+          let p2 = computeLocation(cd,m,i,m.beats / 3.0,gi) - p1
+          let p3 = computeLocation(cd,m,i,m.beats * 2.0 / 3.0,gi) - p1
+          let p4 = computeLocation(cd,m,i,m.beats,gi) - p1
           //  Now we can compute the Bezier
           let cb = Bezier.fromPoints(Vector(), p2, p3, p4)
           //  And use it to build the Movement
-          let cm = Movement(fullbeats: m.beats,hands: m.hands,btranslate: cb, brotate: m.brotate)
+          let cm = Movement(beats: m.beats,hands: m.hands,btranslate: cb, brotate: m.brotate)
           //  And add the Movement to the Path
           d.path.add(cm)
         }

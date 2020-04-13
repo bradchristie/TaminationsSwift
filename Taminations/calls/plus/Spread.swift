@@ -40,7 +40,7 @@ class Spread : Action {
     //  Is this spread from waves, tandem, actives?
     var spreader: Action? =  nil
       if (ctx.actives.count == ctx.dancers.count / 2) {
-        spreader = (CallContext(ctx, ctx.actives).isLine())
+        spreader = (CallContext(ctx, ctx.actives).isLines())
           ? Case2()  //  Case 2: Active dancers in line or wave spread among themselves
           : Case1()  //  Case 1: Active dancers spread and let in the others
       }

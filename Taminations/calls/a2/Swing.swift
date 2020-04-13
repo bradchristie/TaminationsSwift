@@ -18,19 +18,26 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+class Swing : Action {
+
+  override var level: LevelData { LevelObject.find("a2") }
+  override var requires:[String] { ["b2/trade"] }
+
+  init() {
+    super.init("Swing")
+  }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
-    } else {
-      try super.perform(ctx,index)
+    //  If single wave in center, just those 4 Swing
+    let ctx4 = CallContext(ctx,ctx.center(4))
+    if (ctx4.isLines() && ctx4.isWaves() && !ctx.isTidal()) {
+      try ctx4.applyCalls("Trade").appendToSource()
+    }
+    else if (ctx.isWaves()) {
+      try ctx.applyCalls("Trade")
+    }
+    else {
+      throw CallError("Dancers must be in mini-waves to Swing")
     }
   }
 

@@ -42,6 +42,7 @@ class CallContext {
       "c1/cross_your_neighbor",
       "c2/criss_cross_your_neighbor",
       "plus/explode_the_wave",
+      "a1/explode_the_line",
       "b1/sashay",
       "b1/ladies_chain",
       "a1/any_hand_concept",
@@ -145,6 +146,8 @@ class CallContext {
   var level = LevelObject.find("b1")
   var callstack: [Call] = []
   var dancers: [Dancer] = []
+  var groups: [[Dancer]] = [[]]
+  var groupstr:String { groups.map { $0.count.s }.joined(separator: "")  }
   private var source: CallContext? = nil
   private var snap = true
   private var extend = true
@@ -296,6 +299,16 @@ class CallContext {
     try applyCalls(calltext)
   }
 
+  func checkCalls(_ calltext: [String]) -> Bool {
+    let textctx = CallContext(self)
+    do {
+      try textctx.applyCalls(calltext)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   func animate(_ beat:Double) {
     dancers.forEach { $0.animate(beat:beat) }
   }
@@ -303,12 +316,20 @@ class CallContext {
     dancers.forEach { $0.animateToEnd() }
   }
 
+  private func cleanupCall(_ calltext:String) -> String {
+    //  Clean up any whitespace
+    calltext.replaceAll("\\s+"," ")
+      //  Make sure Trade Circulate is not read as Trade and Circulate
+      .replaceIgnoreCase("trade circulate", "tradecirculate")
+
+  }
+
   /**
    * This is the main loop for interpreting a call
    * @param calltxt  One complete call, lower case, words separated by single spaces
    */
   func interpretCall(_ calltxt: String) throws {
-    var calltext = calltxt.replaceAll("\\s+", " ")
+    var calltext = cleanupCall(calltxt)
     var err: CallError = CallNotFoundError(calltxt)
     //  Clear out any previous paths from incomplete parsing
     dancers.forEach {
@@ -419,7 +440,7 @@ class CallContext {
           (!perimeter || (tam.attr("sequencer") ?? "").contains("perimeter"))
       }.forEach { tam in
         //  Calls that are gender-specific, e.g. Star Thru,
-        //  are specifically flagged in the XML
+        //  are specifically flagged in XML
         let sexy = tam.attr("sequencer")?.contains("gender-specific") ?? false
         //  Make sure we don't mismatch heads and sides
         //  on calls that specifically refer to them
@@ -736,11 +757,20 @@ class CallContext {
     "T-Bone RLUU",
     //  There are also 8 possible 3x1 t-bones not listed here
     "Static Square",
+    "Right-Hand Zs",
+    "Left-Hand Zs",
     //  Siamese formations
     "Siamese Box 1",
     "Siamese Box 2",
+    //  Blocks
+    "Facing Blocks Right",
+    "Facing Blocks Left",
+    //  Phantom formations
+    "Phantom Snap Formation 1",
+    "Phantom Snap Formation 2",
     //  One wave is H-Beam, above
-    "Siamese Wave"  
+    "Siamese Wave",
+    "I-Column"
   ]
   private static let twoCoupleFormations = [
     "Facing Couples Compact",
@@ -784,10 +814,8 @@ class CallContext {
         //  If the match is at some odd angle (not a multiple of 90 degrees)
         //  then consider it bogus
         let angsnap = matchResult.transform.angle / (.pi / 4)
-        if (angsnap.isApproxInt()) {
-          let totOffset = matchResult.offsets.reduce(0.0) { s, v in
-            s + v.length
-          }
+        let totOffset = matchResult.offsets.reduce(0.0) { s, v in s + v.length }
+        if (totOffset < 9.0 && angsnap.isApproxInt()) {
           //  Favor formations closer to the top of the list
           if (bestMapping == nil || totOffset + 0.2 < bestMapping!.totOffset) {
             bestMapping = BestMapping(
@@ -806,6 +834,7 @@ class CallContext {
   }
 
   func adjustToFormationMatch(_ match:BestMapping) {
+    dancers.forEach { d in d.data.active = true }
     for (i, d) in dancers.enumerated() {
       if (match.offsets[i].length > 0.1) {
         //  Get the last movement
@@ -820,6 +849,53 @@ class CallContext {
         d.animateToEnd()
       }
     }
+  }
+
+  func adjustToFormation(_ fname:String) -> Bool {
+    //  Work on a copy with all dancers active, mapping only uses active dancers
+    let ctx1 = CallContext(self)
+    let ctx2 = CallContext(TamUtils.getFormation(fname))
+    let mapping = ctx1.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:true,handholds:false, maxError: 2.9)
+    if (mapping != nil) {
+      //  If it does, get the offsets
+      let matchResult = ctx1.computeFormationOffsets(ctx2, mapping!, delta: 0.5)
+      let totOffset = matchResult.offsets.reduce(0.0) { s, v in s + v.length }
+      adjustToFormationMatch(BestMapping(name: fname,mapping: mapping!,offsets: matchResult.offsets,totOffset: totOffset))
+      return true
+    }
+    return false
+  }
+
+  //  Rotate phantoms until a match is found
+  //  for a given call
+  //  Phantoms must be in diagonally opposite pairs
+  //  which are rotated together
+  //  as this is required for XML mapping to work
+  func rotatePhantoms(_ call:String) -> Bool {
+    let phantoms = dancers.filter { $0.gender == Gender.PHANTOM }
+    var mapindex = 0
+    while (mapindex < ( 1 << (phantoms.count/2))) {
+      if (mapindex > 0) {
+        //  Flip one phantom selected with a Gray sequence
+        //  https://en.wikipedia.org/wiki/Gray_code
+        var nextp = 0
+        var gray = 1
+        while ((gray & mapindex) == 0) {
+          nextp += 1
+          gray = gray << 1
+        }
+        phantoms[nextp * 2].rotateStartAngle(180.0)
+        phantoms[nextp * 2 + 1].rotateStartAngle(180.0)
+      }
+      if (checkCalls([call])) {
+        //  Good rotation found
+        //  Return with phantoms in current rotation
+        return true
+      }
+      //  This rotation does not work
+      mapindex += 1
+    }
+    return false
   }
 
   //  Return max number of beats among all the dancers
@@ -977,28 +1053,34 @@ class CallContext {
         : false
   }
 
-  //  Return true if this is 4 dancers in a line
-  func isLine() -> Bool {
-      //  Must have 4 dancers
-      dancers.count == 4 &&
-        //  Each dancer must have right or left shoulder to origin
-        dancers.all { d in
-          d.angleToOrigin.abs.isApprox(.pi / 2)
-        } &&
-        //  All dancers must either be on the y axis
-        (dancers.all { d in
-          d.location.x.isApprox(0.0)
-        } ||
-          //  or on the x axis
-          dancers.all { d in
-            d.location.y.isApprox(0.0)
-          })
-  }
-
   //  Return true if 8 dancers are in 2 general lines of 4 dancers each
+  //  Also works for 4 dancers in 1 line
   func isLines() -> Bool {
     dancers.all {
       d in dancersToRight(d).count + dancersToLeft(d).count == 3
+    }
+  }
+
+  func isWaves() -> Bool {
+    dancers.all { d in
+      var dr = dancerToRight(d)
+      if (dr != nil && d.distanceTo(dr!) > 2.0) {
+        dr = nil
+      }
+      var dl = dancerToLeft(d)
+      if (dl != nil && d.distanceTo(dl!) > 2.0) {
+        dl = nil
+      }
+      if (dr==nil && dl==nil) {
+        return false
+      }
+      if (dr != nil && !isInWave(d,dr!)) {
+        return false
+      }
+      if (dl != nil && !isInWave(d,dl!)) {
+        return false
+      }
+      return true
     }
   }
 
@@ -1014,7 +1096,7 @@ class CallContext {
     isLines() &&
       dancers.all { d in isInCouple(d) } &&
       dancers.filter { d in d.data.leader }.count == 4 &&
-      dancers.filter { d in d.data.leader }.count == 4
+      dancers.filter { d in d.data.trailer }.count == 4
   }
 
   //  Return true if dancers are at squared set positions
@@ -1059,6 +1141,17 @@ class CallContext {
     }.count
     return centerCount == 4 &&
       ((xCount == 4 && yCount == 0) || (xCount == 0 && yCount == 4))
+  }
+
+  //  Direction dancer would turn to Tag the Line
+  func tagDirection(_ d:Dancer) -> String {
+    if (dancerToRight(d)?.data.center == true) {
+      return "Right"
+    }
+    else if (dancerToLeft(d)?.data.center == true) {
+      return "Left"
+    }
+    return ""
   }
 
   func isCollision() -> Bool {
@@ -1216,17 +1309,29 @@ class CallContext {
       }
     }
     //  Analyze for centers and very centers
-    //  Sort dancers by distance from center
+    //  Sort and group dancers by distance from center
     let dorder = dancers.sorted { $0.location.length < $1.location.length }
+    groups = []
+    var dist = 0.0
+    dorder.forEach { d in
+      if (d.location.length.isGreaterThan(dist)) {
+        groups.append([])
+      }
+      groups[groups.count-1].append(d)
+      dist = d.location.length
+    }
+
     //  The 2 dancers closest to the center
     //  are centers (4 dancers) or very centers (8 dancers)
-    if (!dorder[1].location.length.isApprox(dorder[2].location.length)) {
-      if (dancers.count == 4) {
-        dorder[0].data.center = true
-        dorder[1].data.center = true
-      } else {
-        dorder[0].data.verycenter = true
-        dorder[1].data.verycenter = true
+    if (dancers.count > 2) {
+      if (!dorder[1].location.length.isApprox(dorder[2].location.length)) {
+        if (dancers.count == 4) {
+          dorder[0].data.center = true
+          dorder[1].data.center = true
+        } else {
+          dorder[0].data.verycenter = true
+          dorder[1].data.verycenter = true
+        }
       }
     }
     // If tidal, then the next 4 dancers are centers

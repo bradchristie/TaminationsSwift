@@ -55,6 +55,13 @@ extension Double {
   func isAround(_ a2:Double) -> Bool {
     angleEquals(a2)
   }
+  //  Less than and not equal to
+  func isLessThan(_ a2:Double,delta:Double=0.1) -> Bool {
+    self < a2 && !self.isApprox(a2,delta:delta)
+  }
+  func isGreaterThan(_ a2:Double,delta:Double=0.1) -> Bool {
+    a2.isLessThan(self,delta:delta)
+  }
 
 }
 
@@ -110,7 +117,6 @@ extension Array {
     i >= 0 && i < count ? self[i] : nil
   }
 
-
   var second:Element? { self[1] }
 
 }
@@ -133,6 +139,10 @@ extension Array where Array.Element : Equatable {
 
 }
 
+//  Subtract one array from another, without modifying original arrays
+func -<T:Equatable>(a1:[T],a2:[T]) -> [T] {
+  a1.filter { !a2.contains($0) }
+}
 
 extension String {
 
@@ -232,7 +242,7 @@ extension String {
   func matchesWithGroups(_ regexPattern: String) -> [[String]] {
     do {
       let text = self
-      let regex = try NSRegularExpression(pattern: regexPattern)
+      let regex = try NSRegularExpression(pattern: regexPattern, options: [.caseInsensitive])
       let matches = regex.matches(in: text,
         range: NSRange(text.startIndex..., in: text))
       return matches.map { match in

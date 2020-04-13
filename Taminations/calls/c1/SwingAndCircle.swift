@@ -18,19 +18,26 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+class SwingAndCircle : Action {
+
+  override var level:LevelData { LevelObject.find("c1") }
+  override var requires:[String] { ["c1/swing_and_circle"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
+    if (norm.endsWith("12")) {
+      try ctx.applyCalls("Swing and Circle 1/4",
+        "Swing and Circle 1/4")
+
+    } else if (norm.endsWith("34")) {
+      try ctx.applyCalls("Swing and Circle 1/4",
+        "Swing and Circle 1/4",
+        "Swing and Circle 1/4")
+
     } else {
-      try super.perform(ctx,index)
+      try ctx.applyCalls("Swing and Circle 1/4",
+        "Swing and Circle 1/4",
+        "Swing and Circle 1/4",
+        "Swing and Circle 1/4")
     }
   }
 

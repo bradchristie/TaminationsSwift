@@ -18,7 +18,7 @@
 
 */
 
-class BoxtheGnat : Action {
+class BoxtheGnat : ActivesOnlyAction {
 
   init() {
     super.init("Box the Gnat")
@@ -57,7 +57,7 @@ class BoxtheGnat : Action {
       let y4 = (d.gender == Gender.BOY) ? -2.0 : 2.0
       let hands = (d.gender == Gender.BOY) ? Hands.GRIPLEFT : Hands.GRIPRIGHT
       let m = Movement(
-        fullbeats: 4.0, hands: hands,
+        beats: 4.0, hands: hands,
         btranslate: Bezier(x1:0.0, y1:0.0, ctrlx1: 1.0, ctrly1: cy1,
                            ctrlx2: dist / 2, ctrly2: cy1, x2: dist / 2 + 1, y2: 0.0),
         brotate: Bezier(x1:0.0, y1:0.0, ctrlx1: 1.3, ctrly1: 0.0,

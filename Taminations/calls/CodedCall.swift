@@ -66,6 +66,7 @@ class CodedCall : Call {
     "lefthinge" : { Hinge("lefthinge","Left Hinge") },
     "leftpartnerhinge" : { Hinge("lefthinge","Left Partner Hinge") },
     "ladies" : { Girls() },
+    "jaywalk" : { Jaywalk() },
     "12" : { Half() },
     "12sashay" : { HalfSashay() },
     "circulate" : { Circulate() },
@@ -82,16 +83,21 @@ class CodedCall : Call {
     "14out" : { QuarterIn("14out","Quarter Out") },
     "14tag" : { QuarterTag("quartertag","Quarter Tag") },
     "left14tag" : { QuarterTag("leftquartertag","Left Quarter Tag") },
+    "ramble" : { Ramble() },
     "run" : { Run("run","Run") },
     "runright" : { Run("runright","Run Right") },
     "runleft" : { Run("runleft","Run Left") },
+    "scootandramble" : { ScootAndRamble() },
     "separate" : { Separate() },
-    "slideleft" : { Slide("slideleft","Slide Left") },
-    "slideright" : { Slide("slideright","Slide Right") },
-    "slidein" : { Slide("slidein","Slide In") },
-    "slideout" : { Slide("slideout","Slide Out") },
+    "slideleft" : { SlideDir("slideleft","Slide Left") },
+    "slideright" : { SlideDir("slideright","Slide Right") },
+    "slidein" : { SlideDir("slidein","Slide In") },
+    "slideout" : { SlideDir("slideout","Slide Out") },
     "slidethru" : { SlideThru() },
     "slip" : { Slip() },
+    "slide" : { Slide() },
+    "swing" : { Swing() },
+    "slither" : { Slither() },
     "squeeze" : { Squeeze() },
     "squeezethehourglass" : { SqueezeTheHourglass() },
     "squeezethegalaxy" : { SqueezeTheGalaxy() },
@@ -154,7 +160,10 @@ class CodedCall : Call {
     "everyone" : { Everyone("everyone","Everyone") },
     "everybody" : { Everyone("everybody","Everybody") },
     "shazam" : { Shazam() },
-    "counterrotate" : { CounterRotate() }
+    "counterrotate" : { CounterRotate() },
+    "snapthelock" : { SnapTheLock() },
+    "castoff34" : { CastOffThreeQuarters() },
+    "peeltoadiamond" : { PeelToADiamond() }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -254,10 +263,6 @@ class CodedCall : Call {
       return Butterfly(callnorm,callname)
     }
 
-    if (callname.lowercased().matches("o .+")) {
-      return OFormation(callnorm,callname)
-    }
-
     if (callnorm.matches("zipcode\\d")) {
       return ZipCode(callnorm,callname)
     }
@@ -300,6 +305,66 @@ class CodedCall : Call {
 
     if (callnorm.matches("(left)?tagback(toawave)?")) {
       return TagBack(callnorm,callname)
+    }
+
+    if (callnorm.matches("transferand(.+)")) {
+      return TransferAnd(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left)?turnanddeal")) {
+      return TurnAndDeal(callnorm,callname)
+    }
+
+    if (callnorm.matches("phantom(.+)")) {
+      return PhantomConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("relocate.+")) {
+      return Relocate(callnorm,callname)
+    }
+
+    if (callnorm.matches("(outside|point)?(out|in|left|right|(go)?(forward|asyouare))?little")) {
+      return Little(callnorm, callname)
+    }
+
+    if (callnorm.matches("little(outside|point)(in|out|left|right|(go)?(forward|asyouare))?")) {
+      return Little(callnorm,callname)
+    }
+
+    if (callnorm.matches("(reverse)?truck")) {
+      return Truck(callnorm,callname)
+    }
+
+    if (callnorm.matches("swingandcircle(12|34)?")) {
+      return SwingAndCircle(callnorm,callname)
+    }
+
+    if (callnorm.matches("concentric(.+)")) {
+      return ConcentricConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("stretch(.+)")) {
+      return StretchConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("checkpoint(.+)by(.*)")) {
+      return CheckpointConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left|right|in|out)loop(1|2|3)")) {
+      return Loop(callnorm,callname)
+    }
+
+    if (callnorm.matches("stagger(.+)")) {
+      return StaggerConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("(left)?tagyour((criss)?cross)?neighbor")) {
+      return TagYourNeighbor(callnorm,callname)
+    }
+
+    if (callname.lowercased().matches("o .+")) {
+      return OFormation(callnorm,callname)
     }
 
     if (callnorm.matches(".*chainthru")) {

@@ -261,7 +261,7 @@ class TamUtils {
       //  'Column' of Magic Column is optional
       .replaceAll("magic (?!column)(?!o)(?!expand)","magic column ")
       //  Use singular form
-      .replaceAll("\\b(boy|girl|beau|belle|center|end|point|head|side)s\\b","$1")
+      .replaceAll("\\b(boy|girl|beau|belle|center|end|point|head|(out)?side)s\\b","$1")
       //  Misc other variations
       .replaceAll("\\bswap(\\s+around)?\\b","swap")
       .replaceAll("\\bmen\\b","boy")

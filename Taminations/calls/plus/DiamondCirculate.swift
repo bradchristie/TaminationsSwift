@@ -69,7 +69,7 @@ class DiamondCirculate : Action {
         let cx2 = xScale * sin(.pi / 3) - offset * sin(.pi / 3)
         let cy2 = yScale - yScale * cos(.pi / 3) + offset * cos(.pi / 3)
         let bz = Bezier.fromPoints(Vector(), Vector(cx1, cy1), Vector(cx2, cy2), p2)
-        let m = Movement(fullbeats: 2.0, hands: Hands.NOHANDS, btranslate: bz, brotate: bzrot)
+        let m = Movement(beats: 2.0, hands: Hands.NOHANDS, btranslate: bz, brotate: bzrot)
         return Path(m)
       } else {
         let cx1 = xScale * sin(.pi / 6) + offset * sin(.pi / 6)
@@ -77,7 +77,7 @@ class DiamondCirculate : Action {
         let cx2 = xScale * sin(.pi / 3) + offset * sin(.pi / 3)
         let cy2 = yScale - yScale * cos(.pi / 3) + offset * cos(.pi / 3)
         let bz = Bezier.fromPoints(Vector(), Vector(cx1, cy1), Vector(cx2, cy2), p2)
-        let m = Movement(fullbeats: 2.0, hands: Hands.NOHANDS, btranslate: bz, brotate: bzrot)
+        let m = Movement(beats: 2.0, hands: Hands.NOHANDS, btranslate: bz, brotate: bzrot)
         return Path(m)
       }
     }

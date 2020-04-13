@@ -83,7 +83,7 @@ struct Handhold {
     var h2 = Hands.NOHANDS
     var ah1 = 0.0
     var ah2 = 0.0
-    let afactor1 = 0.2
+    let afactor1 = geometry == GeometryType.SQUARE ? 0.8 : 0.2
     let afactor2 = geometry == GeometryType.BIGON ? 0.6 : 1.0
 
     //  Dancer 1

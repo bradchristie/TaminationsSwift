@@ -18,20 +18,13 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+class Relocate : Action {
+
+  override var level: LevelData { LevelObject.find("c2") }
+  override var requires:[String] { ["ms/cast_off_three_quarters",
+                                    "c1/counter_rotate"]  + CastOffThreeQuarters().requires }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
-    } else {
-      try super.perform(ctx,index)
-    }
+    try ctx.applyCalls("Outer 6 Counter Rotate While Very Centers Cast Off 3/4")
   }
-
 }

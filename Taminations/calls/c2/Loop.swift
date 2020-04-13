@@ -18,20 +18,20 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+class Loop : Action {
 
-  override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
-    } else {
-      try super.perform(ctx,index)
+  override var level: LevelData { LevelObject.find("c2") }
+
+  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
+    var dir = ""
+    switch (norm) {
+      case let n where n.startsWith("left") : dir = "Left"
+      case let n where n.startsWith("right") : dir = "Right"
+      case let n where n.startsWith("in") : dir = (d.isCenterLeft) ? "Left" : "Right"
+      case let n where n.startsWith("out") : dir = (d.isCenterLeft) ? "Right" : "Left"
+      default: throw CallError("Invalid Loop direction")
     }
+    let amount = Double(Int(norm.suffix(1),radix: 10)!)
+    return TamUtils.getMove("Run \(dir)").scale(1.0, amount)
   }
-
 }

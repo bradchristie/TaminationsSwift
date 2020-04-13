@@ -44,7 +44,7 @@ class CounterRotate : Action {
     let turn = (da < 0) ? "Right" : "Left"
     let brot = TamUtils.getMove("Quarter \(turn)").movelist[0].brotate
     let beats = ceil(d.location.length)
-    let move = Movement(fullbeats: beats,hands: Hands.NOHANDS,btranslate: bz,brotate: brot)
+    let move = Movement(beats: beats,hands: Hands.NOHANDS,btranslate: bz,brotate: brot)
     return Path(move)
 
   }

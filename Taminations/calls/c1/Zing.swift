@@ -20,7 +20,7 @@
 
 class Zing : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
+  override var level:LevelData { LevelObject.find("c1") }
 
   init() {
     super.init("Zoom")

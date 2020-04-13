@@ -236,15 +236,19 @@ class Dancer : Comparable, CustomStringConvertible {
 
   func animate(beat:Double) { animateComputed(beat:beat) }
 
-  func setStartPosition(_ x:Double, _ y:Double) {
+  @discardableResult
+  func setStartPosition(_ pos:Vector) -> Dancer {
     let a = angleFacing
-    starttx = Matrix(x:x,y:y) * Matrix(angle:a)
+    starttx = Matrix(x:pos.x,y:pos.y) * Matrix(angle:a)
     tx = Matrix(starttx)
+    return self
   }
 
-  func rotateStartAngle(_ angle:Double) {
+  @discardableResult
+  func rotateStartAngle(_ angle:Double) -> Dancer {
     starttx = starttx * Matrix(angle:angle.toRadians)
     tx = Matrix(starttx)
+    return self
   }
 
   /**

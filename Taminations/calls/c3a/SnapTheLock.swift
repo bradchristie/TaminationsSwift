@@ -18,20 +18,24 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+
+class SnapTheLock : Action {
+
+  override var level: LevelData { LevelObject.find("c3a") }
+  override var requires:[String] { ["a1/partner_tag","a1/lock_it","b1/step_thru"] }
+
+  init() {
+    super.init("Snap the Lock")
+  }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
-    } else {
-      try super.perform(ctx,index)
+    do {
+      try ctx.applyCalls("Partner Tag",
+        "Outsides Partner Tag While Centers Step to a Wave Lockit Step Thru")
+    } catch _ as CallError {
+      throw CallError("Cannot Snap the Lock from this formation.")
     }
+
   }
 
 }

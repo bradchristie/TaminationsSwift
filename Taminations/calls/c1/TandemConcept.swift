@@ -56,7 +56,7 @@ class TandemConcept: FourDancerConcept {
     }
   }
 
-  override func computeLocation(_ d: Dancer, _ m: Movement, _ beat: Double, _ groupIndex: Int) -> Vector {
+  override func computeLocation(_ d: Dancer, _ m: Movement, _ mi:Int, _ beat: Double, _ groupIndex: Int) -> Vector {
     //  Position tandem dancers 0.5 units in front and behind concept dancer
     let offset = 0.5
     let isLeader = groupIndex == 0

@@ -18,16 +18,23 @@
 
 */
 
-class Slide : Action {
+class WheelAround : ActivesOnlyAction {
+
+  override var level:LevelData { LevelObject.find("b2") }
+
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    var dir = ""
-    switch (norm) {
-      case "slideleft" : dir = "Left"
-      case "slideright" : dir = "Right"
-      case "slidein" : dir = d.isCenterLeft ? "Left" : "Right"
-      case "slideout" : dir = d.isCenterLeft ? "Right" : "Left"
-      default : throw CallError("Slide how?")
+    guard let d2 = d.data.partner else {
+      throw CallError("Dancer \(d) is not part of a Facing Couple")
     }
-    return TamUtils.getMove("Dodge \(dir)")
+    let dist = d.distanceTo(d2)
+    let move =
+      norm.startsWith("reverse") ?
+        d2.isRightOf(d)
+          ? "Beau Reverse Wheel"
+          : "Belle Reverse Wheel"
+        : d2.isRightOf(d)
+          ? "Beau Wheel"
+          : "Belle Wheel"
+    return TamUtils.getMove(move).scale(dist/2.0,dist/2.0)
   }
 }

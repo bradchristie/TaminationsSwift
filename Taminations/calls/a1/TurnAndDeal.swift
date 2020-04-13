@@ -18,31 +18,17 @@
 
 */
 
-class WheelAround : Action {
+class TurnAndDeal : Action {
 
-  override var level:LevelData { return LevelObject.find("b2") }
+  override var level: LevelData { LevelObject.find("a1") }
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    let d2q = [d.data.partner, ctx.dancerToRight(d), ctx.dancerToLeft(d)].compactMap {
-        $0
-      }
-      .filter {
-        ctx.isInCouple($0)
-      }.first
-    guard let d2 = d2q else {
-      throw CallError("Dancer \(d) is not part of a Facing Couple")
-    }
-    if (!d2.data.active) {
-      throw CallError("Dancer \(d) must Wheel Around with partner")
-    }
-    let move =
-      norm.startsWith("reverse") ?
-        d2.isRightOf(d)
-          ? "Beau Reverse Wheel"
-          : "Belle Reverse Wheel"
-        : d2.isRightOf(d)
-          ? "Beau Wheel"
-          : "Belle Wheel"
-    return TamUtils.getMove(move)
+    let dir = ctx.tagDirection(d)
+    let dist = !ctx.isTidal() ? 2.0 :
+      d.data.center ? 1.5 : 0.5
+    let sign = dir == "Left" ? 1.0 : -1.0
+    return TamUtils.getMove("U-Turn \(dir)")
+      .skew(sign*((norm.startsWith("left")) ? 1.0 : -1.0),dist*sign)
+
   }
 }

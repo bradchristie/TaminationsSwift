@@ -29,12 +29,13 @@ class SiameseConcept : FourDancerConcept {
   override func dancerGroups(_ ctx: CallContext) throws -> [[Dancer]] {
     //  First find couples
     couples = ctx.dancers.filter { d in
-      d.data.beau && (d.data.partner?.data.belle ?? false) }
+      d.data.beau && (d.data.partner?.data.belle ?? false) &&
+            (d.data.partner?.data.partner == d) }
       .map { d in [d,d.data.partner!] }
     //  Remaining dancers are tandems
     tandems = ctx.dancers.filter { d in
       let d2 = ctx.dancerInBack(d)
-      return d2 != nil &&
+      return d2 != nil && ctx.dancersInBack(d).count % 2 == 1 &&
         couples.flatMap { $0 } .none { [d,d2].contains($0) } }
     .map { d in [d,ctx.dancerInBack(d)!]}
     //  Better be all the dancers
@@ -45,10 +46,10 @@ class SiameseConcept : FourDancerConcept {
   }
 
   override func startPosition(_ group: [Dancer]) -> Vector {
-    return (group[0].location + group[1].location).scale(0.5,0.5)
+    (group[0].location + group[1].location).scale(0.5,0.5)
   }
 
-  override func computeLocation(_ d: Dancer, _ m: Movement, _ beat: Double, _ groupIndex: Int) -> Vector {
+  override func computeLocation(_ d: Dancer, _ m: Movement, _ mi:Int, _ beat: Double, _ groupIndex: Int) -> Vector {
     let pos = m.translate(beat).location
     let offset = 0.5
     let isFirst = groupIndex == 0

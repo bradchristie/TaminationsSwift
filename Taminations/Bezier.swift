@@ -81,6 +81,9 @@ class Bezier {
   func yt(_ t:Double) -> Double {
     y1 + t*(cy + t*(by + t*ay))
   }
+  func pt(_ t:Double) -> Vector {
+    Vector(xt(t),yt(t))
+  }
 
   //  Compute dx, dy values for a specific t value
   private func dxt(_ t:Double) -> Double {
@@ -131,6 +134,14 @@ class Bezier {
   func skew(_ x:Double, _ y:Double) -> Bezier {
     Bezier(x1:x1, y1:y1, ctrlx1:ctrlx1, ctrly1:ctrly1,
            ctrlx2:ctrlx2+x, ctrly2:ctrly2+y, x2:x2+x, y2:y2+y)
+  }
+
+  func clip(_ fraction:Double) -> Bezier {
+    let p1 = pt(0.0)
+    let p2 = pt(fraction / 3.0)
+    let p3 = pt(fraction * 2.0 / 3.0)
+    let p4 = pt(fraction)
+    return Bezier.fromPoints(p1,p2,p3,p4)
   }
 
 }

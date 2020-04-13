@@ -39,7 +39,7 @@ class BoxCounterRotate : Action {
     let dv = (v2 - v).rotate(-a1)
     let cv1 = (v2 * 0.5).rotate(-a1)
     let cv2 = (v * 0.5).rotate(-a1) + dv
-    let m = Movement(fullbeats: 2.0, hands: .NOHANDS,
+    let m = Movement(beats: 2.0, hands: .NOHANDS,
       btranslate: Bezier(x1:0.0, y1:0.0, ctrlx1: cv1.x, ctrly1: cv1.y,
                          ctrlx2: cv2.x, ctrly2: cv2.y, x2: dv.x, y2: dv.y),
       brotate: Bezier(x1:0.0, y1:0.0, ctrlx1: 0.55, ctrly1:0.0,

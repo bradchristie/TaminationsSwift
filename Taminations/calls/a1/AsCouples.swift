@@ -54,7 +54,7 @@ class AsCouples : FourDancerConcept {
     }
   }
 
-  override func computeLocation(_ d: Dancer, _ m: Movement, _ beat: Double, _ groupIndex: Int) -> Vector {
+  override func computeLocation(_ d: Dancer, _ m: Movement, _ mi:Int, _ beat: Double, _ groupIndex: Int) -> Vector {
     //  Position tandem dancers 0.5 units left and right of the concept dancer
     let pos = m.translate(beat).location
     let offset = 0.5

@@ -49,7 +49,6 @@ enum Hands : Int {
 
 class Movement {
 
-  let fullbeats:Double
   let hands:Hands
   let beats:Double
   let btranslate:Bezier
@@ -62,33 +61,16 @@ class Movement {
  *   of travel.  Two Bezier curves are used, one for travel and one for
  *   facing direction.
  *
- * @param fullbeats  Timing
+ * @param beats  Timing
  * @param hands  One of the const ints above
- *     Next set of parameters are for direction of travel
- *     X and Y values for start of curve are always 0,0
- * @param cx1    X value for 1st model point
- * @param cy1    Y value for 1st model point
- * @param cx2    X value for 2nd model point
- * @param cy2    Y value for 2nd model point
- * @param x2     X value for end of curve
- * @param y2     Y value for end of curve
- *     Next set of parameters are for facing direction
- *     X and Y values for start of curve, as well as Y value for 1st model
- *     point, are all 0
- * @param cx3    X value for 1st model point
- * @param cx4    X value for 2nd model point
- * @param cy4    Y value for 2nd model point
- * @param x4     X value for end of curve
- * @param y4     Y value for end of curve
- * @param beats  Where to stop for a clipped movement
+ * @param btranslate  Bezier curve for movement
+ * @param brotate  Bezier curve for facing direction, can be same as btranslate
  */
-  init(fullbeats:Double,hands:Hands,
+  init(beats:Double,hands:Hands,
        btranslate:Bezier,
-       brotate:Bezier,
-       beats:Double=0) {
-    self.fullbeats = fullbeats
+       brotate:Bezier) {
     self.hands = hands
-    self.beats = beats > 0 ? beats : fullbeats
+    self.beats = beats
     self.btranslate = btranslate
     self.brotate = brotate
   }
@@ -99,7 +81,7 @@ class Movement {
    */
   convenience init(elem:XMLElement) {
     self.init(
-      fullbeats: Double(elem.attr("beats")!)!, 
+      beats: Double(elem.attr("beats")!)!, 
       hands: Hands.getHands(elem.attr("hands") ?? "none"), 
       btranslate: Bezier(x1:0.0, y1:0.0,
           ctrlx1: Double(elem.attr("cx1")!)!, 
@@ -114,22 +96,21 @@ class Movement {
           ctrlx2: Double(elem.attr("cx4") ?? elem.attr("cx2")!)!,
           ctrly2: Double(elem.attr("cy4") ?? elem.attr("cy2")!)!, 
           x2: Double(elem.attr("x4") ?? elem.attr("x2")!)!, 
-          y2: Double(elem.attr("y4") ?? elem.attr("y2")!)!),
-      beats: Double(elem.attr("beats")!)!
+          y2: Double(elem.attr("y4") ?? elem.attr("y2")!)!)
     )
   }
 
   func translate(_ t:Double) -> Matrix {
-    let tt = min(max(0,t),fullbeats)
-    return btranslate.translate(tt/fullbeats)
+    let tt = min(max(0,t),beats)
+    return btranslate.translate(tt/beats)
   }
   func translate() -> Matrix {
     translate(beats)
   }
 
   func rotate(_ t:Double) -> Matrix {
-    let tt = min(max(0,t),fullbeats)
-    return brotate.rotate(tt/fullbeats)
+    let tt = min(max(0,t),beats)
+    return brotate.rotate(tt/beats)
   }
   func rotate() -> Matrix {
     rotate(beats)
@@ -139,14 +120,14 @@ class Movement {
    * Return a new movement by changing the beats
    */
   func time(_ b:Double) -> Movement {
-    Movement(fullbeats: b, hands: hands, btranslate: btranslate, brotate: brotate, beats: b)
+    Movement(beats: b, hands: hands, btranslate: btranslate, brotate: brotate)
   }
 
   /**
  * Return a new movement by changing the hands
  */
   func useHands(_ h:Hands) -> Movement {
-    Movement(fullbeats: fullbeats, hands: h, btranslate: btranslate, brotate: brotate, beats: beats)
+    Movement(beats: beats, hands: h, btranslate: btranslate, brotate: brotate)
   }
 
   /**
@@ -154,41 +135,23 @@ class Movement {
    * If y is negative hands are also switched.
    */
   func scale(_ x:Double, _ y:Double) -> Movement {
-    Movement(fullbeats: fullbeats,
-      hands: y < 0 && hands == .RIGHTHAND ? .LEFTHAND : y < 0 && hands == .LEFTHAND ? .RIGHTHAND : hands  ,
+    Movement(beats: beats,
+      hands: y < 0 && hands == .RIGHTHAND ? .LEFTHAND
+           : y < 0 && hands == .LEFTHAND ? .RIGHTHAND
+           : y < 0 && hands == .GRIPRIGHT ? .GRIPLEFT
+           : y < 0 && hands == .GRIPLEFT ? .GRIPRIGHT
+           : hands  ,
       btranslate: btranslate.scale(x,y),
-      brotate: brotate.scale(x,y),
-      beats: beats)
+      brotate: brotate.scale(x,y))
   }
 
   /**
    * Return a new Movement with the end point shifted by x and y
    */
   func skew(_ x:Double, _ y:Double) -> Movement {
-    beats < fullbeats ? skewClip(x,y) : skewFull(x,y)
-  }
-  func skewFull(_ x:Double, _ y:Double) -> Movement {
-    Movement(fullbeats: fullbeats, hands: hands,
+    Movement(beats: beats, hands: hands,
       btranslate: btranslate.skew(x,y),
-      brotate: brotate,
-      beats: beats)
-  }
-  func skewClip(_ x:Double, _ y:Double) -> Movement {
-    var vdelta = Vector(x,y)
-    let vfinal = translate().location + vdelta
-    var m = self
-    var maxiter = 100
-    repeat {
-      // Shift the end point by the current difference
-      m = m.skewFull(vdelta.x, vdelta.y)
-      // See how that affects the clip point
-      let loc = m.translate().location
-      vdelta = vfinal - loc
-      maxiter -= 1
-    } while (vdelta.length > 0.001 && maxiter > 0)
-    //  If timed out, return original rather than something that
-    //  might put the dancers in outer space
-    return maxiter > 0 ? m : self
+      brotate: brotate)
   }
 
   /**
@@ -205,10 +168,8 @@ class Movement {
   }
 
   func clip(_ b:Double) -> Movement {
-    Movement(fullbeats: fullbeats, hands: hands,
-      btranslate: btranslate,
-      brotate: brotate,
-      beats: b)
+    let fraction = b / beats
+    return Movement(beats: b, hands: hands, btranslate: btranslate.clip(fraction), brotate: brotate.clip(fraction))
   }
 
   func isStand() -> Bool {

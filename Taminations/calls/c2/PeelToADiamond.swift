@@ -18,20 +18,19 @@
 
 */
 
-//  For most calls where only some dancers are selected, the other dancers
-//  can be ignored.  Removing them from the context, and analyzing what is left,
-//  often makes it easier to figure out how to perform the call.
-class ActivesOnlyAction : Action {
+
+class PeelToADiamond : Action {
+
+  override var level: LevelData { LevelObject.find("c2") }
+
+  init() {
+    super.init("Peel to a Diamond")
+  }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    if (ctx.actives.count < ctx.dancers.count) {
-      let ctx2 = CallContext(ctx, ctx.actives)
-      ctx2.analyze()
-      try super.perform(ctx2,index)
-      ctx2.appendToSource()
-    } else {
-      try super.perform(ctx,index)
-    }
+    let trailers = ctx.dancers.filter { $0.data.trailer }
+    try ctx.applyCalls("Half Zoom")
+    try CallContext(ctx,trailers).applyCalls("Hinge").appendToSource()
   }
 
 }

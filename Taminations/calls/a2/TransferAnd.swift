@@ -18,22 +18,16 @@
 
 */
 
-class ZigZag : Action {
+class TransferAnd : Action {
 
-  override var level:LevelData { return LevelObject.find("a2") }
+  override var level: LevelData { LevelObject.find("a2") }
+  override var requires:[String] { ["a2/transfer_and_anything"] }
 
-  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    if (d.data.leader && norm.matches("zigz[ai]g")) {
-      return TamUtils.getMove("Quarter Right")
-    } else if (d.data.leader && norm.matches("zagz[ai]g")) {
-      return TamUtils.getMove("Quarter Left")
-    } else if (d.data.trailer && norm.matches("z[ai]gzig")) {
-      return TamUtils.getMove("Quarter Right")
-    } else if (d.data.trailer && norm.matches("z[ai]gzag")) {
-      return TamUtils.getMove("Quarter Left")
-    } else {
-      return TamUtils.getMove("Stand")
-    }
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
+    let othercall = name.replaceFirst("Transfer\\s+and\\s+","")
+    try ctx.applyCalls("Transfer and")
+    ctx.contractPaths()
+    try ctx.applyCalls("Centers \(othercall)")
   }
 
 }

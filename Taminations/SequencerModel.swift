@@ -41,6 +41,9 @@ class SequencerModel {
     self.callsView = callsView
     self.callListener = CallListener(callHandler: { call in self.loadOneCall(call) },
       errorHandler: { error in self.showError(error) } )
+    //  Force pre-load of selected calls
+    //  (not sure it matters on this platform)
+    CallContext.loadCalls([])
     startSequence()
     callsView.textInput.returnAction {
       let call = self.callsView.textInput.text
@@ -142,6 +145,9 @@ class SequencerModel {
       cctx.checkForCollisions()
       cctx.extendPaths()
       cctx.matchStandardFormation()
+      if (cctx.isCollision()) {
+        throw CallError("Unable to calculate valid animation.")
+      }
       cctx.appendToSource()
       seqView.animationView.recalculate()
       let newbeats = seqView.animationView.movingBeats

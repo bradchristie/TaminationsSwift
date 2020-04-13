@@ -51,7 +51,8 @@ class Circulate : Action {
       try ctx.applyCalls("all 8 circulate")
     }
     //  If in columns, do Column Circulate
-    else if (ctx.isColumns()) {
+    //  (if there are 6 dancers, must be 2 columns of 3)
+    else if (ctx.actives.count == 6 || ctx.isColumns()) {
       try ctx.applyCalls("column circulate")
     }
     //  If none of those, but tBones, calculate each path individually

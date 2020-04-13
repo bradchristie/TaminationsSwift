@@ -27,7 +27,22 @@ class Slip : Action {
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Centers Trade") 
+    //  If single wave in center, then very centers trade
+    let ctx4 = CallContext(ctx, ctx.center(4))
+    ctx4.analyze()
+    if (ctx4.isLines() && !ctx.isTidal()) {
+      try ctx.applyCalls("Very Centers Trade")
+    } else {
+      //  Otherwise, all centers trade
+      //  Check that it's not a partner trade
+      let ctxc = CallContext(ctx, ctx.dancers.filter {
+        $0.data.center
+      })
+      if (!ctxc.isWaves()) {
+        throw CallError("Centers must be in a mini-wave.")
+      }
+      try ctx.applyCalls("Centers Trade")
+    }
   }
 
 }
