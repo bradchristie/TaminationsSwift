@@ -24,11 +24,12 @@ class TurnAndDeal : Action {
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     let dir = ctx.tagDirection(d)
+    let amount = ctx.isTidal() ? 1.5 : 1.0
     let dist = !ctx.isTidal() ? 2.0 :
       d.data.center ? 1.5 : 0.5
     let sign = dir == "Left" ? 1.0 : -1.0
     return TamUtils.getMove("U-Turn \(dir)")
-      .skew(sign*((norm.startsWith("left")) ? 1.0 : -1.0),dist*sign)
+      .skew(sign*((norm.startsWith("left")) ? amount : -amount),dist*sign)
 
   }
 }

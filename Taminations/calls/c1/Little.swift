@@ -42,7 +42,13 @@ class Little : Action {
       turn = ""
     }
     do {
-      try ctx.applyCalls("Outer 4 \(turn) Counter Rotate While Center 4 Step and Fold")
+      if (ctx.actives.count == 8) {
+        try ctx.applyCalls("Outer 4 \(turn) Counter Rotate While Center 4 Step and Fold")
+      } else if (ctx.actives.count == 4 && ctx.actives.containsAll(ctx.outer(4))) {
+        try ctx.applyCalls("Outer 4 \(turn) Counter Rotate")
+      } else {
+        throw CallError("Don't know how to Little for these dancers.")
+      }
     } catch _ as CallError {
     throw CallError("Unable to do Little from this formation.")
   }

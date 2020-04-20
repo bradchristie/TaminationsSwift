@@ -24,9 +24,11 @@ class AroundToALine : Action {
     if (ctx.actives.count < ctx.dancers.count) {
       ctx.matchStandardFormation()
       ctx.dancers.forEach { it in it.data.active = true }
-      if (norm.contains("1")) {
+      if (norm.contains("1andcomeintothemiddle")) {
+        try ctx.applyCalls("Around One and Come Into the Middle")
+      } else if (norm.contains("1toaline")) {
         try ctx.applyCalls("Around One To A Line")
-      } else if (norm.contains("2")) {
+      } else if (norm.contains("2toaline")) {
         try ctx.applyCalls("Around Two To A Line")
       } else {
         throw CallError("Go Around What?")

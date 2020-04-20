@@ -60,7 +60,7 @@ class Adjust : Action {
       throw CallError("Sorry, don't know how to \(name) from here.")
     }
     let ctx2 = CallContext(formation)
-    guard let mapping = ctx.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:true,handholds:false, maxError:2.0) else {
+    guard let mapping = ctx.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:180,handholds:false, maxError:2.0) else {
       throw CallError("Unable to match formation to \(fname)")
     }
     let matchResult = ctx.computeFormationOffsets(ctx2,mapping,delta:0.3)

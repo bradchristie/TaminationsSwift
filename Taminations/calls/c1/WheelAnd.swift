@@ -29,7 +29,8 @@ class WheelAnd : Action {
     let reverse = (wheelcall.lowercased().contains("reverse")) ? "Reverse" : ""
     //  Find the 4 dancers to Wheel
     let facingOut = ctx.dancers.filter { d in d.isFacingOut }
-    if (facingOut.containsAll(ctx.outer(4))) {
+    //  Check for t-bones, center 4 facing out, outer 4 facing their shoulders
+    if (ctx.center(4).containsAll(facingOut)) {
       try ctx.applyCalls("As Couples Step")
     }
     //  First we will try the usual way

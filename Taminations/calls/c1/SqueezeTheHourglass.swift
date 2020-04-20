@@ -31,7 +31,7 @@ class SqueezeTheHourglass : Action {
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Match to any hourglass
     let hourglass = CallContext(TamUtils.getFormation("Hourglass RH GP"))
-    guard let mm = hourglass.matchFormations(ctx,rotate: true) else {
+    guard let mm = hourglass.matchFormations(ctx,rotate: 180) else {
       throw CallError("Not an Hourglass formation")
     }
     //  All but two of the dancers squeeze

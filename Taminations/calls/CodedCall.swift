@@ -28,6 +28,8 @@ class CodedCall : Call {
     "androll" : { Roll("androll","and Roll") },
     "around1toaline" : { AroundToALine("around1toaline","Around One to a Line") },
     "around2toaline" : { AroundToALine("around2toaline","Around Two to a Line") },
+    "around1andcomeintothemiddle" : {  AroundToALine("around1andcomeintothemiddle",
+          "Around One and Come Into the Middle") },
     "roll" : { Roll("roll","Roll") },
     "backaway" : { BackAway() },
     "beau" : { Beaus() },
@@ -361,6 +363,10 @@ class CodedCall : Call {
 
     if (callnorm.matches("(left)?tagyour((criss)?cross)?neighbor")) {
       return TagYourNeighbor(callnorm,callname)
+    }
+
+    if (callnorm.matches("castashadowcenter(go|cast)?34")) {
+      return CastAShadow(callnorm,callname)
     }
 
     if (callname.lowercased().matches("o .+")) {

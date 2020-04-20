@@ -49,6 +49,16 @@ extension Vector {
   func ds(_ d:Dancer) -> Vector { d.tx.inverse() * self }
 }
 
+//  Take a list of dancers in any order, re-order
+//  in pairs of diagonal opposites
+extension Array where Element:Dancer {
+  func inOrder() -> [Dancer] {
+    self.filter { $0.location.x.isGreaterThan(0.0) ||
+      ($0.location.x.isAbout(0.0) && $0.location.y.isGreaterThan(0.0)) }
+    .flatMap { d in [d,self.first { $0.location == -d.location }!] }
+  }
+}
+
 class Dancer : Comparable, CustomStringConvertible {
 
   static let NUMBERS_OFF = 0

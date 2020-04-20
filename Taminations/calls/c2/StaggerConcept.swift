@@ -31,11 +31,11 @@ class StaggerConcept : ModifiedFormationConcept {
   override func checkFormation(_ ctx: CallContext) -> Bool {
     let ctx1 = CallContext(TamUtils.getFormation("Facing Blocks Right"))
     let ctx2 = CallContext(TamUtils.getFormation("Facing Blocks Left"))
-    if (ctx.matchFormations(ctx1,sexy:false,fuzzy:true,rotate:true,handholds:false) != nil) {
+    if (ctx.matchFormations(ctx1,sexy:false,fuzzy:true,rotate:180,handholds:false) != nil) {
       startFormation = "Facing Blocks Right"
       return true
     }
-    if (ctx.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:true,handholds:false) != nil) {
+    if (ctx.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:180,handholds:false) != nil) {
       startFormation = "Facing Blocks Left"
       return true
     }

@@ -45,7 +45,7 @@ class Vector {
     return angleAngleDiff(v.angle, angle)
   }
 
-  //  Return Z-coord of the cross product between two vectors
+  //  Return Z-coordinate of the cross product between two vectors
   func crossZ(_ v: Vector) -> Double {
     return x * v.y - y * v.x
   }
@@ -73,6 +73,12 @@ prefix func -(v:Vector) -> Vector {
 
 func *(v:Vector, s:Double) -> Vector {
   return v.scale(s,s)
+}
+
+extension Vector : Equatable {
+  static func ==(left:Vector, right:Vector) -> Bool {
+    left.x.isAbout(right.x) && left.y.isAbout(right.y)
+  }
 }
 
 func angleAngleDiff(_ a1:Double, _ a2:Double) -> Double {

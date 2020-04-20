@@ -27,11 +27,12 @@ class ModifiedFormationConcept : Action {
 
   func checkFormation(_ ctx:CallContext) -> Bool {
     let ctx2 = CallContext(TamUtils.getFormation(formationName))
-    return ctx.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:true,handholds:false) != nil
+    return ctx.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:90,handholds:false) != nil
   }
 
   func reformFormation(_ ctx:CallContext) -> Bool {
-    ctx.adjustToFormation(formationName)
+    ctx.adjustToFormation(formationName,rotate:180) ||
+    ctx.adjustToFormation(formationName,rotate:90)
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
@@ -39,14 +40,14 @@ class ModifiedFormationConcept : Action {
     if (!checkFormation(ctx)) {
       throw CallError("Not $conceptName formation")
     }
-    //  Shift dancers into columns
+    //  Shift dancers into modified formation
     if (!ctx.adjustToFormation(modifiedFormationName)) {
       throw CallError("Unable to adjust \(formationName) to \(modifiedFormationName)")
     }
     let adjusted = ctx.dancers.filter { $0.path.movelist.isNotEmpty() }
 
     //  Perform the call
-    let callName = name.replaceIgnoreCase(conceptName, "")
+    let callName = name.replaceFirstIgnoreCase(conceptName, "")
     try ctx.applyCalls(callName)
     //  Merge the initial adjustment into the start of the call
     ctx.dancers.forEach { d in

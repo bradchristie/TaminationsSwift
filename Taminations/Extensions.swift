@@ -178,6 +178,13 @@ extension String {
     }
     return retval
   }
+  func replaceFirstIgnoreCase(_ query:String, _ replacement:String) -> String {
+    var retval = self
+    if let r = range(of: query, options: [.regularExpression,.caseInsensitive]) {
+      retval.replaceSubrange(r, with: replacement)
+    }
+    return retval
+  }
 
   func split() -> [String] {
     components(separatedBy: CharacterSet.whitespaces)

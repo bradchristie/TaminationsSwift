@@ -190,6 +190,7 @@ class CallContext {
       : tam.children(tag: "formation").first ?? tam
     var dlist: [Dancer] = []
     for (i, element) in f.children(tag: "dancer").enumerated() {
+      //  This assumes square geometry
       //  Make sure each dancer in the list is immediately followed by its
       //  diagonal opposite.  Required for mapping.
       let d1 = Dancer(number: numberArray[i * 2], couple: coupleArray[i * 2],
@@ -447,7 +448,7 @@ class CallContext {
         let headsmatchsides = !tam.attr("title")!.contains("Heads?|Sides?")
         //  Try to match the formation to the current dancer positions
         let ctx2 = CallContext(tam)
-        let mmm = ctx1.matchFormations(ctx2, sexy: sexy, fuzzy: fuzzy, handholds: false,
+        let mmm = ctx1.matchFormations(ctx2, sexy: sexy, fuzzy: fuzzy, handholds: !fuzzy,
           headsmatchsides: headsmatchsides)
         if let mm = mmm {
           let matchResult = ctx1.computeFormationOffsets(ctx2, mm)
@@ -572,9 +573,9 @@ class CallContext {
   }
 
   func matchFormations(_ ctx2: CallContext,
-                               sexy:Bool=false,
-                               fuzzy:Bool=false,
-                               rotate:Bool=false,
+                               sexy:Bool=false,  // don't match girls with boys
+                               fuzzy:Bool=false,  // dancers can be somewhat offset
+                               rotate:Int=0,    // rotate dancers by 90s or 180 degrees to match
                                handholds: Bool=true,
                                headsmatchsides:Bool=true,
                                maxError:Double=1.9) -> [Int]? {
@@ -585,7 +586,7 @@ class CallContext {
     var mapping = [Int](repeating: -1, count: dancers.count)
     var bestmapping:[Int]? = nil
     var bestOffset:Double = 0.0
-    var rotated = [Bool](repeating: false, count: dancers.count)
+    var rotated = [Int](repeating: 0, count: dancers.count)
     var mapindex = 0
     while (mapindex >= 0 && mapindex < dancers.count) {
       var nextmapping = mapping[mapindex] + 1
@@ -608,17 +609,17 @@ class CallContext {
         mapping[mapindex] = -1
         mapping[mapindex + 1] = -1
         //  If fuzzy, try rotating this dancer
-        if (rotate && !rotated[mapindex]) {
-          dancers[mapindex].rotateStartAngle(180.0)
-          dancers[mapindex+1].rotateStartAngle(180.0)
-          rotated[mapindex] = true
+        if (rotate > 0 && rotated[mapindex] + rotate < 360) {
+          dancers[mapindex].rotateStartAngle(rotate.d)
+          dancers[mapindex+1].rotateStartAngle(rotate.d)
+          rotated[mapindex] += rotate
         } else {
-          if (rotated[mapindex]) {
+          if (rotated[mapindex]+rotate == 360) {
             //  Restore to original
-            dancers[mapindex].rotateStartAngle(180.0)
-            dancers[mapindex+1].rotateStartAngle(180.0)
+            dancers[mapindex].rotateStartAngle(rotate.d)
+            dancers[mapindex+1].rotateStartAngle(rotate.d)
           }
-          rotated[mapindex] = false
+          rotated[mapindex] = 0
           mapindex -= 2
         }
       } else {
@@ -741,7 +742,6 @@ class CallContext {
     "Tidal Line RH",
     "Tidal Wave of 6",
     "I-Beam",
-    "H-Beam",
     "Diamonds RH Girl Points",
     "Diamonds RH PTP Girl Points",
     "Hourglass RH BP",
@@ -749,28 +749,19 @@ class CallContext {
     "Butterfly RH",
     "O RH",
     "Sausage RH",
-    "T-Bone URRD",
-    "T-Bone RUUL",
-    "T-Bone DLDL",
-    "T-Bone RDRD",
-    "T-Bone UURL",
-    "T-Bone RLUU",
     //  There are also 8 possible 3x1 t-bones not listed here
     "Static Square",
     "Right-Hand Zs",
     "Left-Hand Zs",
     //  Siamese formations
+    //  This also covers C-1 Phantom formations
     "Siamese Box 1",
     "Siamese Box 2",
     //  Blocks
     "Facing Blocks Right",
     "Facing Blocks Left",
-    //  Phantom formations
-    "Phantom Snap Formation 1",
-    "Phantom Snap Formation 2",
-    //  One wave is H-Beam, above
     "Siamese Wave",
-    "I-Column"
+    "Concentric Diamonds RH"
   ]
   private static let twoCoupleFormations = [
     "Facing Couples Compact",
@@ -779,8 +770,7 @@ class CallContext {
     "Diamond RH",
     "Single Eight Chain Thru",
     "Single Quarter Tag",
-    "Square RH",
-    "Square LH"    
+    "Square RH"
   ]
 
 
@@ -807,23 +797,28 @@ class CallContext {
     formations.forEach { f in
       let ctx2 = CallContext(TamUtils.getFormation(f))
       //  See if this formation matches
-      let mappingq = ctx1.matchFormations(ctx2, sexy: false, fuzzy: true, rotate: true, handholds: false)
+      let rot = (f.contains("Lines")) ? 180 : 90
+      let mappingq = ctx1.matchFormations(ctx2, sexy: false, fuzzy: true, rotate: rot, handholds: false)
       if let mapping = mappingq {
         //  If it does, get the offsets
         let matchResult = ctx1.computeFormationOffsets(ctx2, mapping)
         //  If the match is at some odd angle (not a multiple of 90 degrees)
         //  then consider it bogus
-        let angsnap = matchResult.transform.angle / (.pi / 4)
+        let angsnap = matchResult.transform.angle / (.pi / 2)
         let totOffset = matchResult.offsets.reduce(0.0) { s, v in s + v.length }
         if (totOffset < 9.0 && angsnap.isApproxInt()) {
           //  Favor formations closer to the top of the list
-          if (bestMapping == nil || totOffset + 0.2 < bestMapping!.totOffset) {
-            bestMapping = BestMapping(
-              name: f, // only used for debugging
-              mapping: mapping,
-              offsets: matchResult.offsets,
-              totOffset: totOffset
-            )
+          //  Especially favor lines
+          let favoring = (bestMapping?.name.contains("Line") == true) ? 2.0 : 1.0
+          if (totOffset < 9.0 && angsnap.isApproxInt(delta: 0.05)) {
+            if (bestMapping == nil || totOffset*favoring + 0.2 < bestMapping!.totOffset) {
+              bestMapping = BestMapping(
+                name: f, // only used for debugging
+                mapping: mapping,
+                offsets: matchResult.offsets,
+                totOffset: totOffset
+              )
+            }
           }
         }
       }
@@ -851,11 +846,11 @@ class CallContext {
     }
   }
 
-  func adjustToFormation(_ fname:String) -> Bool {
-    //  Work on a copy with all dancers active, mapping only uses active dancers
+  func adjustToFormation(_ fname:String, rotate:Int=180) -> Bool {
+    //  Work on a copy with all dancers active, mapping only uses active dancers???
     let ctx1 = CallContext(self)
     let ctx2 = CallContext(TamUtils.getFormation(fname))
-    let mapping = ctx1.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:true,handholds:false, maxError: 2.9)
+    let mapping = ctx1.matchFormations(ctx2,sexy:false,fuzzy:true,rotate:rotate,handholds:false, maxError: 2.9)
     if (mapping != nil) {
       //  If it does, get the offsets
       let matchResult = ctx1.computeFormationOffsets(ctx2, mapping!, delta: 0.5)
@@ -1008,7 +1003,7 @@ class CallContext {
   private func tryOneDiamondFormation(_ f:String) -> [Dancer] {
     let ctx2 = CallContext(TamUtils.getFormation(f))
     var points:[Dancer] = []
-    if let mapping = matchFormations(ctx2,rotate:true) {
+    if let mapping = matchFormations(ctx2,rotate:180) {
       for (i,d) in dancers.enumerated() {
         if (ctx2.dancers[mapping[i]].gender == Gender.GIRL) {
           points.append(d)

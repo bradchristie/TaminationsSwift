@@ -82,7 +82,7 @@ class TriangleCirculate : Action {
         } else {
           //  No points, maybe a sausage
           let sausage = CallContext(TamUtils.getFormation("Sausage RH"))
-          if (ctx.matchFormations(sausage,rotate: true) != nil) {
+          if (ctx.matchFormations(sausage,rotate: 180) != nil) {
             ctx.center(2).forEach { d in d.data.active = false }
           }
         }

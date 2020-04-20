@@ -30,7 +30,7 @@ class SqueezeTheGalaxy : Action {
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  Match to any hourglass
     let galaxy = CallContext(TamUtils.getFormation("Galaxy RH GP"))
-    guard let mm = galaxy.matchFormations(ctx,rotate: true) else {
+    guard let mm = galaxy.matchFormations(ctx,rotate: 180) else {
       throw CallError("Not a Galaxy formation")
     }
     //  All but two of the dancers squeeze
