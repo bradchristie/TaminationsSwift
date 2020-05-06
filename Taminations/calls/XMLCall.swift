@@ -53,7 +53,7 @@ class XMLCall : Call {
       ctx3.analyze()
     }
 
-    let matchResult = ctx.computeFormationOffsets(ctx2,xmlmap)
+    let matchResult = ctx.computeFormationOffsets(ctx2,xmlmap,delta:0.2)
     xmlmap.enumerated().forEach { (i3,m) in
       let p = Path(allp[m>>1])
       if (p.movelist.isEmpty) {

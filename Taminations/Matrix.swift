@@ -110,39 +110,25 @@ class Matrix {
       let u = Matrix()
       return (u, sigma, v)
     } else {
-      let j = a.sq + b.sq
-      let k = c.sq + d.sq
-      let vc = a * c + b * d
-      //  Check to see if A^T*A is diagonal
-      if (vc.abs < epsilon) {
-        let s1 = j.Sqrt
-        let s2 = ((j - k).abs < epsilon) ? s1 : k.Sqrt
-        let sigma = [s1, s2]
-        let v = Matrix()
-        let u = Matrix(a / s1, b / s1, 0.0,
-          c / s2, d / s2, 0.0)
-        return (u, sigma, v)
-      } else {   //  Otherwise, solve quadratic for eigenvalues
-        let atanarg1 = 2 * a * c + 2 * b * d
-        let atanarg2 = a * a + b * b - c * c - d * d
-        let theta = 0.5 * atan2(atanarg1, atanarg2)
-        let u = Matrix(theta.Cos, -theta.Sin, 0.0,
-          theta.Sin, theta.Cos, 0.0)
+      let atanarg1 = 2 * a * c + 2 * b * d
+      let atanarg2 = a * a + b * b - c * c - d * d
+      let theta = 0.5 * atan2(atanarg1, atanarg2)
+      let u = Matrix(theta.Cos, -theta.Sin, 0.0,
+        theta.Sin, theta.Cos, 0.0)
 
-        let phi = 0.5 * atan2(2 * a * b + 2 * c * d, a.sq - b.sq + c.sq - d.sq)
-        let s11 = (a * theta.Cos + c * theta.Sin) * phi.Cos +
-          (b * theta.Cos + d * theta.Sin) * phi.Sin
-        let s22 = (a * theta.Sin - c * theta.Cos) * phi.Sin +
-          (-b * theta.Sin + d * theta.Cos) * phi.Cos
+      let phi = 0.5 * atan2(2 * a * b + 2 * c * d, a.sq - b.sq + c.sq - d.sq)
+      let s11 = (a * theta.Cos + c * theta.Sin) * phi.Cos +
+        (b * theta.Cos + d * theta.Sin) * phi.Sin
+      let s22 = (a * theta.Sin - c * theta.Cos) * phi.Sin +
+        (-b * theta.Sin + d * theta.Cos) * phi.Cos
 
-        let s1 = a.sq + b.sq + c.sq + d.sq
-        let s2 = ((a.sq + b.sq - c.sq - d.sq).sq + 4 * (a * c + b * d).sq).Sqrt
-        let sigma = [(s1 + s2).Sqrt / 2, (s1 - s2).Sqrt / 2]
+      let s1 = a.sq + b.sq + c.sq + d.sq
+      let s2 = ((a.sq + b.sq - c.sq - d.sq).sq + 4 * (a * c + b * d).sq).Sqrt
+      let sigma = [(s1 + s2).Sqrt / 2, (s1 - s2).Sqrt / 2]
 
-        let v = Matrix(s11.sign * phi.Cos, -s22.sign * phi.Sin, 0.0,
-          s11.sign * phi.Sin, s22.sign * phi.Cos, 0.0)
-        return (u, sigma, v)
-      }
+      let v = Matrix(s11.sign * phi.Cos, -s22.sign * phi.Sin, 0.0,
+        s11.sign * phi.Sin, s22.sign * phi.Cos, 0.0)
+      return (u, sigma, v)
     }
   }
 

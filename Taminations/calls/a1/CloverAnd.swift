@@ -70,16 +70,16 @@ class CloverAnd : Action {
     //  Make those 4 dancers Cloverleaf
     let split = name.split("and",maxSplits: 2)
     let (clovercall,andcall) = (split[0],split[1])
-    let ctx1 = CallContext(ctx,clovers)
-    try ctx1.applyCalls("\(clovercall) and")
-    //  "Clover and <nothing>" is stored in A-1 but is really Mainstream
-    ctx1.level = LevelObject.find("ms")
-    ctx1.appendToSource()
+    try ctx.subContext(clovers) { ctx1 in
+      try ctx1.applyCalls("\(clovercall) and")
+      //  "Clover and <nothing>" is stored in A-1 but is really Mainstream
+      ctx1.level = LevelObject.find("ms")
+    }
     //  And the other 4 do the next call at the same time
-    let ctx2 = CallContext(ctx,ctx.dancers.filterNot { d in clovers.contains(d) } )
-    ctx2.dancers.forEach { d in d.data.active = true }
-    try ctx2.applyCalls(andcall)
-    ctx2.appendToSource()
+    try ctx.subContext(ctx.dancers.filterNot { d in clovers.contains(d) }) { ctx2 in
+      ctx2.dancers.forEach { d in d.data.active = true }
+      try ctx2.applyCalls(andcall)
+    }
   }
 
 }

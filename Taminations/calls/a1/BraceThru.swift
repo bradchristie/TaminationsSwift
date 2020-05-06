@@ -30,28 +30,35 @@ class BraceThru : Action {
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    let ctx2 = CallContext(ctx,ctx.actives)
-    try ctx2.applyCalls("Pass Thru")
-    ctx2.analyze()
-
-    try ctx2.dancers.forEach { d in
-      guard let partner = d.data.partner else {
-        throw CallError("Dancer \(d) cannot Brace Thru")
+    try ctx.subContext(ctx.actives) { ctx2 in
+      try ctx2.applyCalls("Pass Thru")
+      ctx2.analyze()
+      try ctx2.dancers.forEach { d in
+        guard let partner = d.data.partner else {
+          throw CallError("Dancer \(d) cannot Brace Thru")
+        }
+        if (d.gender == partner.gender) {
+          throw CallError("Same-sex dancers cannot Brace Thru")
+        }
       }
-      if (d.gender == partner.gender) {
-        throw CallError("Same-sex dancers cannot Brace Thru")
+      let normal = ctx2.actives.filter {
+        $0.data.beau ^ ($0.gender == Gender.GIRL)
       }
+      let sashay = ctx2.actives.filter {
+        $0.data.beau ^ ($0.gender == Gender.BOY)
+      }
+      if (normal.count > 0) {
+        try ctx2.subContext(normal) {
+          try $0.applyCalls("Courtesy Turn")
+        }
+      }
+      if (sashay.count > 0) {
+        try ctx2.subContext(sashay) {
+          try $0.applyCalls("Turn Back")
+        }
+      }
+      ctx2.appendToSource()
     }
-
-    let normal = ctx2.actives.filter { $0.data.beau ^ ($0.gender==Gender.GIRL) }
-    let sashay = ctx2.actives.filter { $0.data.beau ^ ($0.gender==Gender.BOY) }
-    if (normal.count > 0) {
-      try CallContext(ctx2, normal).applyCalls("Courtesy Turn").appendToSource()
-    }
-    if (sashay.count > 0) {
-      try CallContext(ctx2, sashay).applyCalls("Turn Back").appendToSource()
-    }
-    ctx2.appendToSource()
   }
 
 }

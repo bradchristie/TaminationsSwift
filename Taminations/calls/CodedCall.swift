@@ -69,7 +69,7 @@ class CodedCall : Call {
     "leftpartnerhinge" : { Hinge("lefthinge","Left Partner Hinge") },
     "ladies" : { Girls() },
     "jaywalk" : { Jaywalk() },
-    "12" : { Half() },
+    "12" : { Fraction("12","Half") },
     "12sashay" : { HalfSashay() },
     "circulate" : { Circulate() },
     "all8circulate" : { Circulate() },
@@ -165,7 +165,8 @@ class CodedCall : Call {
     "counterrotate" : { CounterRotate() },
     "snapthelock" : { SnapTheLock() },
     "castoff34" : { CastOffThreeQuarters() },
-    "peeltoadiamond" : { PeelToADiamond() }
+    "peeltoadiamond" : { PeelToADiamond() },
+    "hocuspocus" : { HocusPocus() }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -367,6 +368,18 @@ class CodedCall : Call {
 
     if (callnorm.matches("castashadowcenter(go|cast)?34")) {
       return CastAShadow(callnorm,callname)
+    }
+
+    if (callnorm.matches("finish.*")) {
+      return Finish(callnorm,callname)
+    }
+
+    if (callnorm.matches(".*(motivate|coordinate|percolate|perkup)")) {
+      return AnythingConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("\\d\\d")) {
+      return Fraction(callnorm,callname)
     }
 
     if (callname.lowercased().matches("o .+")) {

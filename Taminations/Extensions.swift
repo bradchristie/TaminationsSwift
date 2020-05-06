@@ -31,7 +31,7 @@ extension CGFloat {
 
 extension Double {
 
-  var s:String { "\(self)" }
+  var s:String { "\((self*1000.0).i.d/1000.0)" }
   var i:Int { Int(self) }
   var f:Float { Float(self) }
   var cg:CGFloat { CGFloat(self) }
@@ -88,6 +88,10 @@ extension Array {
     self.enumerated().map { (i,it) in f(i,it) }
   }
 
+  func filterIndexed(_ f:(Int,Self.Element) -> Bool ) -> [Self.Element] {
+    self.enumerated().filter { (i,it) in f(i,it) } .map { (i,it) in it }
+  }
+
   func any(_ f:(Element) throws -> Bool) rethrows -> Bool {
     try first(where:f) != nil
   }
@@ -118,6 +122,14 @@ extension Array {
   }
 
   var second:Element? { self[1] }
+
+}
+
+extension Set {
+
+  func any(_ f:(Element) throws -> Bool) rethrows -> Bool {
+    try first(where:f) != nil
+  }
 
 }
 

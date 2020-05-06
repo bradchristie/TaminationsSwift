@@ -18,31 +18,29 @@
 
 */
 
-//  This is the A-2 call Swing
-class Swing : Action {
+class HocusPocus : Action {
 
-  override var level: LevelData { LevelObject.find("a2") }
-  override var requires:[String] { ["b2/trade"] }
+  override var level: LevelData {
+    LevelObject.find("c2")
+  }
 
   init() {
-    super.init("Swing")
+    super.init("Hocus Pocus")
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    //  If single wave in center, just those 4 Swing
-    if try (!ctx.subContext(ctx.center(4)) { ctx2 in
-      if (ctx.dancers.count > 4 && ctx2.isLines() && ctx2.isWaves() && !ctx.isTidal()) {
-        ctx2.analyze()
-        try ctx2.applyCalls("Trade")
-      }
-    }) {
-      if (ctx.actives.all { ctx.isInWave($0) }) {
-        try ctx.applyCalls("Trade")
-      }
-      else {
-        throw CallError("Dancers must be in mini-waves to Swing")
-      }
+    let outer4 = CallContext(ctx, ctx.outer(4).inOrder())
+    guard let outerO = outer4.fillFormation("O RH")
+      ?? outer4.fillFormation("O LH")
+      ?? outer4.fillFormation("O Eight Chain Thru")
+      ?? outer4.fillFormation("O Trade By") else {
+      throw CallError("Cannot determine how outer dancers can circulate.")
+    }
+    try ctx.subContext(outerO.dancers) {
+      try $0.applyCalls("O Circulate", "O Circulate")
+    }
+    try ctx.subContext(ctx.center(4)) {
+      try $0.applyCalls("Trade")
     }
   }
-
 }

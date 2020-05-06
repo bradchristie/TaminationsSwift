@@ -18,8 +18,6 @@
 
 */
 
-import UIKit
-
 class CallError : Error {
 
   let msg:String

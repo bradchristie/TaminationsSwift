@@ -41,7 +41,8 @@ class ModifiedFormationConcept : Action {
       throw CallError("Not $conceptName formation")
     }
     //  Shift dancers into modified formation
-    if (!ctx.adjustToFormation(modifiedFormationName)) {
+    if (!ctx.adjustToFormation(modifiedFormationName,rotate:180) &&
+        !ctx.adjustToFormation(modifiedFormationName,rotate:180)) {
       throw CallError("Unable to adjust \(formationName) to \(modifiedFormationName)")
     }
     let adjusted = ctx.dancers.filter { $0.path.movelist.isNotEmpty() }

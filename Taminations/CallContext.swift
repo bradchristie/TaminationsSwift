@@ -29,7 +29,7 @@ class CallContext {
   //  Supplements looking up calls in TamUtils.calldata
   //  Keys are normalized call name
   //  Values are file names
-  static var callindex = [String:[String]]()
+  static var callindex = [String:Set<String>]()
 
   //  Initialize callindex with calls in theses files
   class func loadInitFiles() {
@@ -112,9 +112,9 @@ class CallContext {
         } else {
           let norm = TamUtils.normalizeCall(tam.attr("title")!)
           if (callindex[norm] == nil) {
-            callindex[norm] = [String]()
+            callindex[norm] = Set<String>()
           }
-          callindex[norm]!.append(link)
+          callindex[norm]!.insert(link)
         }
       }
       loadedXML[link] = doc
@@ -182,9 +182,10 @@ class CallContext {
   //  Create a context from a formation defined in XML
   //  The element passed in can be either a "tam" from
   //  an animation, or a formation
-  convenience init(_ tam: XMLElement) {
+  convenience init(_ tam: XMLElement, loadPaths:Bool=false) {
     let numberArray = TamUtils.getNumbers(tam)
     let coupleArray = TamUtils.getCouples(tam)
+    let paths = loadPaths ? tam.children(tag:"path") : []
     let f = (tam.attr("formation") != nil)
       ? TamUtils.getFormation(tam.attr("formation")!)
       : tam.children(tag: "formation").first ?? tam
@@ -198,17 +199,23 @@ class CallContext {
         fillcolor: UIColor.white, // color not important, these are never displayed
         mat: Matrix(x: element.attr("x")!.d, y: element.attr("y")!.d)
           * Matrix(angle: element.attr("angle")!.d.toRadians),
-        geom: GeometryMaker.makeAll(.SQUARE).first!, moves: [])
+        geom: GeometryMaker.makeAll(.SQUARE).first!,
+        moves: [])
       dlist.append(d1)
       let d2 = Dancer(number: numberArray[i * 2 + 1], couple: coupleArray[i * 2 + 1],
         gender: element.attr("gender")! == "boy" ? 1 : 2,
         fillcolor: UIColor.white, // color not important, these are never displayed
         mat: Matrix(x: element.attr("x")!.d, y: element.attr("y")!.d)
           * Matrix(angle: element.attr("angle")!.d.toRadians),
-        geom: GeometryMaker.makeAll(.SQUARE).second!, moves: [])
+        geom: GeometryMaker.makeAll(.SQUARE).second!,
+        moves: [])
       dlist.append(d2)
     }
     self.init(dlist)
+    if (loadPaths) {
+      dancers.enumerated().forEach { (i,d) in
+        d.path = Path(paths.count > i/2 ? TamUtils.translatePath(paths[i/2]) : []) }
+    }
   }
 
   func noSnap() -> CallContext {
@@ -234,14 +241,40 @@ class CallContext {
    */
   func appendToSource() {
     dancers.forEach { it in
-      it.clonedFrom!.path.add(it.path)
-      it.clonedFrom!.animateToEnd()
+      if let clone = it.clonedFrom {
+        clone.path.add(it.path)
+        clone.animateToEnd()
+      }
     }
     if let mysource = source {
       if (mysource.level < level) {
         mysource.level = level
       }
     }
+  }
+
+  private func appendTo(_ ctx:CallContext) -> Bool {
+    var retval = false
+    ctx.dancers.forEach { d in
+      if let it = dancers.first(where: { $0 == d } ) {
+        retval = retval || it.path.movelist.isNotEmpty()
+        d.path.add(it.path)
+        d.animateToEnd()
+      }
+    }
+    return retval
+  }
+
+  //  Create a new CallContext from a list of dancers
+  //  (usually a subset of this CallContext dancers).
+  //  Apply a function as a method of the new CallContext.
+  //  Then transfer any new calls from the created CallContext to this CallContext.
+  //  Return true if anything new was added.
+  @discardableResult
+  func subContext(_ dancers:[Dancer],block:(CallContext) throws ->()) throws -> Bool {
+    let ctx = CallContext(dancers.inOrder())
+    try block(ctx)
+    return ctx.appendTo(self)
   }
 
   //  For now this just checks for collisions in a tidal formation
@@ -387,6 +420,13 @@ class CallContext {
     try checkForAction(calltxt)
   }
 
+  func xmlFilesForCall(_ norm:String) -> Set<String> {
+    let callitems = TamUtils.callmap[norm] ?? []
+    let callfiles1 = callitems.map { $0.link }
+    var callfiles2 = CallContext.callindex[norm] ?? Set<String>()
+    callfiles1.forEach { callfiles2.insert($0) }
+    return callfiles2
+  }
 
   //  Main routine to map a call to an animation in a Taminations XML file
   private func matchXMLcall(_ calltext: String, fuzzy: Bool = false) throws -> Bool {
@@ -422,12 +462,7 @@ class CallContext {
     }
     //  Try to find a match in the xml animations
     let callnorm = TamUtils.normalizeCall(calltext)
-    let callitems = TamUtils.callmap[callnorm] ?? []
-    let callfiles1 = callitems.map {
-      $0.link
-    }
-    let callfiles2 = CallContext.callindex[callnorm] ?? []
-    let callfiles = callfiles1 + callfiles2
+    let callfiles = xmlFilesForCall(callnorm)
     //  Found xml file with call, now look through each animation
     let found = callfiles.isEmpty
     var bestOffset = Double.greatestFiniteMagnitude
@@ -451,7 +486,7 @@ class CallContext {
         let mmm = ctx1.matchFormations(ctx2, sexy: sexy, fuzzy: fuzzy, handholds: !fuzzy,
           headsmatchsides: headsmatchsides)
         if let mm = mmm {
-          let matchResult = ctx1.computeFormationOffsets(ctx2, mm)
+          let matchResult = ctx1.computeFormationOffsets(ctx2, mm, delta:0.2)
           let totOffset = matchResult.offsets.reduce(0.0) {
             (s, v) in s + v.length
           }
@@ -503,12 +538,16 @@ class CallContext {
   }
 
   //  Once a mapping of two formations is found,
-  //  this computes the difference between the two.
+  //  this finds the best rotation to fit one onto the other
+  //  and computes the difference between the two.
   struct FormationMatchResult {
     var transform:Matrix
     var offsets:[Vector]
   }
 
+  //  Once a mapping of two formations is found,
+  //  this finds the best rotation to fit one onto the other
+  //  and computes the difference between the two.
   func computeFormationOffsets(_ ctx2:CallContext, _ mapping:[Int], delta:Double=0.1) -> FormationMatchResult {
     var dvbest:[Vector] = []
     //  We don't know how the XML formation needs to be turned to overlap
@@ -578,8 +617,9 @@ class CallContext {
                                rotate:Int=0,    // rotate dancers by 90s or 180 degrees to match
                                handholds: Bool=true,
                                headsmatchsides:Bool=true,
+                               subformation:Bool=false,
                                maxError:Double=1.9) -> [Int]? {
-    if (dancers.count != ctx2.dancers.count) {
+    if (!subformation && dancers.count != ctx2.dancers.count) {
       return nil
     }
     //  Find mapping using DFS
@@ -631,7 +671,9 @@ class CallContext {
           let matchResult = computeFormationOffsets(ctx2,mapping)
           //  Don't match if some dancers are too far from their mapped location
           let maxOffset = matchResult.offsets.max { v1,v2 in v1.length < v2.length }!
-          if (maxOffset.length < maxError) {
+          //  Don't match if rotation is not multiple of 90 degrees
+          let angsnap = matchResult.transform.angle / (.pi / 2)
+          if (maxOffset.length < maxError && angsnap.isApproxInt(delta:0.2)) {
             let totOffset = matchResult.offsets.reduce(0.0, { $0 + $1.length })
             if (bestmapping == nil || totOffset < bestOffset) {
               bestmapping = mapping  // in Swift this copies the array
@@ -734,50 +776,51 @@ class CallContext {
 
   //  See if the current dancer positions resemble a standard formation
   //  and, if so, snap to the standard
-  private static let standardFormations = [
-    "Normal Lines Compact",
-    "Normal Lines",
-    "Double Pass Thru",
-    "Quarter Tag",
-    "Tidal Line RH",
-    "Tidal Wave of 6",
-    "I-Beam",
-    "Diamonds RH Girl Points",
-    "Diamonds RH PTP Girl Points",
-    "Hourglass RH BP",
-    "Galaxy RH GP",
-    "Butterfly RH",
-    "O RH",
-    "Sausage RH",
-    //  There are also 8 possible 3x1 t-bones not listed here
-    "Static Square",
-    "Right-Hand Zs",
-    "Left-Hand Zs",
+  private static let standardFormations:Dictionary<String,Double> = [
+    "Normal Lines Compact" : 1.0,
+    "Normal Lines" : 1.0,
+    "Double Pass Thru" : 1.0,
+    "Quarter Tag" : 1.0,
+    "Tidal Line RH" : 1.0,
+    "Tidal Wave of 6" : 2.0,
+    "I-Beam" : 2.0,
+    "Diamonds RH Girl Points" : 2.0,
+    "Diamonds RH PTP Girl Points" : 2.0,
+    "Hourglass RH BP" : 3.0,
+    "Galaxy RH GP" : 3.0,
+    "Butterfly RH" : 3.0,
+    "O RH" : 3.0,
+    "Sausage RH" : 3.0,
+    "Static Square" : 2.0,
+    "Right-Hand Zs" : 2.0,
+    "Left-Hand Zs" : 2.0,
     //  Siamese formations
     //  This also covers C-1 Phantom formations
-    "Siamese Box 1",
-    "Siamese Box 2",
+    "Siamese Box 1" : 2.0,
+    "Siamese Box 2" : 2.0,
     //  Blocks
-    "Facing Blocks Right",
-    "Facing Blocks Left",
-    "Siamese Wave",
-    "Concentric Diamonds RH"
+    "Facing Blocks Right" : 2.0,
+    "Facing Blocks Left" : 2.0,
+    "Siamese Wave" : 2.0,
+    "Concentric Diamonds RH" : 2.0,
+    "Quarter Z RH" : 2.0,
+    "Quarter Z LH" : 2.0
   ]
-  private static let twoCoupleFormations = [
-    "Facing Couples Compact",
-    "Facing Couples",
-    "Two-Faced Line RH",
-    "Diamond RH",
-    "Single Eight Chain Thru",
-    "Single Quarter Tag",
-    "Square RH"
+  private static let twoCoupleFormations: Dictionary<String,Double> = [
+    "Facing Couples Compact" : 1.0,
+    "Facing Couples" : 1.0,
+    "Two-Faced Line RH" : 1.0,
+    "Diamond RH" : 1.0,
+    "Single Eight Chain Thru" : 1.0,
+    "Single Quarter Tag" : 1.0,
+    "Square RH" : 1.0
   ]
 
 
   struct BestMapping {
     var name:String
     var mapping:[Int]
-    var offsets:[Vector]
+    var match: FormationMatchResult
     var totOffset:Double
   }
   func matchStandardFormation() {
@@ -795,9 +838,9 @@ class CallContext {
     let formations = ctx1.dancers.count == 4
       ? CallContext.twoCoupleFormations : CallContext.standardFormations
     formations.forEach { f in
-      let ctx2 = CallContext(TamUtils.getFormation(f))
+      let ctx2 = CallContext(TamUtils.getFormation(f.key))
       //  See if this formation matches
-      let rot = (f.contains("Lines")) ? 180 : 90
+      let rot = (f.key.contains("Lines") || f.key.contains("Couples")) ? 180 : 90
       let mappingq = ctx1.matchFormations(ctx2, sexy: false, fuzzy: true, rotate: rot, handholds: false)
       if let mapping = mappingq {
         //  If it does, get the offsets
@@ -809,13 +852,13 @@ class CallContext {
         if (totOffset < 9.0 && angsnap.isApproxInt()) {
           //  Favor formations closer to the top of the list
           //  Especially favor lines
-          let favoring = (bestMapping?.name.contains("Line") == true) ? 2.0 : 1.0
+          let favoring = f.value
           if (totOffset < 9.0 && angsnap.isApproxInt(delta: 0.05)) {
             if (bestMapping == nil || totOffset*favoring + 0.2 < bestMapping!.totOffset) {
               bestMapping = BestMapping(
-                name: f, // only used for debugging
+                name: f.key, // only used for debugging
                 mapping: mapping,
-                offsets: matchResult.offsets,
+                match: matchResult,
                 totOffset: totOffset
               )
             }
@@ -824,11 +867,11 @@ class CallContext {
       }
     }
     if let bestMap = bestMapping {
-      adjustToFormationMatch(bestMap)
+      adjustToFormationMatch(bestMap.match)
     }
   }
 
-  func adjustToFormationMatch(_ match:BestMapping) {
+  func adjustToFormationMatch(_ match:FormationMatchResult) {
     dancers.forEach { d in d.data.active = true }
     for (i, d) in dancers.enumerated() {
       if (match.offsets[i].length > 0.1) {
@@ -854,8 +897,7 @@ class CallContext {
     if (mapping != nil) {
       //  If it does, get the offsets
       let matchResult = ctx1.computeFormationOffsets(ctx2, mapping!, delta: 0.5)
-      let totOffset = matchResult.offsets.reduce(0.0) { s, v in s + v.length }
-      adjustToFormationMatch(BestMapping(name: fname,mapping: mapping!,offsets: matchResult.offsets,totOffset: totOffset))
+      adjustToFormationMatch(matchResult)
       return true
     }
     return false
@@ -891,6 +933,27 @@ class CallContext {
       mapindex += 1
     }
     return false
+  }
+
+  //  Use phantoms to fill in a formation starting from the dancers
+  //  in the current context
+  func fillFormation(_ fname:String) -> CallContext? {
+    //  Use letters for phantom numbers so there's no way they can
+    //  match the real dancers
+    let letters = ["A","B","C","D","E","F","G","H"]
+    var nextPhantom = 0
+    let ctx2 = CallContext(TamUtils.getFormation(fname))
+    guard let mapping = matchFormations(ctx2,sexy:false,fuzzy:true,rotate:0,handholds:false, subformation:true) else { return nil }
+    let matchResult = computeFormationOffsets(ctx2, mapping)
+    let rotmat = Matrix.init(angle: -matchResult.transform.angle)
+    let unmapped:[Dancer] = ctx2.dancers.filterIndexed { i,_ in !mapping.contains(i) }
+    let phantoms: [Dancer] = unmapped.map { d in
+      let ph = Dancer(number: letters[nextPhantom], couple: "0", gender: 3, fillcolor: .gray, mat: rotmat*d.starttx,
+        geom: GeometryMaker.makeAll(.SQUARE).first!, moves: [])
+      nextPhantom += 1
+      return ph
+    }
+    return CallContext(self,dancers+phantoms)
   }
 
   //  Return max number of beats among all the dancers
@@ -1020,6 +1083,8 @@ class CallContext {
       tryOneDiamondFormation("Galaxy RH GP")
   }
 
+  //  Return pair of boxes for dancers in a 2x4 formation
+  //  TODO
 
   //  Return true if this dancer is in a wave or mini-wave
   func isInWave(_ d: Dancer, _ d1: Dancer? = nil) -> Bool {
@@ -1273,7 +1338,7 @@ class CallContext {
         d1.data.belle = true
       }
       else if (rightcount % 2 == 1 && leftcount % 2 == 0 && !bestRightMismatch &&
-        d1.distanceTo(bestright!) < 3 || (bestleft != nil && bestleftMismatch)) {
+        d1.distanceTo(bestright!) < 3 || (bestright != nil && bestleftMismatch)) {
         d1.data.partner = bestright
         d1.data.beau = true
       }

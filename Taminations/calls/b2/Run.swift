@@ -35,7 +35,7 @@ class Run : Action {
           : norm == "runleft"
           ? ctx.dancerToLeft(d)
           : d.data.partner else {
-          throw CallError("Dancer ${d.number} has nobody to Run around")
+          throw CallError("Dancer \(d) has nobody to Run around")
         }
         //  But special case of t-bones, could be the dancer on the other side,
         //  check if another dancer is running around this dancer's "partner"

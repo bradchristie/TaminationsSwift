@@ -21,24 +21,25 @@
 class Slide : Action {
 
   override var level: LevelData { LevelObject.find("a2") }
-  
+
   init() {
     super.init("Slide")
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  If single wave in center, just those 4 Slide
-    let ctx4 = CallContext(ctx,ctx.center(4))
-    if (ctx.dancers.count > 4 &&
-      ctx4.isLines() && ctx4.isWaves() && !ctx.isTidal()) {
-      ctx4.analyze()
-      try ctx4.applyCalls("Slide").appendToSource()
-    }
-    else if (ctx.isWaves()) {
-      try super.perform(ctx, index)
-    }
-    else {
-      throw CallError("Dancers must be in mini-waves to Swing")
+    if try (!ctx.subContext(ctx.center(4)) { ctx2 in
+      if (ctx.dancers.count > 4 && ctx2.isLines() && ctx2.isWaves() && !ctx.isTidal()) {
+        ctx2.analyze()
+        try ctx2.applyCalls("Slide")
+      }
+    }) {
+      if (ctx.actives.all { ctx.isInWave($0) }) {
+        try super.perform(ctx, index)
+      }
+      else {
+        throw CallError("Dancers must be in mini-waves to Slide")
+      }
     }
   }
 
