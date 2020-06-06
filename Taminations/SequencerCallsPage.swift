@@ -23,7 +23,7 @@ import UIKit
 class SequencerCallsPage : Page {
 
   private let _view = LinearLayout(.VERTICAL)
-  override var view:View { return _view }
+  override var view:View { _view }
 
   let textInput = TextInput()
   private let callList = ScrollingLinearLayout()
@@ -75,14 +75,14 @@ class SequencerCallsPage : Page {
     _view.appendView(errorText)
   }
 
-  func addCall(_ call:String, level:LevelData) {
+  func addCall(_ call:String, level:LevelData?) {
     let callLine = SelectablePanel()
     let item = callList.items.count
     callLine.clickAction {
       Application.app.sendMessage(.SEQUENCER_CURRENTCALL,
         ("item", "\(item)"))
     }
-    callLine.backgroundColor = level.color
+    callLine.backgroundColor = level?.color ?? UIColor.white
     callLine.weight = 0
     let callText = TextView(call)
     callText.textSize = 36.sp
@@ -93,7 +93,7 @@ class SequencerCallsPage : Page {
     callText.leftMargin = 4
     callLine.appendView(callText)
     callText.fillVertical()
-    let levelText = TextView(level.name)
+    let levelText = TextView(level?.name ?? "")
     levelText.textSize = 12
     levelText.weight = 0
     callLine.appendView(levelText)

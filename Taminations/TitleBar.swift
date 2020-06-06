@@ -38,7 +38,7 @@ class TitleBar : LinearLayout {
     backButton.clickAction {
       Application.app.goBack()
     }
-    backButton.longPressAction {
+    backButton.longPressAction { _,_ in
       Application.app.sendRequest(.STARTUP)
     }
     appendView(backButton)

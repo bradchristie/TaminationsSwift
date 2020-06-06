@@ -89,7 +89,8 @@ class CallContext {
       "b1/star",
       "b2/alamo_style",
       "c2/once_removed_concept",
-      "c1/split_square_thru_variations"
+      "c1/split_square_thru_variations",
+      "c2/unwrap"
     ]
 
     if (callindex.isEmpty) {
@@ -853,7 +854,10 @@ class CallContext {
           //  Favor formations closer to the top of the list
           //  Especially favor lines
           let favoring = f.value
-          if (totOffset < 9.0 && angsnap.isApproxInt(delta: 0.05)) {
+          //  Special hack to favor lines over boxes
+          let specialHack =
+            bestMapping?.name.startsWith("Normal Lines") ?? false && f.key == "Double Pass Thru"
+          if (totOffset < 9.0 && angsnap.isApproxInt(delta: 0.05) && !specialHack) {
             if (bestMapping == nil || totOffset*favoring + 0.2 < bestMapping!.totOffset) {
               bestMapping = BestMapping(
                 name: f.key, // only used for debugging
@@ -1297,41 +1301,19 @@ class CallContext {
     }
     var istidal = false
     dancers.forEach { d1 in
-
-      var bestleft:Dancer? = nil
-      var bestright:Dancer? = nil
-      var leftcount = 0
-      var rightcount = 0
-      var frontcount = 0
-      var backcount = 0
-
-      //  Count dancers to the left and right,
-      //  and find the closest on each side
-      dancers.filter { $0 != d1 }.forEach { d2 in
-        if (d2.isRightOf(d1)) {
-          rightcount += 1
-          if (bestright == nil || d1.distanceTo(d2) < d1.distanceTo(bestright!)) {
-            bestright = d2
-          }
-        } else if (d2.isLeftOf(d1)) {
-          leftcount += 1
-          if (bestleft == nil || d1.distanceTo(d2) < d1.distanceTo(bestleft!)) {
-            bestleft = d2
-          }
-        }
-        //  Also count dancers in front and in back
-        else if (d2.isInFrontOf(d1)) {
-          frontcount += 1
-        }
-        else if (d2.isInBackOf(d1)) {
-          backcount += 1
-        }
-      }
+      let bestleft = dancerToLeft(d1)
+      let bestright = dancerToRight(d1)
+      let leftcount = dancersToLeft(d1).count
+      let rightcount = dancersToRight(d1).count
+      let frontcount = dancersInFront(d1).count
+      let backcount = dancersInBack(d1).count
 
       //  Use the results of the counts to assign belle/beau/leader/trailer
       //  and partner
-      let bestleftMismatch = bestleft != nil && bestleft!.data.partner != nil && bestleft!.data.partner != d1
-      let bestRightMismatch = bestright != nil && bestright!.data.partner != nil && bestright!.data.partner != d1
+      let bestleftMismatch = bestleft != nil &&
+          !isInWave(d1,bestleft) && !isInCouple(d1,bestleft)
+      let bestRightMismatch = bestright != nil &&
+          !isInWave(d1,bestright) && !isInCouple(d1,bestright)
       if (leftcount % 2 == 1 && rightcount % 2 == 0 && !bestleftMismatch &&
         d1.distanceTo(bestleft!) < 3 || (bestleft != nil && bestRightMismatch)) {
         d1.data.partner = bestleft

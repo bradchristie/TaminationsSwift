@@ -22,10 +22,11 @@ import UIKit
 
 class ViewController: UIViewController {
 
-  let app = Application()
+  var app = Application()
   var layout:LinearLayout?
 
   override func loadView() {
+    Application.setViewController(self)
     TamUtils.readinitfiles()
     if (!Application.istablet) {
       AppDelegate.AppUtility.setOrientation(.portrait)

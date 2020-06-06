@@ -112,6 +112,9 @@ extension Array {
   //func dropLast(_ n:Int) -> [Element] {
   //  return Array(self[...(count-n-1)])
  // }
+  func take(_ n:Int) -> [Element] {
+    Array(self[...(n-1)])
+  }
 
   func filterNot(_ f:(Element)->Bool) -> [Element] {
     filter { e in !f(e) }

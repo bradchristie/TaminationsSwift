@@ -28,6 +28,9 @@ class Application : Page {
   private static var myheight:CGFloat { return UIScreen.main.bounds.height }
   private static var mywidth:CGFloat { return UIScreen.main.bounds.width }
   static let istablet = UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad
+  private static var _viewController : UIViewController? = nil
+  static var viewController:UIViewController { get { _viewController! }}
+  static func setViewController(_ vc:UIViewController) { _viewController = vc }
 
   static var isLandscape: Bool {  get { return mywidth > myheight } }
   static var isPortrait: Bool { get { return myheight > mywidth } }

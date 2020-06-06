@@ -84,10 +84,11 @@ class SequencerPage : Page {
     }
     onMessage(Request.Action.ANIMATION_PART) { message in
       let partnum = message["part"]!.i-1
-      self.callPage.highlightCall(partnum)
+      let listnum = self.model.callNum2listNum(partnum)
+      self.callPage.highlightCall(listnum)
       self.seqView.callText.textSize = min(24,self.seqView.animationView.height/5)
-      self.seqView.callText.text = (partnum >= 0 && partnum < self.model.callNames.count)
-        ? self.model.callNames[partnum]
+      self.seqView.callText.text = (listnum >= 0 && partnum < self.model.callNames.count)
+        ? self.model.callNames[listnum]
         : ""
     }
     onMessage(Request.Action.ANIMATION_DONE) { message in
@@ -99,7 +100,10 @@ class SequencerPage : Page {
       self.model.checkStartingFormation()
     }
     onMessage(Request.Action.SEQUENCER_CURRENTCALL) { message in
-      self.seqView.animationView.goToPart(message["item"]!.i)
+      let callnum = self.model.listNum2callNum(message["item"]!.i)
+      if (callnum > 0) {
+        self.seqView.animationView.goToPart(callnum)
+      }
     }
     onMessage(Request.Action.TRANSITION_COMPLETE) { messsage in
       self.callPage.textInput.focus()

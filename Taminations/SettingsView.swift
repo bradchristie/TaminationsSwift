@@ -129,12 +129,14 @@ class SettingsView : ScrollingLinearLayout {
     layout.backgroundColor = UIColor.FLOOR
     layout.bottomMargin = 10
     layout.topBorder = 3
+    //  Radio buttons only for sequencer
     if (withRadio) {
       radioButtons("Dancer Colors", default: "By Couple", 
         ("By Couple",""),
         ("Random",""),
         ("None",""))
     } else {
+      //  otherwise just show title
       let titleView = TextView("Dancer Colors")
       titleView.textSize = 24
       titleView.textStyle = "bold"
@@ -144,38 +146,11 @@ class SettingsView : ScrollingLinearLayout {
       titleView.fillHorizontal()
       layout.appendView(titleView)
     }
-    let colorBar = LinearLayout(.HORIZONTAL)
-    let colorNames = ["black","blue","cyan","gray","green","magenta",
-                      "orange","red","white","yellow"]
+
+    //  Dancer colors selected with popup menu (aka dropdown)
     var dancerColor:[TextView] = []
-    colorNames.forEach { cname in
-      let c = UIColor.colorForName(cname)
-      let cs = SelectablePanel()
-      let t = TextView("  ")
-      t.backgroundColor = c
-      t.alignLeft()
-      t.fillVertical()
-      t.weight = 1
-      cs.appendView(t)
-      cs.fillVertical()
-      cs.weight = 1
-      colorBar.appendView(cs)
-      cs.clickAction {
-        if (self.colorDancer > 0) {
-          let textView = dancerColor[self.colorDancer-1]
-          textView.backgroundColor = c
-          textView.textColor = (c == UIColor.black || c == UIColor.blue)
-            ? UIColor.white : UIColor.black
-          Setting("Couple \(self.colorDancer)").s = cname
-          Application.app.sendMessage(.SETTINGS_CHANGED)
-        }
-      }
-    }
     let dancerLine = LinearLayout(.HORIZONTAL)
-    let connectorLine = LinearLayout(.HORIZONTAL)
-    var connectors:[TextView] = []
     for i in 1...4 {
-      let dancerPanel = LinearLayout(.VERTICAL)
       let dancerSelector = SelectablePanel()
       let text = TextView("    \(i)    ")
       let color = colorForCouple("Couple \(i)")
@@ -185,39 +160,55 @@ class SettingsView : ScrollingLinearLayout {
       text.fillParent()
       dancerColor.append(text)
       dancerSelector.appendView(text)
-      dancerPanel.leftMargin = 10
-      dancerPanel.rightMargin = 10
-      let connector = TextView("  |       ")
-      connector.backgroundColor = UIColor.FLOOR
-      connector.textColor = UIColor.FLOOR
-      connector.alignMiddle()
-      connector.fillParent()
-      connectors.append(connector)
       dancerSelector.clickAction {
-        connectors.forEach { c in c.textColor = UIColor.FLOOR }
-        if (self.colorDancer == i) {
-          self.colorDancer = 0
-          connector.textColor = UIColor.FLOOR
-        } else {
-          self.colorDancer = i
-          connector.textColor = UIColor.black
+        let dropDown = DropDown()
+        dropDown.addItem("Black") { item in
+          item.backgroundColor = UIColor.black
+          (item as! ViewGroup).children[0].textColor = UIColor.white
         }
+        dropDown.addItem("Blue") { item in
+          item.backgroundColor = UIColor.blue
+          (item as! ViewGroup).children[0].textColor = UIColor.white
+        }
+        dropDown.addItem("Cyan") { $0.backgroundColor = UIColor.cyan }
+        dropDown.addItem("Gray") { $0.backgroundColor = UIColor.gray }
+        dropDown.addItem("Green") { $0.backgroundColor = UIColor.green }
+        dropDown.addItem("Magenta") { $0.backgroundColor = UIColor.magenta }
+        dropDown.addItem("Orange") { $0.backgroundColor = UIColor.orange }
+        dropDown.addItem("Red") { $0.backgroundColor = UIColor.red }
+        dropDown.addItem("White") { $0.backgroundColor = UIColor.white }
+        dropDown.addItem("Yellow") { $0.backgroundColor = UIColor.yellow }
+
+        dropDown.selectAction { name in
+          Setting("Couple \(i)").s = name
+          Setting("Dancer \(i*2-1)").s = "default"
+          Setting("Dancer \(i*2)").s = "default"
+          text.backgroundColor = UIColor.colorForName(name)
+          text.textColor = (name == "Black" || name == "Blue")
+            ? UIColor.white : UIColor.black
+          dropDown.hide()
+          Application.app.sendMessage(.SETTINGS_CHANGED)
+        }
+
+        dropDown.showAt(self, 0, 0)
       }
-    //  dancerSelector.fillVertical()
       dancerSelector.fillVertical()
       dancerLine.appendView(dancerSelector)
-      connectorLine.appendView(connector)
     }
     layout.fillHorizontal()
-    colorBar.fillHorizontal()
     let barFiller = View()
     barFiller.weight = 1
-    //dancerLine.appendView(dancerBar)
     dancerLine.alignLeft()
     layout.appendView(dancerLine)
-    connectorLine.alignLeft()
-    layout.appendView(connectorLine)
-    layout.appendView(colorBar)
+    //  Also add suggestion to long-press on dancer
+    let hint1 = TextView("You can also set a single dancer color")
+    hint1.leftMargin = 10
+    hint1.fillHorizontal()
+    layout.appendView(hint1)
+    let hint2 = TextView("by long-pressing on the dancer.")
+    hint2.leftMargin = 10
+    hint2.fillHorizontal()
+    layout.appendView(hint2)
     appendView(layout)
   }
 

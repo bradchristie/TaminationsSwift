@@ -166,7 +166,8 @@ class CodedCall : Call {
     "snapthelock" : { SnapTheLock() },
     "castoff34" : { CastOffThreeQuarters() },
     "peeltoadiamond" : { PeelToADiamond() },
-    "hocuspocus" : { HocusPocus() }
+    "hocuspocus" : { HocusPocus() },
+    "explode" : { Explode() }
   ]
 
   //  More complex calls where the text is needed either to select

@@ -6,9 +6,9 @@
 import UIKit
 
 extension Int {
-  var dip:Int { get { return (self.d*View.scale).i } }
-  var pp:Int { get { return (self*Application.screenHeight)/1000 } }
-  var sp:Int { get { return (self.pp.cg
+  var dip:Int { get { (self.d*View.scale).i } }
+  var pp:Int { get { (self*Application.screenHeight)/1000 } }
+  var sp:Int { get { (self.pp.cg
     * (Setting("Dynamic Type").b ?? false 
     ? UIFont.preferredFont(forTextStyle: .body).pointSize / UIFont.labelFontSize : 1)).i  } }
 }
@@ -79,12 +79,12 @@ class View : NSObject {
 
   //  Colors
   var backgroundColor:UIColor {
-    get { return div.backgroundColor ?? UIColor.black }
+    get { div.backgroundColor ?? UIColor.black }
     set(value) { div.backgroundColor = value }
   }
   var textColor:UIColor = UIColor.black
   var opacity:Double {
-    get { return div.alpha.d }
+    get { div.alpha.d }
     set(value) { div.alpha = value.cg }
   }
 
@@ -93,7 +93,7 @@ class View : NSObject {
 
   //  Borders
   var topBorder:Int {
-    get { return topBorderLayer?.borderWidth.i ?? 0 }
+    get { topBorderLayer?.borderWidth.i ?? 0 }
     set {
       if (topBorderLayer == nil) {
         topBorderLayer = TopBorder()
@@ -104,7 +104,7 @@ class View : NSObject {
     }
   }
   var bottomBorder:Int {
-    get { return bottomBorderLayer?.borderWidth.i ?? 0 }
+    get { bottomBorderLayer?.borderWidth.i ?? 0 }
     set {
       if (bottomBorderLayer == nil) {
         bottomBorderLayer = BottomBorder()
@@ -114,7 +114,7 @@ class View : NSObject {
     }
   }
   var leftBorder:Int {
-    get { return leftBorderLayer?.borderWidth.i ?? 0 }
+    get { leftBorderLayer?.borderWidth.i ?? 0 }
     set {
       if (leftBorderLayer == nil) {
         leftBorderLayer = LeftBorder()
@@ -124,7 +124,7 @@ class View : NSObject {
     }
   }
   var rightBorder:Int {
-    get { return rightBorderLayer?.borderWidth.i ?? 0 }
+    get { rightBorderLayer?.borderWidth.i ?? 0 }
     set {
       if (rightBorderLayer == nil) {
         rightBorderLayer = RightBorder()
@@ -134,7 +134,7 @@ class View : NSObject {
     }
   }
   var border: Int {
-    get { return 0 }
+    get { 0 }
     set {
       topBorder = newValue
       bottomBorder = newValue
@@ -143,7 +143,7 @@ class View : NSObject {
     }
   }
   var borderColor:UIColor {
-    get { return UIColor(cgColor:div.layer.borderColor ?? UIColor.black.cgColor) }
+    get { UIColor(cgColor:div.layer.borderColor ?? UIColor.black.cgColor) }
     set { div.layer.borderColor = newValue.cgColor }
   }
 
@@ -155,26 +155,26 @@ class View : NSObject {
   private var _leftMargin = 0
   private var _rightMargin = 0
   var topMargin:Int {
-    get { return _topMargin }
+    get { _topMargin }
     set(value) { _topMargin = value; parent?.layoutChildren() }
   }
   var bottomMargin:Int {
-    get { return _bottomMargin }
+    get { _bottomMargin }
     set(value) { _bottomMargin = value; parent?.layoutChildren() }
   }
   var leftMargin:Int {
-    get { return _leftMargin }
+    get { _leftMargin }
     set(value) { _leftMargin = value; parent?.layoutChildren() }
   }
   var rightMargin:Int {
-    get { return _rightMargin }
+    get { _rightMargin }
     set(value) {
       _rightMargin = value;
       parent?.layoutChildren()
     }
   }
   var margins:Int {
-    get { return 0 }
+    get { 0 }
     set {
       bottomMargin = newValue
       topMargin = newValue
@@ -214,7 +214,7 @@ class View : NSObject {
 
   private var _weight = 0
   var weight:Int {
-    get { return _weight }
+    get { _weight }
     set(value) { _weight = value; parent?.layoutChildren() }
   }
   @discardableResult
@@ -324,6 +324,20 @@ class View : NSObject {
   func keyDownAction(code: @escaping (Int)->()) { }
   func keyUpAction(code: @escaping (Int)->()) { }
   func displayAction(code: @escaping ()->()) { }
+  private var longPressCode:(Int,Int)->() = { _,_ in }
+  @objc private func longPress(_ sender:UILongPressGestureRecognizer) {
+    if (sender.state == UIGestureRecognizer.State.began) {
+      let pt = sender.location(in: div)
+      longPressCode(pt.x.i, pt.y.i)
+    }
+  }
+  func longPressAction(_ code: @escaping (Int,Int)->()) {
+    longPressCode = code
+    div.addGestureRecognizer(UILongPressGestureRecognizer(target: self,
+      action: #selector(View.longPress(_:))))
+  }
+
+
   //  Focus, Hide and Show
   func focus() {
     div.becomeFirstResponder()

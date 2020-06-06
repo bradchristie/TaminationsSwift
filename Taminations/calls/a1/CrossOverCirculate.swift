@@ -34,6 +34,10 @@ class CrossOverCirculate : Action {
       }) else {
         throw CallError("Unable to calculate Cross Over Circulate for dancer \(d)")
       }
+      //  Centers <-> Ends
+      if (!(d.data.center ^ d2.data.end)) {
+        throw CallError("Incorrect circulate path for Cross Over Circulate")
+      }
       let move = (d2.isRightOf(d)) ? "Run Right" : "Run Left"
       //  Pass right shoulders if necessary
       let xScale = (d2.isRightOf(d) && d2.data.leader) ? 2.0 : 1.0
@@ -46,6 +50,10 @@ class CrossOverCirculate : Action {
         dd != d && !dd.isOpposite(d) && !dd.isLeftOf(d) && !dd.isRightOf(d)
       }) else {
         throw CallError("Unable to calculate Cross Over Circulate for dancer \(d)")
+      }
+      //  Centers <-> Ends
+      if (!(d.data.center ^ d2.data.end)) {
+        throw CallError("Incorrect circulate path for Cross Over Circulate")
       }
       let v = d.vectorToDancer(d2)
       //  Pass right shoulders if necessary

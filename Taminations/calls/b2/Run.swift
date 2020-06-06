@@ -29,14 +29,45 @@ class Run : Action {
       if (d.data.active) {
         //  Find dancer to run around
         //  Usually it's the partner
-        //  If a direction was given, look there
-        guard var d2 = norm == "runright" 
-          ? ctx.dancerToRight(d)
-          : norm == "runleft"
-          ? ctx.dancerToLeft(d)
-          : d.data.partner else {
-          throw CallError("Dancer \(d) has nobody to Run around")
+        var d2q = d.data.partner
+        let dleft = ctx.dancerToLeft(d)
+        let dright = ctx.dancerToRight(d)
+        //  If that fails, look around
+        if (d2q == nil || d.data.active) {
+          let leftcount = ctx.dancersToLeft(d).count
+          let rightcount = ctx.dancersToRight(d).count
+          if (dleft == nil || dleft!.data.active) {
+            d2q = dright
+          }
+          else if (dright == nil || dright!.data.active) {
+            d2q = dleft
+          }
+          else if (leftcount % 2 == 1 && rightcount % 2 == 0) {
+            d2q = dleft
+          }
+          else if (rightcount % 2 == 1 && leftcount % 2 == 0) {
+            d2q = dright
+          }
         }
+        //  If a direction was given, look there
+        if (norm == "runright") {
+          d2q = dright
+        }
+        if (norm == "runleft") {
+          d2q = dleft
+        }
+        //  If a direction was given, look there
+        if (norm == "runright") {
+          d2q = dright
+        }
+        if (norm == "runleft") {
+          d2q = dleft
+        }
+        if (d2q == nil || d2q!.data.active) {
+          throw CallError("Dancer $d has nobody to Run around")
+        }
+        var d2 = d2q!
+
         //  But special case of t-bones, could be the dancer on the other side,
         //  check if another dancer is running around this dancer's "partner"
         //  also check if partner is also active

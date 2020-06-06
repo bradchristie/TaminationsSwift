@@ -52,7 +52,9 @@ class Canvas : View {
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-      touchesEnded(touches, with: event)
+      //  Could be cancelled because it's really a long press
+      //  So don't do touchedEnded (i.e. touchUp)
+      // touchesEnded(touches, with: event)
     }
   }
 

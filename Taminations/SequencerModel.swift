@@ -118,12 +118,34 @@ class SequencerModel {
     }
   }
 
+  private func isComment(_ text:String) -> Bool {
+    text.trim().matches("\\W.*")
+  }
+
+  func callNum2listNum(_ callNum:Int) -> Int {
+    if (callNum < 0) {
+      return callNum
+    } else {
+      return callNames.indices.filter { !isComment(callNames[$0]) }[callNum]
+    }
+  }
+
+  func listNum2callNum(_ listNum:Int) -> Int {
+    if (listNum < 0 || isComment(callNames[listNum])) {
+      return -1
+    } else {
+      return callNames.take(listNum).filter { !isComment($0) }.count
+    }
+  }
+
   private func insertCall(_ call:String) {
     if (interpretOneCall(call)) {
-      updateParts()
-      seqView.animationView.goToPart(callNames.count-1)
-      seqView.animationView.doPlay()
-      seqView.panelLayout.playButton.setImage(PauseShape())
+      if (!isComment(call)) {
+        updateParts()
+        seqView.animationView.goToPart(callNames.count - 1)
+        seqView.animationView.doPlay()
+        seqView.panelLayout.playButton.setImage(PauseShape())
+      }
     } else {
       callNames.remove(at:callNames.count-1)
     }
@@ -131,6 +153,13 @@ class SequencerModel {
 
   @discardableResult
   private func interpretOneCall(_ calltext:String) -> Bool {
+    if (isComment(calltext)) {
+      callsView.addCall(calltext, level: nil)
+      callNames.append(calltext)
+      callBeats.append(0.0)
+      return true
+
+    }
     //  Remove any underscores, which are reserved for internal calls only
     let calltxt = calltext.replace("_","")
     //  Add call as entered, in case parsing fails
@@ -144,7 +173,11 @@ class SequencerModel {
       try cctx.performCall()
       cctx.checkForCollisions()
       cctx.extendPaths()
-      cctx.matchStandardFormation()
+      //  Snap to a standard formation so subsequent calls will work
+      //  But not if just one XML call, as it knows how it should end
+      if (cctx.callstack.count > 1 || cctx.callstack[0] is CodedCall) {
+        cctx.matchStandardFormation()
+      }
       if (cctx.isCollision()) {
         throw CallError("Unable to calculate valid animation.")
       }
@@ -169,8 +202,14 @@ class SequencerModel {
 
   //  Update parts and tics on animation panel
   private func updateParts() {
-    if (callBeats.count > 1) {
-      let partstr = callBeats.count > 1 ? callBeats.dropLast().map { "\($0)" } .joined(separator: ";") : ""
+    if (callBeats.filter { $0 > 0.0 }.count > 1) {
+      let partstr = callBeats.filter { $0 > 0.0 }.count > 1 ?
+        callBeats
+          .filter { $0 > 0.0 }
+          .dropLast()
+          .map { "\($0)" }
+          .joined(separator: ";")
+        : ""
       seqView.animationView.partsstr = partstr
     } else {
       seqView.animationView.partsstr = ""
@@ -192,16 +231,19 @@ class SequencerModel {
   func undoLastCall() {
     if (callNames.isNotEmpty()) {
       let lastIndex = callNames.count - 1
+      let lastCall = callNames[lastIndex]
       callNames.remove(at:lastIndex)
       callBeats.remove(at:lastIndex)
-      let totalBeats = callBeats.reduce(0, { x,y in x+y })
-      seqView.animationView.dancers.forEach { d in
-        while (d.path.beats > totalBeats) {
-          d.path.pop()
+      if (!isComment(lastCall)) {
+        let totalBeats = callBeats.reduce(0, { x, y in x + y })
+        seqView.animationView.dancers.forEach { d in
+          while (d.path.beats > totalBeats) {
+            d.path.pop()
+          }
         }
+        seqView.animationView.recalculate()
+        seqView.animationView.doEnd()
       }
-      seqView.animationView.recalculate()
-      seqView.animationView.doEnd()
       callsView.removeLastCall()
       updateParts()
     }

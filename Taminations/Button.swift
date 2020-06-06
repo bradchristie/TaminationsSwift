@@ -23,7 +23,6 @@ import UIKit
 class Button : View {
 
   private let mydiv = ButtonDiv()
-  private var longPressCode:()->() = { }
 
   var text:String {
     get { return mydiv.title(for: UIControl.State()) ?? "" }
@@ -44,15 +43,6 @@ class Button : View {
   }
 
   func drawImage(_:CGRect) { }  // for ImageButton
-
-  func longPressAction(_ code: @escaping ()->()) {
-    longPressCode = code
-    mydiv.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(Button.longPress)))
-  }
-
-  @objc private func longPress() {
-    longPressCode()
-  }
 
 }
 

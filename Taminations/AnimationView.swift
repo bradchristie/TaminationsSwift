@@ -68,9 +68,12 @@ class AnimationView : Canvas {
 
   override init() {
     super.init()
-    touchDownAction { _,x,y in
+    touchUpAction { _,x,y in
       let (dx,dy) = self.mouse2dancer(x,y)
       self.doTouch(dx,dy)
+    }
+    longPressAction { x, y in
+      self.doDropDown(x,y)
     }
   }
 
@@ -89,6 +92,38 @@ class AnimationView : Canvas {
     }
   }
 
+  private func doDropDown(_ x:Int, _ y:Int) {
+    let (dx,dy) = self.mouse2dancer(x, y)
+    if let d = dancerAt(dx,dy) {
+      let dropDown = DropDown()
+      dropDown.addItem("Black") { item in
+        item.backgroundColor = UIColor.black
+        (item as! ViewGroup).children[0].textColor = UIColor.white
+      }
+      dropDown.addItem("Blue") { item in
+        item.backgroundColor = UIColor.blue
+        (item as! ViewGroup).children[0].textColor = UIColor.white
+      }
+      dropDown.addItem("Cyan") { $0.backgroundColor = UIColor.cyan }
+      dropDown.addItem("Gray") { $0.backgroundColor = UIColor.gray }
+      dropDown.addItem("Green") { $0.backgroundColor = UIColor.green }
+      dropDown.addItem("Magenta") { $0.backgroundColor = UIColor.magenta }
+      dropDown.addItem("Orange") { $0.backgroundColor = UIColor.orange }
+      dropDown.addItem("Red") { $0.backgroundColor = UIColor.red }
+      dropDown.addItem("White") { $0.backgroundColor = UIColor.white }
+      dropDown.addItem("Yellow") { $0.backgroundColor = UIColor.yellow }
+      dropDown.addItem("default")
+
+      dropDown.selectAction { name in
+        Setting("Dancer \(d)").s = name
+        self.setOneColor(d)
+        dropDown.hide()
+        self.invalidate()
+      }
+
+      dropDown.showAt(self, x, y)
+    }
+  }
 
   /**
    *   Starts the animation
@@ -244,14 +279,22 @@ class AnimationView : Canvas {
     }
   }
 
+  private func setOneColor(_ d:Dancer) {
+    let onecolor = Setting("Dancer \(d)").s ?? "default"
+    let usercolor = Setting("Couple \(d.number_couple)").s
+    if (onecolor != "default") {
+      d.fillcolor = UIColor.colorForName(onecolor)
+    } else if (usercolor != nil) {
+      d.fillcolor = UIColor.colorForName(usercolor!)
+    } else {
+      d.fillcolor = dancerColor[d.number_couple.i]
+    }
+  }
+
   private func setColors(_ isOn:Bool) {
     dancers.forEach { d in
       d.showColor = isOn
-      if let cname = Setting("Couple \(d.number_couple)").s {
-        d.fillcolor = UIColor.colorForName(cname)
-      } else {
-        d.fillcolor = dancerColor[d.number_couple.i]
-      }
+      setOneColor(d)
     }
     invalidate()
   }
@@ -302,9 +345,9 @@ class AnimationView : Canvas {
     }
   }
 
-  var totalBeats:Double { return leadin + beats }
-  var movingBeats:Double { return beats - leadout }
-  var score:Double { return iscore }
+  var totalBeats:Double { leadin + beats }
+  var movingBeats:Double { beats - leadout }
+  var score:Double { iscore }
 
 
   /**
@@ -324,18 +367,18 @@ class AnimationView : Canvas {
     return (dx,dy)
   }
 
+  private func dancerAt(_ dx:Double, _ dy:Double) -> Dancer? {
+    let v = Vector(dx,dy)
+    return dancers.filter { ($0.location - v).length < 0.5 }
+           .min { d1,d2 in (d1.location-v).length < (d2.location-v).length }
+  }
+
   //  Touching a dancer shows and hides its path
   private func doTouch(_ dx:Double, _ dy:Double) {
     //  Compare touch point with dancer locations
-    let v = Vector(dx,dy)
-    let bestdq = dancers.min { d1,d2 in
-      (d1.location-v).length < (d2.location-v).length
-    }
-    if let bestd = bestdq {
-      if ((bestd.location - v).length < 0.5) {
-        bestd.showPath = !bestd.showPath
-        invalidate()
-      }
+    if let d = dancerAt(dx,dy) {
+      d.showPath = !d.showPath
+      invalidate()
     }
   }
 

@@ -268,7 +268,9 @@ class TamUtils {
       .replaceAll("\\bwomen\\b","girl")
       .replaceAll("\\blead(er)?(ing)?s?\\b","lead")
       .replaceAll("\\btrail(er)?(ing)?s?\\b","trail")
+      .replaceAll("\\bcentres?\\b","center")
       .replaceAll("\\b(1|3)4 tag the line\\b","$14 tag")
+      .replaceAll("\\b12 square thru\\b","square thru 2")
       //  'Dixie Style' -> 'Dixie Style to a Wave'
       .replaceAll("\\bdixie style(?! to)","dixie style to a wave")
       .replaceAll("\\bchase left\\b","left chase")

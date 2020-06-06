@@ -26,7 +26,8 @@ class Touch : Action {
     }
     let dist = d.distanceTo(d2)
     let dir = norm.startsWith("left") ? "Right" : "Left"
-    return TamUtils.getMove("Extend \(dir)").scale(dist/2, 1.0)
+    //  Touch to handhold in between wide and narrow
+    return TamUtils.getMove("Extend \(dir)").scale(dist/2, 0.75)
   }
 
 }

@@ -69,7 +69,7 @@ class AnimationPage : Page {
     }
     //  In portrait, swipe to switch animations
     if (Application.isPortrait) {
-      _view.swipeAction { dir in
+      _view.animationView.swipeAction { dir in
         if (dir == .LEFT && self.animnum < self.model!.tamcount-1) {
           saveRequest["animnum"] = (self.animnum+1).s
           Application.app.sendRequest(saveRequest)
