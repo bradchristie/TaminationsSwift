@@ -40,6 +40,7 @@ class Vector : CustomStringConvertible {
     "(\(x.s) \(y.s))"
   }
 
+
   //  Compute vector length
   var length:Double { get { sqrt(x*x + y*y) } }
 
@@ -92,6 +93,10 @@ prefix func -(v:Vector) -> Vector {
 
 func *(v:Vector, s:Double) -> Vector {
   v.scale(s,s)
+}
+
+func /(v:Vector, s:Double) -> Vector {
+  v.scale(1.0/s,1.0/s)
 }
 
 extension Vector : Equatable {

@@ -31,6 +31,47 @@ class CallContext {
   //  Values are file names
   static var callindex = [String:Set<String>]()
 
+  private static let standardFormations:Dictionary<String,Double> = [
+    "Normal Lines Compact" : 1.0,
+    "Normal Lines" : 1.0,
+    "Double Pass Thru" : 1.0,
+    "Quarter Tag" : 1.0,
+    "Tidal Line RH" : 1.0,
+    "Tidal Wave of 6" : 2.0,
+    "I-Beam" : 2.0,
+    "Diamonds RH Girl Points" : 2.0,
+    "Diamonds RH PTP Girl Points" : 2.0,
+    "Hourglass RH BP" : 3.0,
+    "Galaxy RH GP" : 3.0,
+    "Butterfly RH" : 3.0,
+    "O RH" : 3.0,
+    "Sausage RH" : 3.0,
+    "Static Square" : 2.0,
+    "Right-Hand Zs" : 2.0,
+    "Left-Hand Zs" : 2.0,
+    //  Siamese formations
+    //  This also covers C-1 Phantom formations
+    "Siamese Box 1" : 2.0,
+    "Siamese Box 2" : 2.0,
+    //  Blocks
+    "Facing Blocks Right" : 2.0,
+    "Facing Blocks Left" : 2.0,
+    "Siamese Wave" : 2.0,
+    "Concentric Diamonds RH" : 2.0,
+    "Quarter Z RH" : 2.0,
+    "Quarter Z LH" : 2.0
+  ]
+  private static let twoCoupleFormations: Dictionary<String,Double> = [
+    "Facing Couples Compact" : 1.0,
+    "Facing Couples" : 1.0,
+    "Two-Faced Line RH" : 1.0,
+    "Diamond RH" : 1.0,
+    "Single Eight Chain Thru" : 1.0,
+    "Single Quarter Tag" : 1.0,
+    "Square RH" : 1.0
+  ]
+
+
   //  Initialize callindex with calls in theses files
   class func loadInitFiles() {
 
@@ -160,12 +201,10 @@ class CallContext {
   //  and no paths.
   //  Create a context from an array of Dancer
   init(_ sourcedancers: [Dancer], beat: Double) {
-    dancers = sourcedancers.map { it in
-      it.animate(beat:beat)
-      let d = Dancer(it)
-      it.animateToEnd()
-      return d
-    }
+    sourcedancers.forEach { $0.animate(beat:beat) }
+    dancers = sourcedancers.areDancersOrdered()
+      ? sourcedancers.map { Dancer($0) }
+      : sourcedancers.map { Dancer($0) }.center().inOrder()
   }
 
   convenience init(_ sourcedancers: [Dancer]) {
@@ -219,6 +258,7 @@ class CallContext {
     }
   }
 
+  @discardableResult
   func noSnap() -> CallContext {
     snap = false
     return self
@@ -241,10 +281,15 @@ class CallContext {
    * The CallContext must have been previously cloned from the source.
    */
   func appendToSource() {
-    dancers.forEach { it in
-      if let clone = it.clonedFrom {
-        clone.path.add(it.path)
-        clone.animateToEnd()
+    dancers.forEach { clone in
+      if let original = clone.clonedFrom {
+        //  Phantoms might have been rotated in clone,
+        //  so set start angle in original to match
+        if (clone.gender == Gender.PHANTOM && original.path.movelist.isEmpty) {
+          original.setStartAngle(clone.starttx.angle)
+        }
+        original.path.add(clone.path)
+        original.animateToEnd()
       }
     }
     if let mysource = source {
@@ -335,10 +380,9 @@ class CallContext {
   }
 
   func checkCalls(_ calltext: [String]) -> Bool {
-    let textctx = CallContext(self)
+    let testctx = CallContext(self)
     do {
-      try textctx.applyCalls(calltext)
-      return true
+      return try !testctx.applyCalls(calltext).isCollision()
     } catch {
       return false
     }
@@ -777,54 +821,13 @@ class CallContext {
 
   //  See if the current dancer positions resemble a standard formation
   //  and, if so, snap to the standard
-  private static let standardFormations:Dictionary<String,Double> = [
-    "Normal Lines Compact" : 1.0,
-    "Normal Lines" : 1.0,
-    "Double Pass Thru" : 1.0,
-    "Quarter Tag" : 1.0,
-    "Tidal Line RH" : 1.0,
-    "Tidal Wave of 6" : 2.0,
-    "I-Beam" : 2.0,
-    "Diamonds RH Girl Points" : 2.0,
-    "Diamonds RH PTP Girl Points" : 2.0,
-    "Hourglass RH BP" : 3.0,
-    "Galaxy RH GP" : 3.0,
-    "Butterfly RH" : 3.0,
-    "O RH" : 3.0,
-    "Sausage RH" : 3.0,
-    "Static Square" : 2.0,
-    "Right-Hand Zs" : 2.0,
-    "Left-Hand Zs" : 2.0,
-    //  Siamese formations
-    //  This also covers C-1 Phantom formations
-    "Siamese Box 1" : 2.0,
-    "Siamese Box 2" : 2.0,
-    //  Blocks
-    "Facing Blocks Right" : 2.0,
-    "Facing Blocks Left" : 2.0,
-    "Siamese Wave" : 2.0,
-    "Concentric Diamonds RH" : 2.0,
-    "Quarter Z RH" : 2.0,
-    "Quarter Z LH" : 2.0
-  ]
-  private static let twoCoupleFormations: Dictionary<String,Double> = [
-    "Facing Couples Compact" : 1.0,
-    "Facing Couples" : 1.0,
-    "Two-Faced Line RH" : 1.0,
-    "Diamond RH" : 1.0,
-    "Single Eight Chain Thru" : 1.0,
-    "Single Quarter Tag" : 1.0,
-    "Square RH" : 1.0
-  ]
-
-
   struct BestMapping {
     var name:String
     var mapping:[Int]
     var match: FormationMatchResult
     var totOffset:Double
   }
-  func matchStandardFormation() {
+  func matchFormationList(_ formations:Dictionary<String,Double>) {
     //  Make sure newly added animations are finished
     dancers.forEach { d in
       d.path.recalculate()
@@ -836,8 +839,6 @@ class CallContext {
       $0.data.active = true
     }
     var bestMapping: BestMapping? = nil
-    let formations = ctx1.dancers.count == 4
-      ? CallContext.twoCoupleFormations : CallContext.standardFormations
     formations.forEach { f in
       let ctx2 = CallContext(TamUtils.getFormation(f.key))
       //  See if this formation matches
@@ -875,6 +876,15 @@ class CallContext {
     }
   }
 
+  func matchStandardFormation() {
+    if (snap) {
+      let formations = dancers.count == 4
+        ? CallContext.twoCoupleFormations
+        : CallContext.standardFormations
+      matchFormationList(formations)
+    }
+  }
+
   func adjustToFormationMatch(_ match:FormationMatchResult) {
     dancers.forEach { d in d.data.active = true }
     for (i, d) in dancers.enumerated() {
@@ -893,6 +903,7 @@ class CallContext {
     }
   }
 
+  @discardableResult
   func adjustToFormation(_ fname:String, rotate:Int=180) -> Bool {
     //  Work on a copy with all dancers active, mapping only uses active dancers???
     let ctx1 = CallContext(self)
@@ -911,32 +922,39 @@ class CallContext {
   //  for a given call
   //  Phantoms must be in diagonally opposite pairs
   //  which are rotated together
+  //  unless asym is set
   //  as this is required for XML mapping to work
-  func rotatePhantoms(_ call:String) -> Bool {
-    let phantoms = dancers.filter { $0.gender == Gender.PHANTOM }
-    var mapindex = 0
-    while (mapindex < ( 1 << (phantoms.count/2))) {
-      if (mapindex > 0) {
-        //  Flip one phantom selected with a Gray sequence
-        //  https://en.wikipedia.org/wiki/Gray_code
-        var nextp = 0
-        var gray = 1
-        while ((gray & mapindex) == 0) {
-          nextp += 1
-          gray = gray << 1
+  func rotatePhantoms(_ call:String, rotate:Int=180, asym:Bool=false) -> CallContext? {
+    let phantoms = dancers.filter {
+      $0.gender == Gender.PHANTOM
+    }
+    //  Compute number of possibilities
+    let rotnum = 360 / rotate
+    let phanum = asym ? phantoms.count : phantoms.count / 2
+    let topindex = rotnum.pow(phanum)
+    //  Loop through each possibility
+    for mapindex in 0..<topindex {
+      //  Set rotation of each phantom
+      //  Flip one phantoms selected with a Gray sequence
+      if (mapindex > 0) {  //  mapindex == 0 is first check with no rotation
+        let p = (0..<phanum).first { i in
+          (mapindex / rotnum.pow(i)) % rotnum > 0 }!
+        if (asym) {
+          phantoms[p].rotateStartAngle(rotate.d)
+        } else {
+          phantoms[p * 2].rotateStartAngle(rotate.d)
+          phantoms[p * 2 + 1].rotateStartAngle(rotate.d)
         }
-        phantoms[nextp * 2].rotateStartAngle(180.0)
-        phantoms[nextp * 2 + 1].rotateStartAngle(180.0)
       }
-      if (checkCalls([call])) {
+      let ctx = CallContext(self,dancers)
+      if (ctx.checkCalls([call])) {
         //  Good rotation found
-        //  Return with phantoms in current rotation
-        return true
+        //  Return with phantoms in current position
+        return ctx
       }
       //  This rotation does not work
-      mapindex += 1
     }
-    return false
+    return nil
   }
 
   //  Use phantoms to fill in a formation starting from the dancers
@@ -1117,6 +1135,18 @@ class CallContext {
         : false
   }
 
+  //  Return true if this is 4 dancers in a box
+  func isBox() -> Bool {
+    //  Must have 4 dancers
+    dancers.count == 4 &&
+      //  Each dancer must have one dancer at the same X coordinate
+      //  and one dancer at the same Y coordinate
+    dancers.all { d in
+      dancers.filter { d.location.x.isAbout($0.location.x) }.count == 2 &&
+      dancers.filter { d.location.y.isAbout($0.location.y) }.count == 2
+    }
+  }
+
   //  Return true if 8 dancers are in 2 general lines of 4 dancers each
   //  Also works for 4 dancers in 1 line
   func isLines() -> Bool {
@@ -1218,12 +1248,15 @@ class CallContext {
     return ""
   }
 
+  //  Is there a dancer at a specific spot?
+  func dancerAt(_ spot:Vector) -> Dancer? {
+    dancers.first { $0.location == spot }
+  }
+
   func isCollision() -> Bool {
     dancers.any { d in
       dancers.any { d2 in
-        d != d2 &&
-          d.location.x.isApprox(d2.location.x) &&
-          d.location.y.isApprox(d2.location.y)
+        d != d2 && d.location == d2.location
       }
     }
   }
@@ -1264,6 +1297,20 @@ class CallContext {
       while (d.path.movelist.lastOrNull()?.fromCall == false) {
         d.path.pop()
       }
+    }
+  }
+
+  //  Center dancers around the origin
+  //  Useful for a CallContext created from an arbitrary set of dancers
+  func recenter() {
+    animate(0.0)
+    let maxx = dancers.map { $0.location.x }.max()!
+    let minx = dancers.map { $0.location.x }.min()!
+    let maxy = dancers.map { $0.location.y }.max()!
+    let miny = dancers.map { $0.location.y }.min()!
+    let shift = Vector((maxx + minx) / 2.0, (maxy + miny) / 2.0)
+    dancers.forEach { d in
+      d.setStartPosition(d.location - shift)
     }
   }
 

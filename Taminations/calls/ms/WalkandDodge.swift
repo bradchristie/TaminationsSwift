@@ -21,19 +21,24 @@
 private extension Dancer {
 
   func isIn(_ ctx:CallContext) -> Bool {
-    return ctx.actives.map { $0.number }.contains(number)
+    ctx.actives.map { $0.number }.contains(number)
   }
-  
+
 }
 
 class WalkandDodge : Action {
 
-  override var level:LevelData { return LevelObject.find("ms") }
+  override var level:LevelData { LevelObject.find("ms") }
 
   private var walkctx = CallContext([])
   private var dodgectx = CallContext([])
-  
+
   override func perform(_ ctx: CallContext, _ index: Int) throws {
+    if (ctx.actives.count < ctx.dancers.count) {
+      try ctx.subContext(ctx.actives) { subctx in
+        try perform(subctx,index)
+      }
+    }
     //  Figure out who is a walker and who is a dodger.
     //  Save the results in call contexts
     walkctx = CallContext(ctx)
@@ -80,9 +85,12 @@ class WalkandDodge : Action {
       if (ctx.isInCouple(d) && d.data.partner!.isIn(dodgectx)) {
         throw CallError("Dodgers would cross each other")
       }
-      let dist = d.distanceTo(d.data.partner!)
+      guard let d2 = dir == "Right" ? ctx.dancerToRight(d) : ctx.dancerToLeft(d) else {
+        throw CallError("Unable to calculate Walk and Dodge for dancer \(d)")
+      }
+      let dist = d.distanceTo(d2)
       return TamUtils.getMove("Dodge \(dir)").scale(1.0,dist/2.0)
-      
+
     } else if (d.isIn(walkctx)) {
       //  A Walker.  Check formation and distance.
       let d2 = ctx.dancerInFront(d)
@@ -92,10 +100,10 @@ class WalkandDodge : Action {
       else {
         let dist = d.distanceTo(d2!)
         return TamUtils.getMove("Forward").scale(dist, 1.0).changebeats(3.0)
-      }      
+      }
     } else {
       throw CallError("Dancer \(d) cannot Walk or Dodge")
     }
   }
-  
+
 }

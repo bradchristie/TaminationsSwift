@@ -27,10 +27,9 @@ class Zing : Action {
   }
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    let a = d.angleToOrigin
-    let c1 = a < 0 ? "Run Left" : "Run Right"
-    let c2 = a < 0 ? "Lead Left" : "Lead Right"
-    let c3 = a < 0 ? "Quarter Right" : "Quarter Left"
+    let c1 = d.data.beau ? "Run Left" : "Run Right"
+    let c2 = d.data.beau ? "Lead Left" : "Lead Right"
+    let c3 = d.data.beau ? "Quarter Right" : "Quarter Left"
     if (d.data.leader) {
       guard let d2 = ctx.dancerInBack(d) else {
         throw CallError("Dancer \(d) cannot Zing")

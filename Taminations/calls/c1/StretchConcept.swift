@@ -20,7 +20,7 @@
 
 class StretchConcept : Action {
 
-  override var level: LevelData { LevelObject.find("c2") }
+  override var level: LevelData { LevelObject.find("c1") }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
 

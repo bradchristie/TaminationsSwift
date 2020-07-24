@@ -18,26 +18,30 @@
 
 */
 
-import UIKit
-
 class CircleBy : Action {
 
-  override var level:LevelData { return LevelObject.find("c1") }
-  override var requires:[String] { return ["b1/circle","b2/ocean_wave","b2/trade",
+  override var level:LevelData { LevelObject.find("c1") }
+  override var requires:[String] { ["b1/circle","b2/ocean_wave","b2/trade",
                                            "ms/hinge","ms/cast_off_three_quarters"]}
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
+    //  Make sure we have "Circle By <fraction> and <something>"
     let a = norm.replace("circleby","").split("and",maxSplits: 2)
     if (a.count != 2) {
       throw CallError("Circle By <fraction> and <fraction or call>")
     }
     let (frac1,frac2) = (a[0],a[1])
+    //  Do the first fraction
     switch (frac1) {
       case "nothing" : break
       case "14", "12", "34" : try ctx.applyCalls("Circle Four Left \(frac1)")
       default :  throw CallError("Circle by what?")
     }
-    try ctx.applyCalls("Step to a Wave")
+    //  Step to a Wave
+    //  be careful not to collide with any outer inactive dancers
+    let compact = ctx.dancers.count == 8 && ctx.actives.count == 4 ? "Compact" : ""
+    try ctx.applyCalls("Step to a \(compact) Wave")
+    //  Do the second fraction or call
     switch (frac2) {
       case "nothing" : break
       case "14" : try ctx.applyCalls("Hinge")

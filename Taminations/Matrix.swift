@@ -48,6 +48,11 @@ class Matrix {
     self.init(1.0,0.0,x,0.0,1.0,y)
   }
 
+  //  Create translation matrix from a vector
+  convenience init(position:Vector) {
+    self.init(1.0,0.0,position.x,0.0,1.0,position.y)
+  }
+
   //  Compute and return this * m
   fileprivate func multiply(_ m: Matrix) -> Matrix {
     Matrix(

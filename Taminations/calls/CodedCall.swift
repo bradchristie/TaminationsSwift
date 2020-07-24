@@ -70,7 +70,8 @@ class CodedCall : Call {
     "ladies" : { Girls() },
     "jaywalk" : { Jaywalk() },
     "12" : { Fraction("12","Half") },
-    "12sashay" : { HalfSashay() },
+    "12sashay" : { HalfSashay("12sashay","Half Sashay") },
+    "reverse12sashay" : { HalfSashay("reverse12sashay","Reverse Half Sashay") },
     "circulate" : { Circulate() },
     "all8circulate" : { Circulate() },
     "makemagic" : { MakeMagic() },
@@ -126,6 +127,7 @@ class CodedCall : Call {
     "triplestarthru" : { TripleStarThru() },
     "tripletrade" : { TripleTrade() },
     "turnback" : { TurnBack() },
+    "uturnback" : { TurnBack() },
     "twisttheline" : { TwistAnything("twisttheline","Twist the Line") },
     "zoom" : { Zoom() },
     "singlewheel" : { SingleWheel("singlewheel","Single Wheel") },
@@ -385,6 +387,14 @@ class CodedCall : Call {
 
     if (callname.lowercased().matches("o .+")) {
       return OFormation(callnorm,callname)
+    }
+
+    if (callnorm.matches("triplebox.*")) {
+      return TripleBoxConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("triple(lines?|waves?|columnns?).*")) {
+      return TripleLineConcept(callnorm,callname)
     }
 
     if (callnorm.matches(".*chainthru")) {

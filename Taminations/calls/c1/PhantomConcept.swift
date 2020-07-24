@@ -60,10 +60,10 @@ class PhantomConcept : Action {
     let phantomctx = CallContext(ctx,ctx.dancers+phantoms)
     //  Find good rotation
     phantomctx.analyze()
-    if (!phantomctx.rotatePhantoms(subcall)) {
+    guard let rotatectx = phantomctx.rotatePhantoms(subcall) else {
       throw CallError("Unable to find phantom formation for $subcall")
     }
-    return phantomctx
+    return rotatectx
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {

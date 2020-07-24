@@ -13,6 +13,23 @@ extension Int {
   var isEven:Bool { get { self % 2 == 0 } }
   var isOdd:Bool { get { self % 2 == 1 } }
 
+  func pow(_ i:Int) -> Int {
+    if (i == 0) {
+      return 1
+    } else if (i == 1) {
+      return self
+    } else if (i % 2 == 1) {
+      return self.pow(i-1) * self
+    } else if (i > 2) {
+      let p = self.pow(i/2)
+      return p * p
+    } else if (i == 2) {
+      return self * self
+    } else {
+      return 0  // throw error?
+    }
+  }
+
 }
 
 extension Float {
@@ -43,6 +60,7 @@ extension Double {
   var Sin:Double { sin(self) }
   var Cos:Double { cos(self) }
   var toRadians:Double { self * .pi / 180 }
+  var toDegrees:Double { self * 180 / .pi }
   func isApproxInt(delta:Double=0.1) -> Bool { (self - self.rounded()).abs < delta }
   func isApprox(_ y:Double, delta:Double=0.1) -> Bool { (self-y).abs < delta }
   func isAbout(_ y:Double) -> Bool { isApprox(y) }
@@ -104,6 +122,18 @@ extension Array {
 
   func sortedBy<T:Comparable>(_ f:(Element) -> T) -> [Element] {
     self.sorted { (a,b) in f(a) < f(b) }
+  }
+
+  func groupBy<T:Hashable>(_ f:(Element) -> T) -> [[Element]] {
+    var d = Dictionary<T,[Element]>()
+    forEach { e in
+      let key = f(e)
+      if (d[key] == nil) {
+        d[key] = []
+      }
+      d[key]!.append(e)
+    }
+    return d.values.map { $0 }
   }
 
   func drop(_ n:Int) -> [Element] {

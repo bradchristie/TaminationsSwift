@@ -49,17 +49,48 @@ extension Vector {
   func ds(_ d:Dancer) -> Vector { d.tx.inverse() * self }
 }
 
-//  Take a list of dancers in any order, re-order
-//  in pairs of diagonal opposites
+
 extension Array where Element:Dancer {
-  func inOrder() -> [Dancer] {
-    self.filter { $0.location.x.isGreaterThan(0.0) ||
-      ($0.location.x.isAbout(0.0) && $0.location.y.isGreaterThan(0.0)) }
-    .flatMap { d in [d,self.first { $0.location == -d.location }!] }
+
+  func areDancersOrdered() -> Bool {
+    count % 2 == 0 &&
+      indices.filter {
+          $0 % 2 == 0
+        }
+        .all {
+          self[$0].location == -self[$0 + 1].location
+        }
   }
+
+  //  Center a list of dancers
+  //  Assumes the dancers are distributed evenly around a central point
+  func center() -> [Dancer] {
+    if (count > 0) {
+      let vs = reduce(Vector(), { $0 + $1.location })
+      let va = vs / count.d
+      forEach { d in
+        d.setStartPosition(d.location - va)
+      }
+    }
+    return self
+  }
+
+  //  Take a list of dancers in any order and re-order
+  //  in pairs of diagonal opposites
+  //  If it fails, just return original list
+  //  rather than null or crashing
+  func inOrder() -> [Dancer] {
+    let qd = filter {
+          $0.location.x.isGreaterThan(0.0) ||
+            ($0.location.x.isAbout(0.0) && $0.location.y.isGreaterThan(0.0))
+        } .flatMap { d in [d, self.first { $0.location == -d.location } ] }
+    let dd = qd.filter { $0 != nil }.map { $0! }
+    return dd.count == count ? dd : self
+  }
+
 }
 
-class Dancer : Comparable, CustomStringConvertible {
+class Dancer : Comparable, Hashable, CustomStringConvertible {
 
   static let NUMBERS_OFF = 0
   static let NUMBERS_DANCERS = 1
@@ -139,6 +170,12 @@ class Dancer : Comparable, CustomStringConvertible {
   static func == (lhs:Dancer, rhs:Dancer) -> Bool {
     lhs.number == rhs.number
   }
+
+  //  Required for Hashable
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(number)
+  }
+
   //  Property for CustomStringConvertible
   var description: String { number }
 
@@ -251,6 +288,12 @@ class Dancer : Comparable, CustomStringConvertible {
     let a = angleFacing
     starttx = Matrix(x:pos.x,y:pos.y) * Matrix(angle:a)
     tx = Matrix(starttx)
+    return self
+  }
+
+  @discardableResult
+  func setStartAngle(_ a:Double) -> Dancer {
+    starttx = Matrix(position:starttx.location) * Matrix(angle: a)
     return self
   }
 

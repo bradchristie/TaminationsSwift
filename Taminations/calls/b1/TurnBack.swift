@@ -21,11 +21,11 @@
 class TurnBack : Action {
 
   init() {
-    super.init("Turn Back")
+    super.init("U-Turn Back")
   }
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    return TamUtils.getMove(d.data.beau ? "U-Turn Right" : "U-Turn Left")
+    TamUtils.getMove(d.data.beau ? "U-Turn Right" : "U-Turn Left")
   }
 
 }

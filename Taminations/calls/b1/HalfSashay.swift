@@ -20,10 +20,6 @@
 
 class HalfSashay : Action {
 
-  init() {
-    super.init("Half Sashay")
-  }
-
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
 
     //  Figure out who we sashay with
@@ -40,7 +36,16 @@ class HalfSashay : Action {
     } else {
       throw CallError("Dancer \(d) has nobody to Sashay with")
     }
-    let move = d2.isLeftOf(d) ?  "Sashay Left" : "BackSashay Right"
+    var move = ""
+    if (norm.startsWith("reverse") && d2.isLeftOf(d)) {
+      move = "BackSashay Left"
+    } else if (norm.startsWith("reverse")) {
+      move = "Sashay Right"
+    } else if (d2.isLeftOf(d)) {
+      move = "Sashay Left"
+    } else {
+      move = "BackSashay Right"
+    }
     let dist = d.distanceTo(d2)
 
     return TamUtils.getMove(move).scale(1.0,dist/2.0)
