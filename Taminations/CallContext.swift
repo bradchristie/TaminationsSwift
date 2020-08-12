@@ -147,8 +147,8 @@ class CallContext {
     if (loadedXML[link] == nil) {
       let doc = TamUtils.getXMLAsset(link)
       //  Add all the calls to the index
-      doc.xpath("/tamination/tam").filter 
-      { tam in tam.attr("sequencer") != "no" }.forEach { tam in 
+      doc.xpath("/tamination/tam").filter
+      { tam in tam.attr("sequencer") != "no" }.forEach { tam in
         if let xref = tam.attr("xref-link") {
           loadOneFile(xref)
         } else {
@@ -494,7 +494,8 @@ class CallContext {
     let dc = ctx1.dancers.count
     let ac = ctx1.actives.count
     var perimeter = false
-    if (dc != ac) {
+    let exact = dc == ac
+    if (!exact) {
       //  Don't try to match unless the actives are together
       if (ctx1.actives.any { d in
         ctx1.inBetween(d, ctx1.actives.first!).any {
@@ -518,7 +519,9 @@ class CallContext {
         tam.attr("sequencer") != "no" &&
           TamUtils.normalizeCall(tam.attr("title")!) == callnorm &&
           //  Check for calls that must go around the centers
-          (!perimeter || (tam.attr("sequencer") ?? "").contains("perimeter"))
+          (!perimeter || (tam.attr("sequencer") ?? "").contains("perimeter")) &&
+          //  Check for 4-dancer calls that do not work for 8 dancers
+          (exact || !(tam.attr("sequencer") ?? "").contains("exact"))
       }.forEach { tam in
         //  Calls that are gender-specific, e.g. Star Thru,
         //  are specifically flagged in XML
