@@ -169,7 +169,12 @@ class CodedCall : Call {
     "castoff34" : { CastOffThreeQuarters() },
     "peeltoadiamond" : { PeelToADiamond() },
     "hocuspocus" : { HocusPocus() },
-    "explode" : { Explode() }
+    "explode" : { Explode() },
+    "crossramble" : { CrossRamble() },
+    "castback" : { CastBack("castback","Cast Back") },
+    "crosscastback" : { CastBack("crosscastback","Cross Cast Back") },
+    "horseshoeturn" : { HorseshoeTurn() },
+    "scootandcrossramble" : { ScootAndCrossRamble() }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -402,6 +407,11 @@ class CodedCall : Call {
         return nil
       }
       return AnythingChainThru(callnorm,callname)
+    }
+
+    //  Start should not match Star Thru e.g.
+    if (callname.lowercased().matches("start .+")) {
+      return Start(callnorm,callname)
     }
 
     return nil

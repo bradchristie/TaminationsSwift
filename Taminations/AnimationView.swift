@@ -795,6 +795,8 @@ class AnimationView : Canvas {
   func recalculate() {
     beats = 0.0
     dancers.forEach { d in
+      d.computePath()
+      d.animate(beat: beat)  // current position clobbered by computePath
       beats = max(beats, d.beats + leadout)
     }
   }

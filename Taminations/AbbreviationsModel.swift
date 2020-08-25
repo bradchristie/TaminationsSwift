@@ -57,9 +57,9 @@ class AbbreviationsModel {
     "circ": "Circulate",
     "ci": "Centers In",
     "cl": "Cloverleaf",
-    "dx": "Dixie Style : a Wave",
+    "dx": "Dixie Style to a Wave",
     "ht": "Half Tag",
-    "ptc": "Pass : the Center",
+    "ptc": "Pass to the Center",
     "sb": "Scoot Back",
     "stt": "Spin the Top",
     "ttl": "Tag the Line",
@@ -70,15 +70,30 @@ class AbbreviationsModel {
     self.view = view
     //  Initialize with abbrevs above if 1st time
     if (Storage["+abbrev stored"] == nil) {
-      initialAbbrev.forEach { (key,value) in
-        Storage["abbrev \(key)"] = value
-      }
+      defaultAbbreviations()
       Storage["+abbrev stored"] = "true"
     }
   }
 
+  func clearAbbreviations() {
+    Storage.keys.forEach { it in
+      if (it.matches("abbrev \\S+")) {
+        Storage.remove(it)
+      }
+    }
+    loadAbbreviations()
+  }
+
+  func defaultAbbreviations() {
+    clearAbbreviations()
+    initialAbbrev.forEach { (key: String, value: String) -> () in
+      Storage["abbrev \(key)"] = value
+    }
+    loadAbbreviations()
+  }
+
   func loadAbbreviations() {
-    //  Read stored abbreviations and fill table
+    //  Read abbreviations previously stored and fill table
     view.clear()
     Storage.keys.sorted().forEach { key in
       //  skip "*abbrev stored" and any other non-user stuff
@@ -102,20 +117,7 @@ class AbbreviationsModel {
     view.clearErrors()
     //  Process all the current abbreviations
     (0 ..< view.numItems).forEach { i in
-      //  error if duplicate
-      if (Storage["abbrev " + view[i].abbr] != nil) {
-        view.markError(i)
-      }
-      //  error if a word used in calls
-      else if (TamUtils.words.contains(view[i].abbr.lowercased())) {
-        view.markError(i)
-      }
-      //  ok if a single non-blank string
-      else if (view[i].abbr.matches("\\S+") && !view[i].expa.isBlank) {
-        Storage["abbrev " + view[i].abbr] = view[i].expa
-      }
-      //  otherwise (embedded spaces) error
-      else if (!view[i].abbr.isBlank) {
+      if (!addOneAbbreviation(view[i].abbr, view[i].expa)) {
         view.markError(i)
       }
     }
@@ -124,6 +126,50 @@ class AbbreviationsModel {
     if (!view[view.numItems-1].abbr.isBlank) {
       view.addItem("", "")
     }
+  }
+
+  @discardableResult
+  func addOneAbbreviation(_ abbr:String, _ expansion:String) -> Bool {
+    //  error if duplicate
+    if (Storage["abbrev " + abbr] != nil) {
+      return false
+    }
+    //  error if a word used in calls
+    else if (TamUtils.words.contains(abbr.lowercased())) {
+      return false
+    }
+    //  ok if a single non-blank string
+    else if (abbr.matches("\\S+") && !expansion.isBlank) {
+      Storage["abbrev " + abbr] = expansion
+      return true
+    }
+    //  otherwise (embedded spaces) error
+    else if (!abbr.isBlank) {
+      return false
+    }
+    return true  // blank link, ok, just ignore it
+  }
+
+  func copyAbbreviationsToClipboard() {
+    let text = Storage.keys.sorted().filter {
+      it in it.matches("abbrev \\S+")
+    }.map { it in it.replace("abbrev ","") + " " + Storage[it]!}
+    let pb = UIPasteboard(name:.general,create:false)!
+    pb.string = text.joined(separator:"\n")
+  }
+
+  func pasteAbbreviationsFromClipboard() {
+    let pb = UIPasteboard(name:.general,create:false)!
+    if (pb.string != nil) {
+      let s = pb.string!
+      s.split("\n").forEach { line in
+        let words = line.split(" ",maxSplits: 2)
+        if (words.count > 1) {
+          addOneAbbreviation(words[0], words[1])
+        }
+      }
+    }
+    loadAbbreviations()
   }
 
 }

@@ -26,7 +26,15 @@
 class FourDancerConcept : Action {
 
   var conceptName:String { get { "" } }
-  var realCall:String { get { name.replaceIgnoreCase("\(conceptName) ", "") } }
+  private var extraCall:String? { get {
+    name.lowercased().contains("individually")
+      ? name.replaceFirstIgnoreCase(".*individually ", "")
+      : nil
+  } }
+  var realCall:String { get {
+    name.replaceIgnoreCase("\(conceptName) ", "")
+        .replaceIgnoreCase("individually.*", "")
+  } }
 
   //  Return list of groups of dancers
   //  List must have 4 sub-lists
@@ -127,6 +135,14 @@ class FourDancerConcept : Action {
     ctx.animateToEnd()
     conceptctx.dancers.enumerated().forEach { (ci,cd) in
       postAdjustment(ctx,cd,groups[ci])
+    }
+    //  Perform any calls for single dancers (e.g. "individually roll")
+    if let extra = extraCall {
+      if (extra.trim().lowercased().matches("roll")) {
+        try Roll("","").perform(ctx, 1)
+      } else {
+        throw CallError("Don't know how to Individually \(extra)")
+      }
     }
 
   }

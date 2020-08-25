@@ -44,11 +44,16 @@ class ViewGroup : View {
   }
 
   func clear() {
-    children.forEach { child in
+    while (children.count > 0) {
+      let child = children.removeLast()
       child.parent = nil
       child.div.removeFromSuperview()
     }
-    children.removeAll()
+    //children.forEach { child in
+    //  child.parent = nil
+    //  child.div.removeFromSuperview()
+    //}
+    //children.removeAll()
   }
 
   //  Find first descendent that satisfies a predicate

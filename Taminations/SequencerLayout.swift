@@ -77,6 +77,14 @@ class SequencerLayout : LinearLayout {
     copyButton.fillVertical()
     editButtons.appendView(pasteButton)
     pasteButton.fillVertical()
+    abbrButton.id = "Sequencer Abbrev"
+    instructionsButton.id = "Sequencer Help"
+    settingsButton.id = "Sequencer Settings"
+    callsButton.id = "Sequencer Calls"
+    undoButton.id = "Sequencer Undo"
+    resetButton.id = "Sequencer Reset"
+    copyButton.id = "Sequencer Copy"
+    pasteButton.id = "Sequencer Paste"
 
     pageButtons.weight = 0
     instructionsButton.weight = 1

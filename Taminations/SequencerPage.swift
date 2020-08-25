@@ -66,15 +66,15 @@ class SequencerPage : Page {
       self.callPage.textInput.focus()
     }
     onMessage(.BUTTON_PRESS) { request in
-      switch (request["button"]!) {
-        case "Help" : self.sequencerRequest(.SEQUENCER_INSTRUCTIONS)
-        case "Settings" : self.sequencerRequest(.SEQUENCER_SETTINGS)
-        case "Abbrev" : self.sequencerRequest(.SEQUENCER_ABBREVIATIONS)
-        case "Calls" : self.sequencerRequest(.SEQUENCER_CALLS)
-        case "Undo": self.model.undoLastCall()
-        case "Reset" : self.model.reset()
-        case "Copy" : self.model.copyCallsToClipboard()
-        case "Paste" : self.model.pasteCallsFromClipboard()
+      switch (request["id"]!) {
+        case "Sequencer Help" : self.sequencerRequest(.SEQUENCER_INSTRUCTIONS)
+        case "Sequencer Settings" : self.sequencerRequest(.SEQUENCER_SETTINGS)
+        case "Sequencer Abbrev" : self.sequencerRequest(.SEQUENCER_ABBREVIATIONS)
+        case "Sequencer Calls" : self.sequencerRequest(.SEQUENCER_CALLS)
+        case "Sequencer Undo": self.model.undoLastCall()
+        case "Sequencer Reset" : self.model.reset()
+        case "Sequencer Copy" : self.model.copyCallsToClipboard()
+        case "Sequencer Paste" : self.model.pasteCallsFromClipboard()
         default : break
       }
     }

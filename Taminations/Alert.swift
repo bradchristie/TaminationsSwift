@@ -18,19 +18,19 @@
 
 */
 
-class ScootAndRamble : Action {
+import UIKit
 
-  override var level:LevelData { LevelObject.find("c1") }
-  override var requires:[String] {
-    ["ms/scoot_back"] + Ramble().requires
-  }
+class Alert {
 
-  init() {
-    super.init("Scoot and Ramble")
-  }
-
-  override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Ramble")
+  @discardableResult
+  init(_ title:String, _ text:String, cancel:Bool=false, _ okAction:@escaping ()->()) {
+    let alert = UIAlertController(title: title, message: text, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "OK", style: .default,
+      handler: { _ in okAction() } ))
+    if (cancel) {
+      alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+    }
+    Application.viewController.present(alert, animated:true)
   }
 
 }

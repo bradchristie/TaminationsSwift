@@ -18,19 +18,25 @@
 
 */
 
-class ScootAndRamble : Action {
+class Start : Action {
 
-  override var level:LevelData { LevelObject.find("c1") }
-  override var requires:[String] {
-    ["ms/scoot_back"] + Ramble().requires
-  }
-
-  init() {
-    super.init("Scoot and Ramble")
-  }
+  override var level: LevelData { LevelObject.find("c1") }
+  override var requires:[String] { ["b1/pass_thru","b2/trade","c1/finish"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Ramble")
+    let finishCall = name.replaceFirstIgnoreCase("^start\\s+", "")
+    //  There has to be a subset of dancers selected to start
+    if (ctx.actives.count >= ctx.dancers.count) {
+      throw CallError("Who is supposed to start?")
+    }
+    //  If the actives are facing, assume that the first part is Pass Thru
+    //  Otherwise for now we will try a Trade
+    let startCall = ctx.actives.all { it in
+      ctx.dancerFacing(it)?.data.active == true
+    } ? "Pass Thru" : "Trade"
+    try ctx.applyCalls(startCall)
+    ctx.dancers.forEach { it in it.data.active = true }
+    try ctx.applyCalls("Finish \(finishCall)")
   }
 
 }

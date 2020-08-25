@@ -37,6 +37,29 @@ class AbbreviationsPage : Page {
     onMessage(.ABBREVIATIONS_CHANGED) { request in
       self.model.saveAbbreviations()
     }
+    onMessage(.BUTTON_PRESS) { request in
+      if (request["id"] == "Abbrev Copy") {
+        self.model.copyAbbreviationsToClipboard()
+        Alert("Sequencer","Abbreviations copied to clipboard") { }
+      }
+      else if (request["id"] == "Abbrev Paste") {
+        Alert("Sequencer","This will MERGE abbreviations from the clipboard. " +
+          "If you want to REPLACE all your abbreviations, Clear first then Load.",
+          cancel:true) {
+          self.model.pasteAbbreviationsFromClipboard()
+        }
+      }
+      else if (request["id"] == "Abbrev Clear") {
+        Alert("Sequencer","WARNING! This will ERASE ALL your abbreviations!",cancel: true) {
+          self.model.clearAbbreviations()
+        }
+      }
+      else if (request["id"] == "Abbrev Reset") {
+        Alert("Sequencer","WARNING! This will REPLACE ALL your abbreviations!",cancel: true) {
+          self.model.defaultAbbreviations()
+        }
+      }
+    }
   }
 
 }

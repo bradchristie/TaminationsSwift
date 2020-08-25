@@ -18,19 +18,17 @@
 
 */
 
-class ScootAndRamble : Action {
+class CrossRamble : Action {
 
-  override var level:LevelData { LevelObject.find("c1") }
-  override var requires:[String] {
-    ["ms/scoot_back"] + Ramble().requires
-  }
+  override var level: LevelData { LevelObject.find("c2") }
+  override var requires:[String] { ["ms/slide_thru","c2/cross_ramble"] }
 
   init() {
-    super.init("Scoot and Ramble")
+    super.init("Cross Ramble")
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Ramble")
+    try ctx.applyCalls("_Cross Ramble Part 1","Slide Thru")
   }
 
 }

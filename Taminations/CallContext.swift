@@ -58,8 +58,8 @@ class CallContext {
     "Facing Blocks Left" : 2.0,
     "Siamese Wave" : 2.0,
     "Concentric Diamonds RH" : 2.0,
-    "Quarter Z RH" : 2.0,
-    "Quarter Z LH" : 2.0
+    "Quarter Z RH" : 4.0,
+    "Quarter Z LH" : 4.0
   ]
   private static let twoCoupleFormations: Dictionary<String,Double> = [
     "Facing Couples Compact" : 1.0,
@@ -867,7 +867,7 @@ class CallContext {
                 name: f.key, // only used for debugging
                 mapping: mapping,
                 match: matchResult,
-                totOffset: totOffset
+                totOffset: totOffset*favoring
               )
             }
           }

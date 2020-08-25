@@ -29,6 +29,8 @@ class Button : View {
     set { mydiv.setTitle(newValue,for:UIControl.State()) }
   }
 
+  var id:String = ""
+
   init(_ t:String) {
     super.init(mydiv)
     mydiv.translatesAutoresizingMaskIntoConstraints = false
@@ -39,7 +41,7 @@ class Button : View {
 
   @objc func buttonSelector() {
     clickCode()
-    Application.app.sendMessage(.BUTTON_PRESS, ("button",text))
+    Application.app.sendMessage(.BUTTON_PRESS, ("button",text),("id",id))
   }
 
   func drawImage(_:CGRect) { }  // for ImageButton

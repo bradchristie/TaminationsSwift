@@ -20,11 +20,39 @@
 
 import UIKit
 
-class AbbreviationsView : ScrollingLinearLayout {
+class AbbreviationsView : LinearLayout {
 
   struct AbbreviationItem {
     let abbr:String
     let expa:String
+  }
+
+  let abbreviationList = ScrollingLinearLayout()
+  let saveButton = Button("Copy")
+  let loadButton = Button("Paste")
+  let clearButton = Button("Clear")
+  let resetButton = Button("Reset")
+  let buttonLayout = LinearLayout(.HORIZONTAL)
+
+  init() {
+    super.init(.VERTICAL)
+    abbreviationList.weight = 1
+    abbreviationList.fillHorizontal()
+    appendView(abbreviationList)
+    buttonLayout.backgroundColor = UIColor.black
+    buttonLayout.weight = 0
+    [saveButton,loadButton,clearButton,resetButton].forEach { button in
+      button.weight = 1
+      button.margins = 4
+      buttonLayout.appendView(button)
+    }
+    saveButton.id = "Abbrev Copy"
+    loadButton.id = "Abbrev Paste"
+    clearButton.id = "Abbrev Clear"
+    resetButton.id = "Abbrev Reset"
+    buttonLayout.fillHorizontal()
+    appendView(buttonLayout)
+    appendView(View())
   }
 
   func addItem(_ abbrev:String="", _ expansion:String="") {
@@ -50,24 +78,28 @@ class AbbreviationsView : ScrollingLinearLayout {
     expaText.fillVertical()
     line.appendView(expaText)
     line.fillHorizontal()
-    appendView(line)
+    abbreviationList.appendView(line)
   }
 
-  var numItems:Int { return items.count }
+  override func clear() {
+    abbreviationList.clear()
+  }
+
+  var numItems:Int { abbreviationList.items.count }
 
   private func abbrView(_ i:Int) -> TextInput {
-    return (items[i] as! ViewGroup).children[0] as! TextInput
+    (abbreviationList.items[i] as! ViewGroup).children[0] as! TextInput
   }
   private func expaView(_ i:Int) -> TextInput {
-    return (items[i] as! ViewGroup).children[1] as! TextInput
+    (abbreviationList.items[i] as! ViewGroup).children[1] as! TextInput
   }
 
   subscript(index: Int) -> AbbreviationItem {
-    return AbbreviationItem(abbr: abbrView(index).text, expa: expaView(index).text)
+    AbbreviationItem(abbr: abbrView(index).text, expa: expaView(index).text)
   }
 
   func clearErrors() {
-    items.forEach { child in
+    abbreviationList.items.forEach { child in
       (child as! ViewGroup).children[0].backgroundColor = UIColor.white
     }
   }

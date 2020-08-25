@@ -126,7 +126,11 @@ class SequencerModel {
     if (callNum < 0) {
       return callNum
     } else {
-      return callNames.indices.filter { !isComment(callNames[$0]) }[callNum]
+      let realCalls = callNames.indices.filter { !isComment(callNames[$0]) }
+      if (callNum < realCalls.count) {
+        return realCalls[callNum]
+      }
+      return callNum
     }
   }
 

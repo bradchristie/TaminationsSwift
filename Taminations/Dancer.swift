@@ -141,14 +141,7 @@ class Dancer : Comparable, Hashable, CustomStringConvertible {
     data = DancerData()
     starttx = geom.startMatrix(mat)
     // Compute points of path for drawing path
-    animateComputed(beat: -2.0)
-    var loc = location
-    pathpath.moveTo(loc.x,loc.y)
-    for beat10 in 0...(beats*10.0).i {
-      animateComputed(beat: beat10.d/10.0)
-      loc = location
-      pathpath.lineTo(loc.x,loc.y)
-    }
+    computePath()
     //  Restore dancer to start position
     animateComputed(beat:-2.0)
   }
@@ -302,6 +295,20 @@ class Dancer : Comparable, Hashable, CustomStringConvertible {
     starttx = starttx * Matrix(angle:angle.toRadians)
     tx = Matrix(starttx)
     return self
+  }
+
+  // Compute points of path for drawing path
+  func computePath() {
+    // Compute points of path for drawing path
+    animateComputed(beat: 0.0)
+    var loc = location
+    pathpath = DrawingPath()
+    pathpath.moveTo(loc.x,loc.y)
+    for beat10 in 0...(beats*10.0).i {
+      animateComputed(beat: beat10.d/10.0)
+      loc = location
+      pathpath.lineTo(loc.x,loc.y)
+    }
   }
 
   /**

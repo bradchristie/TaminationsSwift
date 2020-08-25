@@ -18,19 +18,17 @@
 
 */
 
-class ScootAndRamble : Action {
+class HorseshoeTurn : Action {
 
-  override var level:LevelData { LevelObject.find("c1") }
-  override var requires:[String] {
-    ["ms/scoot_back"] + Ramble().requires
-  }
+  override var level:LevelData { return LevelObject.find("a1") }
+  override var requires:[String] { return ["ms/cloverleaf","a1/partner_tag"] }
 
   init() {
-    super.init("Scoot and Ramble")
+    super.init("Horseshoe Turn")
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Ramble")
+    try ctx.applyCalls("Clover and Partner Tag")
   }
 
 }

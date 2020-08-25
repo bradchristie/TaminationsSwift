@@ -21,9 +21,9 @@
 class Adjust : Action {
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    let fname = name.replaceIgnoreCase("adust to (a(n)?)?", "")
+    let fname = name.replaceIgnoreCase("adust to (an?)?", "")
     var formation: XMLElement
-    if (norm.matches(".*line(s)?")) {
+    if (norm.matches(".*lines?")) {
       formation = TamUtils.getFormation("Normal Lines")
     }
     else if (norm.matches(".*thar")) {
@@ -32,13 +32,16 @@ class Adjust : Action {
     else if (norm.matches(".*square(d)?set")) {
       formation = TamUtils.getFormation("Squared Set")
     }
-    else if (norm.matches(".*boxes")) {
+    else if (norm.matches(".*boxes?")) {
+      formation = TamUtils.getFormation("Eight Chain Thru")
+    }
+    else if (norm.matches(".*columns?")) {
       formation = TamUtils.getFormation("Eight Chain Thru")
     }
     else if (norm.matches(".*14tag")) {
       formation = TamUtils.getFormation("Quarter Tag")
     }
-    else if (norm.matches(".*diamonds")) {
+    else if (norm.matches(".*diamonds?")) {
       formation = TamUtils.getFormation("Diamonds RH Girl Points")
     }
     else if (norm.matches(".*tidal(wave|line)?")) {
@@ -65,6 +68,7 @@ class Adjust : Action {
     }
     let matchResult = ctx.computeFormationOffsets(ctx2,mapping,delta:0.3)
     ctx.adjustToFormationMatch(matchResult)
+    ctx.noSnap()
   }
 
 }
