@@ -29,7 +29,7 @@ class While : Action {
     //  Use another context to do the rest of the call
     //  Don't add standing beats for the inactive dancers
     //  Otherwise there's a lot of standing around at the end
-    let ctx2 = CallContext(ctx,beat:0.0).noSnap().noExtend()
+    let ctx2 = CallContext(ctx,beat:0.0).noSnap()
     ctx2.dancers.forEach { d in d.data.active = true }
     let whilecall = name.lowercased().replaceFirst("while(\\s+the)?\\s+","")
     //  Strip off standing beats of the inactive dancers

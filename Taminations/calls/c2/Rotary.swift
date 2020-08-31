@@ -18,19 +18,23 @@
 
 */
 
-class ScootAndCrossRamble : Action {
+class Rotary : Action {
 
   override var level:LevelData { LevelObject.find("c2") }
   override var requires:[String] {
-    ["ms/scoot_back"] + CrossRamble().requires
-  }
-
-  init() {
-    super.init("Scoot and Cross Ramble")
+    ["b2/wheel_around","ms/hinge"]
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Cross Ramble")
+    let anyCall = name.replaceIgnoreCase("rotary\\s*", "")
+    try ctx.applyCalls("Pull By")
+    ctx.analyze()
+    try ctx.subContext(ctx.outer(4)) { ctx2 in
+      try ctx2.applyCalls("Courtesy Turn and Roll")
+    }
+    try ctx.subContext(ctx.center(4)) { ctx2 in
+      try ctx2.applyCalls("Step to a Left Hand Wave",anyCall)
+    }
   }
 
 }

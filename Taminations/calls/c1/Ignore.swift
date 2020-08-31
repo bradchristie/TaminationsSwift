@@ -18,21 +18,29 @@
 
 */
 
-class Ramble : Action {
+class Ignore : Action {
 
   override var level:LevelData { LevelObject.find("c1") }
-  override var requires:[String] {
-    ["a2/single_wheel","ms/slide_thru","b1/separate"]
-  }
 
-  init() {
-    super.init("Ramble")
-  }
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    let ctx2 = CallContext(ctx,beat:0.0).noSnap()
-    try ctx2.applyCalls("Center 4 Single Wheel and Slide Thru")
-    try ctx2.applyCalls("Outer 4 Separate and Slide Thru")
-    ctx2.appendToSource()
+    //   Who should we ignore?
+    let query = "ignore (?:the)?((?:\(CodedCall.specifier) )+)(?:and )?(?:for a )?(.+)"
+    if let match = name.matchWithGroups(query) {
+      let who = match[1]
+      let call = match[2]
+      //  Remember the dancers that we will ignore
+      try ctx.subContext(ctx.dancers) { ctx2 in
+        try ctx2.interpretCall(who,noAction:true)
+        try ctx2.performCall()
+        let ignoreDancers = ctx2.actives
+        //  Do the call
+        ctx2.dancers.forEach { $0.data.active = true }
+        try ctx2.applyCalls(call)
+        //  Now erase the action of the ignored dancers
+        ctx2.dancers.filter { ignoreDancers.contains($0) }.forEach {
+          $0.path = Path()
+        }
+      }
+    }
   }
-
 }

@@ -37,6 +37,7 @@ class Crazy : Action {
     }
     try ctx.applyCalls("\(crazy8) \(crazycall)","Center 4 \(crazy4) \(crazycall)")
     if (!norm.startsWith("12")) {
+      ctx.matchStandardFormation()
       try ctx.applyCalls("\(crazy8) \(crazycall)")
       if (!norm.startsWith("34")) {
         try ctx.applyCalls("Center 4 \(crazy4) \(crazycall)")

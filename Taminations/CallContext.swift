@@ -192,7 +192,6 @@ class CallContext {
   var groupstr:String { groups.map { $0.count.s }.joined(separator: "")  }
   private var source: CallContext? = nil
   private var snap = true
-  private var extend = true
   private var thoseWhoCan = false
 
   //  For cases where creating a new context from a source,
@@ -261,11 +260,6 @@ class CallContext {
   @discardableResult
   func noSnap() -> CallContext {
     snap = false
-    return self
-  }
-
-  func noExtend() -> CallContext {
-    extend = false
     return self
   }
 
@@ -366,12 +360,9 @@ class CallContext {
 
   @discardableResult
   func applyCalls(_ calltext: [String]) throws -> CallContext {
-    try calltext.dropLast().forEach {
+    try calltext.forEach {
       try CallContext(self).applyCall($0)
     }
-    let ctx = CallContext(self)
-    ctx.extend = extend
-    try ctx.applyCall(calltext.last!)
     return self
   }
   @discardableResult
@@ -407,7 +398,7 @@ class CallContext {
    * This is the main loop for interpreting a call
    * @param calltxt  One complete call, lower case, words separated by single spaces
    */
-  func interpretCall(_ calltxt: String) throws {
+  func interpretCall(_ calltxt: String, noAction:Bool = false) throws {
     var calltext = cleanupCall(calltxt)
     var err: CallError = CallNotFoundError(calltxt)
     //  Clear out any previous paths from incomplete parsing
@@ -462,7 +453,9 @@ class CallContext {
         throw err
       }
     }
-    try checkForAction(calltxt)
+    if (!noAction) {
+      try checkForAction(calltxt)
+    }
   }
 
   func xmlFilesForCall(_ norm:String) -> Set<String> {
@@ -1182,9 +1175,9 @@ class CallContext {
   }
 
   //  Return true if 8 dancers are in 2 general columns of 4 dancers each
-  func isColumns() -> Bool {
+  func isColumns(_ num:Int = 4) -> Bool {
     dancers.all {
-      d in dancersInFront(d).count + dancersInBack(d).count == 3
+      d in dancersInFront(d).count + dancersInBack(d).count == num-1
     }
   }
 

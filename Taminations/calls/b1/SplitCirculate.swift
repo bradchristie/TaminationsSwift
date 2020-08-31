@@ -18,19 +18,32 @@
 
 */
 
-class ScootAndCrossRamble : Action {
-
-  override var level:LevelData { LevelObject.find("c2") }
-  override var requires:[String] {
-    ["ms/scoot_back"] + CrossRamble().requires
-  }
+class SplitCirculate : Action {
 
   init() {
-    super.init("Scoot and Cross Ramble")
+    super.init("Split Circulate")
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Cross Ramble")
+    if (!ctx.isTBone()) {
+      throw CallError("Only 2 boxes of 4 can Split Circulate")
+    }
+    try super.perform(ctx, index)
+  }
+
+  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
+    if (d.data.trailer) {
+      return TamUtils.getMove("Forward 2").changebeats(3.0)
+    }
+    else if (d.data.leader) {
+      let move = (ctx.dancerInFront(d) != nil) ? "Flip" : "Run"
+      if (ctx.dancersToLeft(d).count % 2 == 1) {
+        return TamUtils.getMove("\(move) Left")
+      } else if (ctx.dancersToRight(d).count % 2 == 1) {
+        return TamUtils.getMove("\(move) Right")
+      }
+    }
+    throw CallError("Unable to calculate Split Circulate for dancer \(d)")
   }
 
 }

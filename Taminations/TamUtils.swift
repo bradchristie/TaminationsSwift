@@ -112,7 +112,7 @@ class TamUtils {
   }
 
   class func getFormation(_ fname:String) -> XMLElement {
-    return formations[fname]!
+    formations[fname]!
   }
 
   private class func translate(_ elem:XMLElement) -> [Movement] {
@@ -138,7 +138,7 @@ class TamUtils {
   //  or moves.xml
   //  Returns an array of a single movement
   private class func translateMovement(_ move:XMLElement) -> [Movement] {
-    return [Movement(elem:move)]
+    [Movement(elem:move)]
   }
 
   //  Takes a move, which is an XML element that references another XML
@@ -152,7 +152,7 @@ class TamUtils {
     let movements = translatePath(pathelem)
     //  Get any modifications
     let scaleX = move.attr("scaleX")?.d ?? 1.0
-    let scaleY = (move.attr("scaleY")?.d ?? 1.0) 
+    let scaleY = (move.attr("scaleY")?.d ?? 1.0)
               * (move.attr("reflect") == nil ? 1.0 : -1.0)
     let offsetX = move.attr("offsetX")?.d ?? 0.0
     let offsetY = (move.attr("offsetY")?.d ?? 0.0)
@@ -175,7 +175,7 @@ class TamUtils {
  *   Gets a named path (move) from the file of moves
  */
   class func getMove(_ name:String) -> Path {
-    return Path(translate(moves[name]!))
+    Path(translate(moves[name]!))
   }
 
   /**
@@ -225,7 +225,7 @@ class TamUtils {
 
   /**  Standardize a call name to match against other names  */
   class func normalizeCall(_ callname:String) -> String {
-    return callname.lowercased().trim()
+    callname.lowercased().trim()
       .replaceAll("&","and")
       .replaceAll("\\s+"," ")
       .replaceAll("[^a-zA-Z0-9_ ]","")
@@ -271,6 +271,8 @@ class TamUtils {
       .replaceAll("\\bcentres?\\b","center")
       .replaceAll("\\b(1|3)4 tag the line\\b","$14 tag")
       .replaceAll("\\b12 square thru\\b","square thru 2")
+      .replaceAll("\\bbox recycle\\b","recycle")
+      .replaceAll("interlocked (flip|cut) the","$1 the interlocked")
       //  'Dixie Style' -> 'Dixie Style to a Wave'
       .replaceAll("\\bdixie style(?! to)","dixie style to a wave")
       .replaceAll("\\bchase left\\b","left chase")

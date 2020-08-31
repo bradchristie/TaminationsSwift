@@ -20,7 +20,7 @@
 
 class Circulate : Action {
 
-  override var requires: [String] { return ["b1/circulate"] }
+  override var requires: [String] { ["b1/circulate"] }
 
   init() {
     super.init("Circulate")
@@ -52,11 +52,14 @@ class Circulate : Action {
     }
     //  If in columns, do Column Circulate
     //  (if there are 6 dancers, must be 2 columns of 3)
-    else if (ctx.actives.count == 6 || ctx.isColumns()) {
+    else if (ctx.isColumns()) {
       try ctx.applyCalls("column circulate")
     }
-    //  If none of those, but tBones, calculate each path individually
-    else if (ctx.isTBone()) {
+    else if (ctx.actives.count==6 && ctx.isColumns(3)) {
+      try ctx.applyCalls("column circulate")
+    }
+    //  If none of those, but tBones, or 6 dancers, calculate each path individually
+    else if (ctx.actives.count == 6 || ctx.isTBone()) {
       try super.perform(ctx,index)
       if (ctx.isCollision()) {
         throw CallError("Cannot handle dancer collision here.")
@@ -97,6 +100,42 @@ class Circulate : Action {
 
             }
           }
+        }
+      }
+    }
+
+    // A little harder - 6 dancers not in columns
+    else if (ctx.actives.count == 6) {
+      //  If there is a dancer directly or diagonally in front, go there
+      let d2q = ctx.dancerClosest(d) {
+        $0.data.active && d.angleToDancer($0).abs.isLessThan(.pi/2.0) &&
+          !d.angleFacing.isAround($0.angleFacing + .pi)
+      }
+      if let d2 = d2q {
+        let v = d.vectorToDancer(d2)
+        if (d.angleFacing.isAround(d2.angleFacing)) {
+          return TamUtils.getMove("Extend Left").changebeats(3.0).scale(v.x,v.y)
+        }
+        else if (d.angleFacing.isAround(d2.angleFacing + .pi/2.0)) {
+          return TamUtils.getMove("Lead Left").changebeats(3.0).scale(v.x,v.y)
+        }
+        else if (d.angleFacing.isAround(d2.angleFacing - .pi/2.0)) {
+          return TamUtils.getMove("Lead Right").changebeats(3.0).scale(v.x,-v.y)
+        }
+        else {
+          throw CallError("Unable to calculate Circulate path.")
+        }
+      } else {  // Otherwise look for a dancer to the side
+        let d3q = ctx.dancerClosest(d) {
+          $0.data.active && $0.isRightOf(d)
+        } ?? ctx.dancerClosest(d) {
+          $0.data.active && $0.isRightOf(d)
+        }
+        if let d3 = d3q {
+          let v = d.vectorToDancer(d3)
+          return TamUtils.getMove("Run Left").scale(1.0,v.y/2.0)
+        } else {
+          throw CallError("Unable to calculate Circulate for dancer \(d)")
         }
       }
     }

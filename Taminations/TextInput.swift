@@ -52,6 +52,7 @@ class TextInput : View, UITextFieldDelegate {
     mydiv.autocorrectionType = .no
     mydiv.spellCheckingType = .no
     mydiv.clearButtonMode = .whileEditing
+    mydiv.adjustsFontSizeToFitWidth = true
     mydiv.delegate = self
     backgroundColor = UIColor.white
     mydiv.addTarget(self, action: #selector(self.textFieldChanged), for: .editingChanged)

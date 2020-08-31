@@ -67,11 +67,7 @@ class StepToACompactWave : Action {
     }
     let dist = d.distanceTo(d2)
     let dir = (norm.contains("left")) ? "Right" : "Left"
-    return TamUtils.getMove("Extend \(dir)").scale(dist/2,0.5)    
-  }
-
-  override func postProcess(_ ctx: CallContext, _ index: Int) {
-    //  Do not snap to formation, which parent does
+    return TamUtils.getMove("Extend \(dir)").scale(dist/2,0.5)
   }
 
 }

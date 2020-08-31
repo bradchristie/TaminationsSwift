@@ -18,19 +18,36 @@
 
 */
 
-class ScootAndCrossRamble : Action {
+class Rotate : Action {
 
   override var level:LevelData { LevelObject.find("c2") }
   override var requires:[String] {
-    ["ms/scoot_back"] + CrossRamble().requires
-  }
-
-  init() {
-    super.init("Scoot and Cross Ramble")
+    ["b2/wheel_around","ms/hinge"]
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Cross Ramble")
+    if (!ctx.isLines() || !ctx.dancers.all { ctx.isInCouple($0)} ) {
+      throw CallError("Unable to Rotate from this formation")
+    }
+    let leaders = ctx.dancers.filter { $0.data.leader }
+    let trailers = ctx.dancers.filter { $0.data.trailer }
+    if (leaders.count > 0) {
+      try ctx.subContext(leaders) {
+        try $0.applyCalls("Half Wheel Around")
+      }
+    }
+    if (trailers.count > 0) {
+      try ctx.subContext(trailers) {
+        try $0.applyCalls("Half Reverse Wheel Around")
+      }
+    }
+    try ctx.applyCalls("Couples Hinge")
+    if (norm.endsWith("12")) {
+      try ctx.applyCalls("Couples Hinge")
+    }
+    if (norm.endsWith("34")) {
+      try ctx.applyCalls("Couples Hinge","Couples Hinge")
+    }
   }
 
 }

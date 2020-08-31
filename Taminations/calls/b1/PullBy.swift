@@ -18,19 +18,11 @@
 
 */
 
-class ScootAndCrossRamble : Action {
+class PullBy : PassThru {
 
-  override var level:LevelData { LevelObject.find("c2") }
-  override var requires:[String] {
-    ["ms/scoot_back"] + CrossRamble().requires
-  }
-
-  init() {
-    super.init("Scoot and Cross Ramble")
-  }
-
-  override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Scoot Back","Cross Ramble")
+  override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
+    let hands = norm.startsWith("left") ? Hands.LEFTHAND : Hands.RIGHTHAND
+    return try super.performOne(d, ctx).changehands(hands)
   }
 
 }

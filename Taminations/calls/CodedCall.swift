@@ -81,6 +81,8 @@ class CodedCall : Call {
     "passout" : { PassOut() },
     "passthru" : { PassThru("passthru","Pass Thru") },
     "leftpassthru" : { PassThru("leftpassthru","Left Pass Thru") },
+    "pullby" : { PullBy("pullby","Pull By") },
+    "leftpullby" : { PullBy("leftpullby", "Left Pull By") },
     "point" : { Points() },
     "14in" : { QuarterIn("14in","Quarter In") },
     "14out" : { QuarterIn("14out","Quarter Out") },
@@ -174,7 +176,8 @@ class CodedCall : Call {
     "castback" : { CastBack("castback","Cast Back") },
     "crosscastback" : { CastBack("crosscastback","Cross Cast Back") },
     "horseshoeturn" : { HorseshoeTurn() },
-    "scootandcrossramble" : { ScootAndCrossRamble() }
+    "scootandcrossramble" : { ScootAndCrossRamble() },
+    "splitcirculate" : { SplitCirculate() }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -187,7 +190,7 @@ class CodedCall : Call {
     "112" : { (norm:String,call:String) in OneAndaHalf(norm,call) }
   ]
 
-  static let specifier = "\\s*(boys?|girls?|beaus?|belles?|centers?|ends?|leaders?|trailers?|heads?|sides?|very centers?)\\s*"
+  static let specifier = "\\s*(?:boys?|girls?|beaus?|belles?|centers?|ends?|leaders?|trailers?|heads?|sides?|very centers?)\\s*"
 
   let norm:String
   private let _name:String
@@ -400,6 +403,18 @@ class CodedCall : Call {
 
     if (callnorm.matches("triple(lines?|waves?|columnns?).*")) {
       return TripleLineConcept(callnorm,callname)
+    }
+
+    if (callnorm.matches("rotate(14|12|34)")) {
+      return Rotate(callnorm,callname)
+    }
+
+    if (callnorm.matches("rotary.+")) {
+      return Rotary(callnorm,callname)
+    }
+
+    if (callnorm.matches("ignore.+")) {
+      return Ignore(callnorm,callname)
     }
 
     if (callnorm.matches(".*chainthru")) {
