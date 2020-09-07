@@ -155,7 +155,8 @@ class CodedCall : Call {
     "zagzag" : { ZigZag("zagzag","Zag Zag") },
     "zing" : { Zing() },
     "toawave" : { ToAWave() },
-    "kickoff" : { KickOff() },
+    "kickoff" : { KickOff("kickoff","Kick Off") },
+    "crosskickoff" : { KickOff("crosskickoff","Cross Kick Off") },
     "singlecrossandwheel" : { SingleCrossAndWheel() },
     "crossandwheel" : { CrossAndWheel() },
     "crosstradeandwheel" : { CrossTradeAndWheel() },
@@ -177,7 +178,9 @@ class CodedCall : Call {
     "crosscastback" : { CastBack("crosscastback","Cross Cast Back") },
     "horseshoeturn" : { HorseshoeTurn() },
     "scootandcrossramble" : { ScootAndCrossRamble() },
-    "splitcirculate" : { SplitCirculate() }
+    "splitcirculate" : { SplitCirculate() },
+    "dosado" : { Dosado("dosado","Dosado") },
+    "leftdosado" : { Dosado("leftdosado","Left Dosado") }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -313,7 +316,7 @@ class CodedCall : Call {
       return Adjust(callnorm,callname)
     }
 
-    if (callnorm.matches("bouncethe.*")) {
+    if (callnorm.matches("bounce(the)?.*")) {
       return Bounce(callnorm,callname)
     }
 
@@ -337,11 +340,11 @@ class CodedCall : Call {
       return Relocate(callnorm,callname)
     }
 
-    if (callnorm.matches("(outside|point)?(out|in|left|right|(go)?(forward|asyouare))?little")) {
+    if (callnorm.matches("(scootand)?(outside|point)?(out|in|left|right|(go)?(forward|asyouare))?little")) {
       return Little(callnorm, callname)
     }
 
-    if (callnorm.matches("little(outside|point)(in|out|left|right|(go)?(forward|asyouare))?")) {
+    if (callnorm.matches("(scootand)?little(outside|point)(in|out|left|right|(go)?(forward|asyouare))?")) {
       return Little(callnorm,callname)
     }
 

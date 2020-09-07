@@ -41,12 +41,14 @@ class Bounce : Action {
     }
 
     //  Remember who to bounce
-    let who = norm.replace("bouncethe","")
+    let who = norm.replaceFirst("bounce(the)?","")
     let whoctx = CallContext(ctx,ctx.actives)
     //  Do the veer
     try ctx.applyCalls(veer)
     //  Do the bounce
-    try whoctx.applyCalls("\(who) Turn Back").appendToSource()
+    if (!who.matches("no(body|one)")) {
+      try whoctx.applyCalls("\(who) Turn Back").appendToSource()
+    }
   }
 
 }

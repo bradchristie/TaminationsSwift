@@ -108,7 +108,7 @@ class Case2 : Action {
       v = Vector(0.0, -2.0)
     }
     //  Pop off the last movement and shift it by that offset
-    let m = p.pop()
+    let m = (p.movelist.count > 0) ? p.pop() : TamUtils.getMove("Stand").pop()
     let tx = m.rotate()
     v = tx * v
     p.add(m.skew(v.x,v.y).useHands(Hands.NOHANDS))

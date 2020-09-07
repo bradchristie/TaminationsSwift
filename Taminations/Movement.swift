@@ -55,7 +55,7 @@ class Movement {
   let brotate:Bezier
 
   //  for sequencer
-  var fromCall = true
+  let fromCall:Bool
 
 /**  Constructor for a movement where the dancer does not face the direction
  *   of travel.  Two Bezier curves are used, one for travel and one for
@@ -68,11 +68,13 @@ class Movement {
  */
   init(beats:Double,hands:Hands,
        btranslate:Bezier,
-       brotate:Bezier) {
+       brotate:Bezier,
+       fromCall:Bool=true) {
     self.hands = hands
     self.beats = beats
     self.btranslate = btranslate
     self.brotate = brotate
+    self.fromCall = fromCall
   }
 
   /**
@@ -81,10 +83,10 @@ class Movement {
    */
   convenience init(elem:XMLElement) {
     self.init(
-      beats: Double(elem.attr("beats")!)!, 
-      hands: Hands.getHands(elem.attr("hands") ?? "none"), 
+      beats: Double(elem.attr("beats")!)!,
+      hands: Hands.getHands(elem.attr("hands") ?? "none"),
       btranslate: Bezier(x1:0.0, y1:0.0,
-          ctrlx1: Double(elem.attr("cx1")!)!, 
+          ctrlx1: Double(elem.attr("cx1")!)!,
           ctrly1: Double(elem.attr("cy1")!)!,
           ctrlx2: Double(elem.attr("cx2")!)!,
           ctrly2: Double(elem.attr("cy2")!)!,
@@ -94,8 +96,8 @@ class Movement {
           ctrlx1: Double(elem.attr("cx3") ?? elem.attr("cx1")!)!,
           ctrly1:0.0,
           ctrlx2: Double(elem.attr("cx4") ?? elem.attr("cx2")!)!,
-          ctrly2: Double(elem.attr("cy4") ?? elem.attr("cy2")!)!, 
-          x2: Double(elem.attr("x4") ?? elem.attr("x2")!)!, 
+          ctrly2: Double(elem.attr("cy4") ?? elem.attr("cy2")!)!,
+          x2: Double(elem.attr("x4") ?? elem.attr("x2")!)!,
           y2: Double(elem.attr("y4") ?? elem.attr("y2")!)!)
     )
   }
@@ -120,14 +122,18 @@ class Movement {
    * Return a new movement by changing the beats
    */
   func time(_ b:Double) -> Movement {
-    Movement(beats: b, hands: hands, btranslate: btranslate, brotate: brotate)
+    Movement(beats: b, hands: hands, btranslate: btranslate, brotate: brotate, fromCall: fromCall)
   }
 
   /**
  * Return a new movement by changing the hands
  */
   func useHands(_ h:Hands) -> Movement {
-    Movement(beats: beats, hands: h, btranslate: btranslate, brotate: brotate)
+    Movement(beats: beats, hands: h, btranslate: btranslate, brotate: brotate, fromCall: fromCall)
+  }
+
+  func notFromCall() -> Movement {
+    Movement(beats: beats, hands: hands, btranslate: btranslate, brotate: brotate, fromCall: false)
   }
 
   /**

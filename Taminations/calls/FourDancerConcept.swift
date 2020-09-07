@@ -123,7 +123,7 @@ class FourDancerConcept : Action {
           //  Now we can compute the Bezier
           let cb = Bezier.fromPoints(Vector(), p2, p3, p4)
           //  And use it to build the Movement
-          let cm = Movement(beats: m.beats,hands: m.hands,btranslate: cb, brotate: m.brotate)
+          let cm = Movement(beats: m.beats,hands: m.hands,btranslate: cb, brotate: m.brotate, fromCall: m.fromCall)
           //  And add the Movement to the Path
           d.path.add(cm)
         }

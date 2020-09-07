@@ -159,7 +159,7 @@ class Path {
   }
 
   func notFromCall() -> Path {
-    movelist.forEach { m in m.fromCall = false }
+    movelist = movelist.map { m in m.notFromCall() }
     return self
   }
 

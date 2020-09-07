@@ -21,24 +21,31 @@
 class Little : Action {
 
   override var level: LevelData { LevelObject.find("c1") }
-  override var requires:[String] { ["b1/face","c1/counter_rotate","c1/step_and_fold"] }
+  override var requires:[String] { ["b1/face","c1/counter_rotate","c1/step_and_fold","ms/scoot_back"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
+
+    //  Do the Scoot Back of Scoot and Little
+    if (norm.startsWith("scootand")) {
+      try ctx.applyCalls("Scoot Back")
+    }
+    let norm2 = norm.replace("scootand", "")
+
     //  Figure out which way the outside dancers turn
     var turn = "Face Right"
-    if (norm.startsWith("left") || norm.endsWith("left")) {
+    if (norm2.startsWith("left") || norm2.endsWith("left")) {
       turn = "Face Left"
     }
-    else if (norm.startsWith("right") || norm.endsWith("right")) {
+    else if (norm2.startsWith("right") || norm2.endsWith("right")) {
       turn = "Face Right"
     }
-    else if (norm.startsWith("in") || norm.endsWith("in")) {
+    else if (norm2.startsWith("in") || norm2.endsWith("in")) {
       turn = "Face In"
     }
-    else if (norm.startsWith("out") || norm.endsWith("out")) {
+    else if (norm2.startsWith("out") || norm2.endsWith("out")) {
       turn = "Face Out"
     }
-    else if (norm.endsWith("forward") || norm.endsWith("asyouare")) {
+    else if (norm2.endsWith("forward") || norm2.endsWith("asyouare")) {
       turn = ""
     }
     do {

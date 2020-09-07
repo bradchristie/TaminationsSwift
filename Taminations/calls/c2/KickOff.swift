@@ -22,15 +22,12 @@
 class KickOff : Action {
 
   override var level: LevelData { LevelObject.find("c2") }
-  override var requires:[String] { ["b2/run","plus/anything_and_roll"] }  
-
-  init() {
-    super.init("Kick Off")
-  }
+  override var requires:[String] { ["b2/run","plus/anything_and_roll"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    //  Active dancers Run and Roll
-    try ctx.applyCalls("Run and Roll")
+    //  Active dancers [Cross] Run and Roll
+    let cross = norm.startsWith("cross") ? "Cross" : ""
+    try ctx.applyCalls("\(cross) Run and Roll")
     //  Inactive dancers that moved do a Partner Tag
     ctx.dancers.filter {
       !$0.data.active && $0.path.movelist.count > 0
