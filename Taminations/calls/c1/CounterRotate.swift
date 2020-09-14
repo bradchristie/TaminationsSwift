@@ -26,12 +26,19 @@ class CounterRotate : Action {
     super.init("Counter Rotate")
   }
 
+  override func perform(_ ctx: CallContext, _ index: Int) throws {
+    try super.perform(ctx, index)
+    //  Looks much better if dancers all take the same time
+    let maxBeats = ctx.dancers.map { $0.path.beats }.max()!
+    ctx.dancers.forEach { $0.path.changebeats(maxBeats) }
+  }
+
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
     let da = d.angleToOrigin
     //  Counter Rotate not possible if dancer is looking
     //  directly at the center of the square
     if (da.isAround(0.0)) {
-      throw CallError("Dancer $d cannot Counter Rotate")
+      throw CallError("Dancer \(d) cannot Counter Rotate")
     }
     //  Compute points for Bezier
     let anginc = .pi/6.0 * da.sign

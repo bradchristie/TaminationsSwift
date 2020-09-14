@@ -180,7 +180,8 @@ class CodedCall : Call {
     "scootandcrossramble" : { ScootAndCrossRamble() },
     "splitcirculate" : { SplitCirculate() },
     "dosado" : { Dosado("dosado","Dosado") },
-    "leftdosado" : { Dosado("leftdosado","Left Dosado") }
+    "leftdosado" : { Dosado("leftdosado","Left Dosado") },
+    "promenadehome" : { PromenadeHome("promenadehome","Promenade Home") }
   ]
 
   //  More complex calls where the text is needed either to select
@@ -193,7 +194,7 @@ class CodedCall : Call {
     "112" : { (norm:String,call:String) in OneAndaHalf(norm,call) }
   ]
 
-  static let specifier = "\\s*(?:boys?|girls?|beaus?|belles?|centers?|ends?|leaders?|trailers?|heads?|sides?|very centers?)\\s*"
+  static let specifier = "\\s*(?:boys?|girls?|beaus?|belles?|centers?|ends?|lead(?:er)?s?|trail(?:er)?s?|heads?|sides?|very centers?)\\s*"
 
   let norm:String
   private let _name:String
@@ -316,7 +317,7 @@ class CodedCall : Call {
       return Adjust(callnorm,callname)
     }
 
-    if (callnorm.matches("bounce(the)?.*")) {
+    if (callnorm.matches("bounce(the)?\(specifier)")) {
       return Bounce(callnorm,callname)
     }
 
@@ -418,6 +419,10 @@ class CodedCall : Call {
 
     if (callnorm.matches("ignore.+")) {
       return Ignore(callnorm,callname)
+    }
+
+    if (callnorm.matches("swing(your)?corner(and)?promenade(home)?")) {
+      return PromenadeHome(callnorm,callname)
     }
 
     if (callnorm.matches(".*chainthru")) {

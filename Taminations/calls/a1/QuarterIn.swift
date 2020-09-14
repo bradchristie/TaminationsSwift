@@ -20,16 +20,21 @@
 
 class QuarterIn : Action {
 
-  override var level:LevelData { return LevelObject.find("a1") }
+  override var level:LevelData { LevelObject.find("a1") }
 
   override func performOne(_ d: Dancer, _ ctx: CallContext) throws -> Path {
-    var move = (d.angleToOrigin < 0) ? "Quarter Right" : "Quarter Left"
-    if (d.data.beau) {
-      move = norm.endsWith("out") ? "Quarter Left" : "Quarter Right"
-    } else if (d.data.belle) {
-      move = norm.endsWith("out") ? "Quarter Right" : "Quarter Left"
+    if (!d.data.beau && !d.data.belle) {
+      //  No partner - Face In / Out
+      if ((d.angleToOrigin < 0.0) ^ norm.matches(".*out")) {
+        return TamUtils.getMove("Quarter Right")
+      } else {
+        return TamUtils.getMove("Quarter Left")
+      }
+    } else if (d.data.beau ^ norm.matches(".*out")) {
+      return TamUtils.getMove("Quarter Right")
+    } else {
+      return TamUtils.getMove("Quarter Left")
     }
-    return TamUtils.getMove(move)
   }
 
 }

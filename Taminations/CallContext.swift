@@ -333,20 +333,6 @@ class CallContext {
     }
   }
 
-  private func applyCall(_ calltext: String) throws {
-    try interpretCall(calltext)
-    try performCall()
-    appendToSource()
-  }
-
-  private func checkForAction(_ calltext: String) throws {
-    if (callstack.none { c in
-      c is Action || c is XMLCall
-    }) {
-      throw CallError("\(calltext) does nothing")
-    }
-  }
-
   public func thoseWhoCanOnly() {
     thoseWhoCan = true
   }
@@ -358,10 +344,26 @@ class CallContext {
     throw CallError("Dancer \(d) cannot \(call)")
   }
 
+  private func checkForAction(_ calltext: String) throws {
+    if (callstack.none { c in
+      c is Action || c is XMLCall
+    }) {
+      throw CallError("\(calltext) does nothing")
+    }
+  }
+
+  func applySpecifier(_ calltext:String) throws {
+    try interpretCall(calltext, noAction: true)
+    try performCall()
+  }
+
   @discardableResult
   func applyCalls(_ calltext: [String]) throws -> CallContext {
-    try calltext.forEach {
-      try CallContext(self).applyCall($0)
+    try calltext.forEach { call in
+      let ctx = CallContext(self)
+      try ctx.interpretCall(call)
+      try ctx.performCall()
+      ctx.appendToSource()
     }
     return self
   }
@@ -1308,6 +1310,23 @@ class CallContext {
     dancers.forEach { d in
       d.setStartPosition(d.location - shift)
     }
+  }
+
+  //  Move a dancer to a specific position (location and angle)
+  func moveToPosition(_ d:Dancer, _ location:Vector, _ angle:Double) -> Path {
+    var tohome = location - d.location
+    tohome = tohome.rotate(-d.tx.angle)
+    let adiff = angle.angleDiff(d.tx.angle)
+    let turn = adiff.angleEquals(0.0) ? "Stand"
+      : adiff.angleEquals(.pi / 4) ? "Eighth Left"
+      : adiff.angleEquals(.pi / 2) ? "Quarter Left"
+      : adiff.angleEquals(.pi * 3 / 4) ? "3/8 Left"
+      : adiff.angleEquals(.pi) ? "U-Turn Right"
+      : adiff.angleEquals(-3 * .pi / 4) ? "3/8 Right"
+      : adiff.angleEquals(-.pi / 2) ? "Quarter Right"
+      : adiff.angleEquals(-.pi / 4) ? "Eighth Right"
+      : "Stand"
+    return TamUtils.getMove(turn).changebeats(2.0).skew(tohome.x, tohome.y)
   }
 
   //  This is useful for calls that depend on re-defining dancer types

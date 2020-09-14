@@ -22,81 +22,62 @@ class Run : Action {
 
   override var level: LevelData { LevelObject.find("b2") }
 
+  private func runOne(_ d:Dancer, _ d2:Dancer, _ dir:String) {
+    let dist = d.distanceTo(d2)
+    d.path.add(TamUtils.getMove("Run \(dir)").scale(1.0,dist/2.0))
+    var m2 = "Stand"
+    if (d.isRightOf(d2)) { m2 = "Dodge Right" }
+    else if (d.isLeftOf(d2)) { m2 = "Dodge Left" }
+    else if (d.isInFrontOf(d2)) { m2 = "Forward 2" }
+    else if (d.isInBackOf(d2)) { m2 = "Back 2" }
+    d2.path.add(TamUtils.getMove(m2).scale(dist/2.0,dist/2.0))
+  }
+
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    //  We need to look at all the dancers, not just actives
-    //  because partners of the runners need to dodge
-    try ctx.dancers.forEach { d in
-      if (d.data.active) {
-        //  Find dancer to run around
-        //  Usually it's the partner
-        var d2q = d.data.partner
+    var dancersToRun = Set(ctx.dancers.filter { $0.data.active })
+    var dancersToWalk = Set(ctx.dancers.filter { !$0.data.active })
+    var usePartner = false
+    while (!dancersToRun.isEmpty) {
+      var foundRunner = false
+      try dancersToRun.forEach { d in
         let dleft = ctx.dancerToLeft(d)
         let dright = ctx.dancerToRight(d)
-        //  If that fails, look around
-        if (d2q == nil || d.data.active) {
-          let leftcount = ctx.dancersToLeft(d).count
-          let rightcount = ctx.dancersToRight(d).count
-          if (dleft == nil || dleft!.data.active) {
-            d2q = dright
+        let isLeft = dleft != nil && dancersToWalk.contains(dleft!) &&
+          norm != "runright"
+        let isRight = dright != nil && dancersToWalk.contains(dright!) &&
+          norm != "runleft"
+        if (!isLeft && !isRight) {
+          throw CallError("Dancer \(d) cannot Run.")
+        }
+        else if (!isLeft || (usePartner && dright != nil && dright == d.data.partner)) {
+          //  Run Right
+          guard let d2 = dright else {
+            throw CallError("Dancer \(d) unable to Run.")
           }
-          else if (dright == nil || dright!.data.active) {
-            d2q = dleft
+          runOne(d,d2,"Right")
+          dancersToRun.remove(d)
+          dancersToWalk.remove(d2)
+          foundRunner = true
+          usePartner = false
+        }
+        else if (!isRight || (usePartner && dleft != nil && dleft == d.data.partner)) {
+          //  Run Left
+          guard let d2 = dleft else {
+            throw CallError("Dancer \(d) unable to Run.")
           }
-          else if (leftcount % 2 == 1 && rightcount % 2 == 0) {
-            d2q = dleft
-          }
-          else if (rightcount % 2 == 1 && leftcount % 2 == 0) {
-            d2q = dright
-          }
+          runOne(d,d2,"Left")
+          dancersToRun.remove(d)
+          dancersToWalk.remove(d2)
+          foundRunner = true
+          usePartner = false
         }
-        //  If a direction was given, look there
-        if (norm == "runright") {
-          d2q = dright
+      }
+      if (!foundRunner) {
+        if (!usePartner) {
+          usePartner = true
+        } else {
+          throw CallError("Unable to calculate \(name) for this formation.")
         }
-        if (norm == "runleft") {
-          d2q = dleft
-        }
-        //  If a direction was given, look there
-        if (norm == "runright") {
-          d2q = dright
-        }
-        if (norm == "runleft") {
-          d2q = dleft
-        }
-        if (d2q == nil || d2q!.data.active) {
-          throw CallError("Dancer $d has nobody to Run around")
-        }
-        var d2 = d2q!
-
-        //  But special case of t-bones, could be the dancer on the other side,
-        //  check if another dancer is running around this dancer's "partner"
-        //  also check if partner is also active
-        let d3 = d2.data.partner
-        if (d2.data.active) {
-          guard let d22 = (d2.isRightOf(d) ? ctx.dancerToLeft(d) : ctx.dancerToRight(d)) else {
-            throw CallError("Dancer \(d) has nobody to Run around")
-          }
-          d2 = d22
-        }
-        else if (d != d3 && d3 != nil && d3!.data.active) {
-          guard let d2q = d3!.isRightOf(d) ? ctx.dancerToRight(d) : ctx.dancerToLeft(d) else {
-            throw CallError("Dancer \(d) has nobody to Run around (\(d) around \(d2)")
-          }
-          d2 = d2q
-        }
-        if (d2.data.active) {
-          throw CallError("Dancers cannot Run around each other.")
-        }
-        let m = d2.isRightOf(d) ? "Run Right" : "Run Left"
-        let dist = d.distanceTo(d2)
-        d.path.add(TamUtils.getMove(m).scale(1.0, dist / 2))
-        //  Also set path for partner
-        let m2 = d.isRightOf(d2) ? "Dodge Right"
-          : d.isLeftOf(d2) ? "Dodge Left"
-          : d.isInFrontOf(d2) ? "Forward 2"
-          : d.isInBackOf(d2) ? "Back 2"   //  really ???
-          : "Stand"  // should never happen
-        d2.path.add(TamUtils.getMove(m2).scale(1.0, dist / 2))
       }
     }
   }

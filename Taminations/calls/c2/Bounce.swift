@@ -31,11 +31,11 @@ class Bounce : Action {
     let centerBeaus = ctx.actives.filter {
       d in d.data.center && d.data.beau
     }
-    var veer = ""
+    var dir = ""
     if (centerBeaus.count==0 && centerBelles.count > 0) {
-      veer = "Veer Right"
+      dir = "Right"
     } else if (centerBeaus.count > 0 && centerBelles.count == 0) {
-      veer = "Veer Left"
+      dir = "Left"
     } else {
       throw CallError("Unable to calculate Bounce")
     }
@@ -43,11 +43,14 @@ class Bounce : Action {
     //  Remember who to bounce
     let who = norm.replaceFirst("bounce(the)?","")
     let whoctx = CallContext(ctx,ctx.actives)
+    if (!who.matches("no(body|one)")) {
+      try whoctx.applySpecifier(who)
+    }
     //  Do the veer
-    try ctx.applyCalls(veer)
+    try ctx.applyCalls("Veer \(dir)")
     //  Do the bounce
     if (!who.matches("no(body|one)")) {
-      try whoctx.applyCalls("\(who) Turn Back").appendToSource()
+      try whoctx.applyCalls("Face \(dir)","Face \(dir)").appendToSource()
     }
   }
 
