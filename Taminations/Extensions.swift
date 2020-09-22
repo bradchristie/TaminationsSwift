@@ -150,7 +150,7 @@ extension Array {
     filter { e in !f(e) }
   }
 
-  func elementAtOrNull(_ i:Int) -> Element? {
+  func getOrNull(_ i:Int) -> Element? {
     i >= 0 && i < count ? self[i] : nil
   }
 

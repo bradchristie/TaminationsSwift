@@ -35,7 +35,7 @@ class CallContext {
     "Normal Lines Compact" : 1.0,
     "Normal Lines" : 1.0,
     "Double Pass Thru" : 1.0,
-    "Quarter Tag" : 1.0,
+    "Quarter Tag" : 1.5,
     "Tidal Line RH" : 1.0,
     "Tidal Wave of 6" : 2.0,
     "I-Beam" : 2.0,
@@ -53,6 +53,7 @@ class CallContext {
     //  This also covers C-1 Phantom formations
     "Siamese Box 1" : 2.0,
     "Siamese Box 2" : 2.0,
+    "Siamese Wave" : 2.0,
     //  Blocks
     "Facing Blocks Right" : 2.0,
     "Facing Blocks Left" : 2.0,
@@ -131,7 +132,8 @@ class CallContext {
       "b2/alamo_style",
       "c2/once_removed_concept",
       "c1/split_square_thru_variations",
-      "c2/unwrap"
+      "c2/unwrap",
+      "c2/stretched_concept"
     ]
 
     if (callindex.isEmpty) {

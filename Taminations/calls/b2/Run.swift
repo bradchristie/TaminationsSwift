@@ -39,6 +39,7 @@ class Run : Action {
     var usePartner = false
     while (!dancersToRun.isEmpty) {
       var foundRunner = false
+      var runnersRunned = Set<Dancer>()
       try dancersToRun.forEach { d in
         let dleft = ctx.dancerToLeft(d)
         let dright = ctx.dancerToRight(d)
@@ -55,7 +56,7 @@ class Run : Action {
             throw CallError("Dancer \(d) unable to Run.")
           }
           runOne(d,d2,"Right")
-          dancersToRun.remove(d)
+          runnersRunned.insert(d)
           dancersToWalk.remove(d2)
           foundRunner = true
           usePartner = false
@@ -66,12 +67,13 @@ class Run : Action {
             throw CallError("Dancer \(d) unable to Run.")
           }
           runOne(d,d2,"Left")
-          dancersToRun.remove(d)
+          runnersRunned.insert(d)
           dancersToWalk.remove(d2)
           foundRunner = true
           usePartner = false
         }
       }
+      dancersToRun.subtract(runnersRunned)
       if (!foundRunner) {
         if (!usePartner) {
           usePartner = true

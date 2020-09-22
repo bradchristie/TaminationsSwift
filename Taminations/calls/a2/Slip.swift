@@ -30,7 +30,7 @@ class Slip : Action {
     //  If single wave in center, then very centers trade
     let ctx4 = CallContext(ctx, ctx.center(4))
     ctx4.analyze()
-    if (ctx4.isLines() && !ctx.isTidal()) {
+    if (ctx.dancers.count == 8 && ctx4.isLines() && !ctx.isTidal()) {
       try ctx.applyCalls("Very Centers Trade")
     } else {
       //  Otherwise, all centers trade

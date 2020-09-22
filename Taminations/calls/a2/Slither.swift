@@ -29,7 +29,7 @@ class Slither : Action {
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     //  If single wave in center, then very centers trade
     let ctx4 = CallContext(ctx, ctx.center(4))
-    if (ctx4.isLines() && !ctx.isTidal()) {
+    if (ctx.dancers.count == 8 && ctx4.isLines() && !ctx.isTidal()) {
       ctx.dancers.filter { !$0.data.verycenter }.forEach {
         $0.data.active = false
       }

@@ -45,7 +45,6 @@ class CodedCall : Call {
     "courtesyturn" : { CourtesyTurn() },
     "crossfold" : { CrossFold() },
     "crossovercirculate" : { CrossOverCirculate() },
-    "crossrun" : { CrossRun() },
     "cross" : { Cross() },
     "doublestarthru" : { DoubleStarThru() },
     "end" : { Ends() },
@@ -131,7 +130,7 @@ class CodedCall : Call {
     "turnback" : { TurnBack() },
     "uturnback" : { TurnBack() },
     "twisttheline" : { TwistAnything("twisttheline","Twist the Line") },
-    "zoom" : { Zoom() },
+    "zoom" : { Zoom("zoom","Zoom") },
     "singlewheel" : { SingleWheel("singlewheel","Single Wheel") },
     "leftsinglewheel" : { SingleWheel("leftsinglewheel","Left Single Wheel") },
     "squaretheset" : { SquareTheSet() },
@@ -153,7 +152,7 @@ class CodedCall : Call {
     "zigzag" : { ZigZag("zigzag","Zig Zag") },
     "zagzig" : { ZigZag("zagzig","Zag Zig") },
     "zagzag" : { ZigZag("zagzag","Zag Zag") },
-    "zing" : { Zing() },
+    "zing" : { Zoom("zing","Zing") },
     "toawave" : { ToAWave() },
     "kickoff" : { KickOff("kickoff","Kick Off") },
     "crosskickoff" : { KickOff("crosskickoff","Cross Kick Off") },
@@ -301,7 +300,7 @@ class CodedCall : Call {
       return SiameseConcept(callnorm,callname)
     }
 
-    if (callnorm.matches("(12|34)?crazy.*")) {
+    if (callnorm.matches("(12|34)?(reverse)?crazy.*")) {
       return Crazy(callnorm,callname)
     }
 
@@ -359,10 +358,6 @@ class CodedCall : Call {
 
     if (callnorm.matches("concentric(.+)")) {
       return ConcentricConcept(callnorm,callname)
-    }
-
-    if (callnorm.matches("stretch(.+)")) {
-      return StretchConcept(callnorm,callname)
     }
 
     if (callnorm.matches("checkpoint(.+)by(.*)")) {
@@ -425,6 +420,10 @@ class CodedCall : Call {
       return PromenadeHome(callnorm,callname)
     }
 
+    if (callnorm.matches("\(specifier)crossrun")) {
+      return CrossRun(callnorm,callname)
+    }
+
     if (callnorm.matches(".*chainthru")) {
       if (callnorm.matches(".*squarechainthru")) {
         return nil
@@ -435,6 +434,10 @@ class CodedCall : Call {
     //  Start should not match Star Thru e.g.
     if (callname.lowercased().matches("start .+")) {
       return Start(callnorm,callname)
+    }
+
+    if (callname.lowercased().matches("stretch .+")) {
+      return StretchConcept(callnorm,callname)
     }
 
     return nil

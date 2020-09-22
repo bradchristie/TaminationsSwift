@@ -119,7 +119,7 @@ class SequencerModel {
   }
 
   private func isComment(_ text:String) -> Bool {
-    text.trim().matches("\\W.*")
+    text.trim().matches("[^\\[a-zA-Z0-9].*")
   }
 
   func callNum2listNum(_ callNum:Int) -> Int {
@@ -173,7 +173,9 @@ class SequencerModel {
     let cctx = CallContext(avdancers)
     do {
       let prevbeats = seqView.animationView.movingBeats
-      try cctx.interpretCall(calltxt)
+      //  Remove any [user annotations]
+      let call = calltxt.replaceAll("\\[.*?\\]", "")
+      try cctx.interpretCall(call)
       try cctx.performCall()
       cctx.checkForCollisions()
       cctx.extendPaths()

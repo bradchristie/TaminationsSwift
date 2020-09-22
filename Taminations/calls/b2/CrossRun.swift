@@ -20,63 +20,56 @@
 
 class CrossRun : Action {
 
-  override var level: LevelData { return LevelObject.find("b2") }
-
-  init() {
-    super.init("Cross Run")
-  }
+  override var level: LevelData { LevelObject.find("b2") }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    //  Centers and ends cannot both cross run
-    if (ctx.dancers.any { d in
-      d.data.active && d.data.center
-    } &&
-      ctx.dancers.any { d in
-        d.data.active && d.data.end
-      }) {
-      throw CallError("Centers and ends cannot both Cross Run")
+    if (ctx.actives.count < ctx.dancers.count) {
+      try super.perform(ctx,index)
+      return
     }
-    //  We need to look at all the dancers, not just actives
-    //  because partners of the runners need to dodge
-    try ctx.dancers.forEach { d in
-      if (d.data.active) {
-        //  Must be in a 4-dancer wave or line
-        if (!d.data.center && !d.data.end) {
-          throw CallError("General line required for Cross Run")
-        }
-        //  Partner must be inactive
-        guard let d2 = d.data.partner else {
-          throw CallError("Nobody to Cross Run around")
-        }
-        if (d2.data.active) {
-          throw CallError("Dancer and partner cannot both Cross Run")
-        }
-        //  Center beaus and end belles run left
-        let isright = d.data.beau ^ d.data.center
-        //  TODO check for runners crossing paths
-        //    dancers would need to pass right shoulders
-        let m = (isright) ? "Run Right" : "Run Left"
-        let d3 = (isright)
-          ? ctx.dancersToRight(d).elementAtOrNull(1)
-          : ctx.dancersToLeft(d).elementAtOrNull(1)
-
-        if (d3 == nil) {
-          throw CallError("Unable to calcluate Cross Run")
-        } else if (d3!.data.active) {
-          throw CallError("Dancers cannot Cross Run each other")
-        } else {
-          d.path.add(TamUtils.getMove(m).scale(1.0, d.distanceTo(d3!) / 2.0))
-        }
+    //  Get runners and dodgers
+    let spec = name.replaceIgnoreCase("cross\\s*run", "")
+    let specCtx = CallContext(ctx)
+    try specCtx.applySpecifier(spec)
+    let runners = ctx.actives.filter { specCtx.actives.contains($0) }
+    let dodgers = ctx.actives.filter { !runners.contains($0) }
+    //  Loop through runners and figure out where they are going
+    try runners.forEach { d in
+      //  find active dancer 2 dancers away it can run to
+      let dright = ctx.dancersToRight(d).getOrNull(1)
+      let dleft = ctx.dancersToLeft(d).getOrNull(1)
+      let dir = dright?.data.active != true ? "Left" :
+        dleft?.data.active != true ? "Right" :
+        dright!.location.length > dleft!.location.length ? "Right": "Left"
+      guard let d2 = dir == "Right" ? dright : dleft else {
+        throw CallError("Dancer \(d) cannot Cross Run.")
+      }
+      let dist = d.distanceTo(d2)
+      d.path.add(TamUtils.getMove("Run \(dir)").scale(1.5,dist/2.0))
+    }
+    //  Loop through each dodger and figure out which way they are moving
+    try dodgers.forEach { d in
+      //  Find a direction they can move to a runner's spot
+      //  I don't think there can be more than one
+      //  in a symmetric formation
+      let dright = ctx.dancerToRight(d)
+      let dleft = ctx.dancerToLeft(d)
+      let dfront = ctx.dancerInFront(d)
+      let dback = ctx.dancerInBack(d)
+      //  Dodge or move to that spot
+      if (dright != nil && runners.contains(dright!)) {
+        d.path.add(TamUtils.getMove("Dodge Right")).scale(1.0,d.distanceTo(dright!)/2.0)
+      } else if (dleft != nil && runners.contains(dleft!)) {
+        d.path.add(TamUtils.getMove("Dodge Left")).scale(1.0,d.distanceTo(dleft!)/2.0)
+      } else if (dfront != nil && runners.contains(dfront!)) {
+        d.path.add(TamUtils.getMove("Forward")).changebeats(3.0).scale(d.distanceTo(dfront!),1.0)
+      } else if (dback != nil && runners.contains(dback!)) {
+        d.path.add(TamUtils.getMove("Back")).changebeats(3.0).scale(d.distanceTo(dback!),1.0)
       } else {
-        //  Not an active dancer
-        //  If partner is active then this dancer needs to dodge
-        let d2 = d.data.partner
-        if (d2 != nil && d2!.data.active) {
-          d.path.add(TamUtils.getMove((d.data.beau) ? "Dodge Right" : "Dodge Left"))
-            .scale(1.0, d.distanceTo(d2!) / 2.0)
-        }
+        throw CallError("Unable to calculate Cross Run action for dancer \(d)")
       }
     }
+
   }
 
 }

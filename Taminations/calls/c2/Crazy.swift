@@ -27,20 +27,20 @@ class Crazy : Action {
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     let crazycall = name.lowercased().replaceAll(".*crazy", "")
-    var crazy8 = ""
-    var crazy4 = ""
-    if (crazycall.lowercased().matches("\\s*counter rotate.*")) {
-      crazy8 = "Split"
-      crazy4 = "Box"
-    } else if (crazycall.lowercased().matches("\\s*circulate.*")) {
-      crazy8 = "Split"
-    }
-    try ctx.applyCalls("\(crazy8) \(crazycall)","Center 4 \(crazy4) \(crazycall)")
+    let crazy8 = crazycall.matches("counter rotate.*") ? "Split \(crazycall)" :
+      crazycall.matches("circulate.*") ? "Split \(crazycall)" : crazycall
+    let crazy4 = crazycall.matches("counter rotate.*")
+      ? "Center 4 Box \(crazycall)" : "Center 4 \(crazycall)"
+
+    try ctx.applyCalls(norm.contains("reverse") ? crazy4 : crazy8)
+    ctx.matchStandardFormation()
+    try ctx.applyCalls(norm.contains("reverse") ? crazy8 : crazy4)
     if (!norm.startsWith("12")) {
       ctx.matchStandardFormation()
-      try ctx.applyCalls("\(crazy8) \(crazycall)")
+      try ctx.applyCalls(norm.contains("reverse") ? crazy4 : crazy8)
       if (!norm.startsWith("34")) {
-        try ctx.applyCalls("Center 4 \(crazy4) \(crazycall)")
+        ctx.matchStandardFormation()
+        try ctx.applyCalls(norm.contains("reverse") ? crazy8 : crazy4)
       }
     }
 
