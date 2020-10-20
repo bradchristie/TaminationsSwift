@@ -30,14 +30,37 @@ class TwistAnything: Action {
         name.replaceFirst(".*? and ", "")
     //  Centers facing out or in?
     if (ctx.center(4).all { d in d.isFacingOut } ) {
-      try ctx.applyCalls("Outer 4 Face In and Step while Center 4 Step Ahead",
-        "Outer 4 Trade while Center 4 \(anycall)")
+      //  This is for centers facing out
+      do {
+        //  First try original centers do the any call
+        try ctx.subContext(ctx.dancers) { ctx2 in
+          try ctx2.applyCalls("Outer 4 Face In and Step while Center 4 Step Ahead",
+            "Outer 4 Trade while Center 4 \(anycall))")
+        }
+      } catch _ as CallError {
+        //  If that didn't work, try everybody do the any call
+        try ctx.applyCalls("Outer 4 Face In and Step while Center 4 Step Ahead",
+          "Outer 4 Trade")
+        ctx.matchStandardFormation()
+        try ctx.applyCalls(anycall)
+      }
     }
     else if (ctx.center(4).all { d in d.isFacingIn } ) {
-      try ctx.applyCalls("Outer 4 Face In and Step while Center 4 Half Step Ahead",
-        "Center 4 Trade while Outer 4 \(anycall)")
+      do {
+        try ctx.subContext(ctx.dancers) { ctx2 in
+          try ctx2.applyCalls("Outer 4 Face In and Step while Center 4 Half Step Ahead",
+            "Center 4 Trade while Outer 4 \(anycall)")
+        }
+      } catch _ as CallError {
+        try ctx.applyCalls("Outer 4 Face In and Step while Center 4 Half Step Ahead",
+          "Center 4 Trade")
+        ctx.matchStandardFormation()
+        try ctx.applyCalls(anycall)
+      }
+
     } else {
       throw CallError("Centers must face the same direction")
     }
   }
+
 }

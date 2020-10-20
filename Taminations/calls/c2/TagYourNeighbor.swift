@@ -22,12 +22,13 @@ class TagYourNeighbor : Action {
 
   override var level: LevelData { LevelObject.find("c2") }
   override var requires:[String] { ["ms/fraction_tag",
-                                    "plus/follow_your_neighbor", 
+                                    "plus/follow_your_neighbor",
                                     "c1/cross_your_neighbor",
                                     "c2/criss_cross_your_neighbor"] }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    let left = norm.startsWith("left") ? "Left" : ""
+    let left = norm.contains("left") ? "Left" : ""
+    let vertical = norm.contains("vertical") ? "Vertical" : ""
     var basecall = ""
     switch (norm.replace("left", "")) {
       case "tagyourneighbor" : basecall = "Follow Your Neighbor"
@@ -35,7 +36,7 @@ class TagYourNeighbor : Action {
       case "tagyourcrisscrossneighbor" : basecall = "Criss Cross Your Neighbor"
       default : throw CallError("Tag what?")  // should not happen
     }
-    try ctx.applyCalls("\(left) Half Tag",basecall)
+    try ctx.applyCalls("\(vertical) \(left) Half Tag",basecall)
   }
 
 }

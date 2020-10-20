@@ -44,7 +44,7 @@ class Spread : Action {
           ? Case2()  //  Case 2: Active dancers in line or wave spread among themselves
           : Case1()  //  Case 1: Active dancers spread and let in the others
       }
-    else if (ctx.isLines()) {
+    else if (ctx.isLines() || ctx.isTidal()) {
       spreader = Case2()  //  Case 2
     }
       else if (ctx.dancers.all { d in ctx.isInTandem(d) })  {

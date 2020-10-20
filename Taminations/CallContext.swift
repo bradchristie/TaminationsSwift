@@ -57,7 +57,6 @@ class CallContext {
     //  Blocks
     "Facing Blocks Right" : 2.0,
     "Facing Blocks Left" : 2.0,
-    "Siamese Wave" : 2.0,
     "Concentric Diamonds RH" : 2.0,
     "Quarter Z RH" : 4.0,
     "Quarter Z LH" : 4.0
@@ -313,7 +312,7 @@ class CallContext {
   //  Then transfer any new calls from the created CallContext to this CallContext.
   //  Return true if anything new was added.
   @discardableResult
-  func subContext(_ dancers:[Dancer],block:(CallContext) throws ->()) throws -> Bool {
+  func subContext(_ dancers:[Dancer], block:(CallContext) throws ->()) throws -> Bool {
     let ctx = CallContext(dancers.inOrder())
     try block(ctx)
     return ctx.appendTo(self)

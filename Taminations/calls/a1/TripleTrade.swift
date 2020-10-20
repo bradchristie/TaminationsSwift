@@ -28,7 +28,20 @@ class TripleTrade : Action {
   }
 
   override func perform(_ ctx: CallContext, _ index: Int) throws {
-    try ctx.applyCalls("Center 6 Trade")
+    //  Check to see if tehre's a line of 6
+    //  If so, do it with those dancers
+    let lineOf6 = ctx.dancers.filter { d in
+      ctx.dancersToRight(d).count + ctx.dancersToLeft(d).count == 5
+    }
+    if (lineOf6.count == 6) {
+      try ctx.subContext(lineOf6) { ctx2 in
+        try ctx2.applyCalls("Trade")
+      }
+    }
+    else {
+      //  Otherwise just try with center 6 however they are arranged
+      try ctx.applyCalls("Center 6 Trade")
+    }
   }
 
 }

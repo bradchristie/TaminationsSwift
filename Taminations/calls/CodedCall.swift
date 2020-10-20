@@ -372,7 +372,7 @@ class CodedCall : Call {
       return StaggerConcept(callnorm,callname)
     }
 
-    if (callnorm.matches("(left)?tagyour((criss)?cross)?neighbor")) {
+    if (callnorm.matches("(left|vertical){0,2}tagyour((criss)?cross)?neighbor")) {
       return TagYourNeighbor(callnorm,callname)
     }
 

@@ -29,7 +29,7 @@ class AnythingChainThru : Action {
   override func perform(_ ctx: CallContext, _ index: Int) throws {
     let firstCall = norm.replace("chainthru","")
       .replace("triangle","trianglecirculate")
-      .replace("diamond","diamondcirculate")
+      .replace("interlockeddiamond","interlockeddiamondcirculate")
     try ctx.applyCalls(firstCall,"very centers trade","centers cast off 34")
 
   }

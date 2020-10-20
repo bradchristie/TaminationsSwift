@@ -42,6 +42,9 @@ class GrandSwingThru : Action {
         d.data.active = false
       }
     }
+    if (ctx.actives.count != 6) {
+      throw CallError("Unable to Grand Swing Thru from this formation.")
+    }
 
     //  Ok, do each part
     if (norm.contains("left")) {

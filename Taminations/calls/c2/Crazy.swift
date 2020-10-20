@@ -32,15 +32,15 @@ class Crazy : Action {
     let crazy4 = crazycall.matches("counter rotate.*")
       ? "Center 4 Box \(crazycall)" : "Center 4 \(crazycall)"
 
-    try ctx.applyCalls(norm.contains("reverse") ? crazy4 : crazy8)
+    try ctx.applyCalls(norm.contains("reversecrazy") ? crazy4 : crazy8)
     ctx.matchStandardFormation()
-    try ctx.applyCalls(norm.contains("reverse") ? crazy8 : crazy4)
+    try ctx.applyCalls(norm.contains("reversecrazy") ? crazy8 : crazy4)
     if (!norm.startsWith("12")) {
       ctx.matchStandardFormation()
-      try ctx.applyCalls(norm.contains("reverse") ? crazy4 : crazy8)
+      try ctx.applyCalls(norm.contains("reversecrazy") ? crazy4 : crazy8)
       if (!norm.startsWith("34")) {
         ctx.matchStandardFormation()
-        try ctx.applyCalls(norm.contains("reverse") ? crazy8 : crazy4)
+        try ctx.applyCalls(norm.contains("reversecrazy") ? crazy8 : crazy4)
       }
     }
 
